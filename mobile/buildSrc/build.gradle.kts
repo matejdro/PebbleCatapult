@@ -54,7 +54,7 @@ dependencies {
 
 tasks.register("commit-hooks", Copy::class) {
    from("$rootDir/../config/hooks/")
-   into("$rootDir/../.git/hooks")
+   into("$rootDir/../../.git/hooks")
 }
 
 afterEvaluate {
