@@ -63,8 +63,6 @@ class MainActivity : ComponentActivity() {
       splashScreen.setKeepOnScreenCondition { !initComplete }
 
       beginInitialisation(savedInstanceState == null)
-
-      appGraph.getErrorReporter().report(Exception("CRASH"))
    }
 
    private fun beginInitialisation(startup: Boolean) {
