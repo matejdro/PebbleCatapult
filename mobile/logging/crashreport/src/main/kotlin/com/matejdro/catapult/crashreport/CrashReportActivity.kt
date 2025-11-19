@@ -165,7 +165,7 @@ private fun CrashReportPreview() {
 
    PreviewTheme {
       Column(verticalArrangement = Arrangement.spacedBy(16.dp), modifier = Modifier.padding(16.dp)) {
-         ErrorReport(errorText, "microPebble", {}, {}, {})
+         ErrorReport(errorText, "Catapult", {}, {}, {})
       }
    }
 }

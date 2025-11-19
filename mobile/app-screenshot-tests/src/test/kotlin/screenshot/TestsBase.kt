@@ -7,11 +7,13 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.DeviceConfig.Companion.PIXEL_5
 import app.cash.paparazzi.Paparazzi
+import com.airbnb.android.showkase.models.Showkase
 import com.airbnb.android.showkase.models.ShowkaseBrowserComponent
 import com.android.ide.common.rendering.api.SessionParams
 import com.android.resources.NightMode
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.google.testing.junit.testparameterinjector.TestParameterValuesProvider
+import com.matejdro.catapult.showkase.getMetadata
 import org.junit.Before
 import org.junit.Rule
 import org.junit.runner.RunWith
@@ -30,23 +32,21 @@ abstract class TestsBase {
 
    object PreviewProvider : TestParameterValuesProvider() {
       override fun provideValues(context: Context): List<*> {
-//         TODO uncomment this when you have at least one preview marked with @ShowkaseComposable
-//         val splitIndex = context.getOtherAnnotation(SplitIndex::class.java).index
-//         val whitelistedPackages = Splits.paparazziSplits.elementAt(splitIndex)
-//
-//         val components = Showkase.getMetadata().componentList
-//            .filter { showkaseBrowserComponent ->
-//               val isInSplit = if (whitelistedPackages.isNotEmpty()) {
-//                  whitelistedPackages.any { showkaseBrowserComponent.componentKey.startsWith(it) }
-//               } else {
-//                  val blacklistedPackages = Splits.paparazziSplits.flatten()
-//                  blacklistedPackages.all { !showkaseBrowserComponent.componentKey.startsWith(it) }
-//               }
-//
-//               isInSplit && showkaseBrowserComponent.group != "Default Group"
-//            }
-//            .map { TestKey(it) }
-         val components = emptyList<TestKey>()
+         val splitIndex = context.getOtherAnnotation(SplitIndex::class.java).index
+         val whitelistedPackages = Splits.paparazziSplits.elementAt(splitIndex)
+
+         val components = Showkase.getMetadata().componentList
+            .filter { showkaseBrowserComponent ->
+               val isInSplit = if (whitelistedPackages.isNotEmpty()) {
+                  whitelistedPackages.any { showkaseBrowserComponent.componentKey.startsWith(it) }
+               } else {
+                  val blacklistedPackages = Splits.paparazziSplits.flatten()
+                  blacklistedPackages.all { !showkaseBrowserComponent.componentKey.startsWith(it) }
+               }
+
+               isInSplit && showkaseBrowserComponent.group != "Default Group"
+            }
+            .map { TestKey(it) }
 
          for (i in components.indices) {
             for (j in components.indices) {

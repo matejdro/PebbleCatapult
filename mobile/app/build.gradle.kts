@@ -129,10 +129,14 @@ dependencies {
    implementation(projects.logging.api)
    implementation(projects.logging.crashreport)
    implementation(projects.logging.data)
+   implementation(projects.tasklist.ui)
+   implementation(projects.tools.ui)
 
    implementation(libs.androidx.activity.compose)
    implementation(libs.androidx.core)
    implementation(libs.androidx.core.splashscreen)
+   implementation(libs.androidx.datastore)
+   implementation(libs.androidx.datastore.preferences)
    implementation(libs.androidx.lifecycle.runtime)
    implementation(libs.androidx.lifecycle.viewModel)
    implementation(libs.androidx.lifecycle.viewModel.compose)
@@ -147,8 +151,6 @@ dependencies {
    implementation(libs.simpleStack)
    implementation(libs.tinylog.api)
 
-   implementation(libs.androidx.datastore)
-   implementation(libs.androidx.datastore.preferences)
 
    keeperR8(libs.androidx.r8)
 }

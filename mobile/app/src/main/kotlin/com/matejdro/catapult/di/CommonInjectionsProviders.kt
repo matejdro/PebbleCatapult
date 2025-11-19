@@ -2,9 +2,15 @@ package com.matejdro.catapult.di
 
 import android.app.Application
 import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStoreFile
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesTo
 import dev.zacsweers.metro.Provides
+import dev.zacsweers.metro.SingleIn
+import dispatch.core.IOCoroutineScope
 import si.inova.kotlinova.core.reporting.ErrorReporter
 import si.inova.kotlinova.core.time.AndroidDateTimeFormatter
 import si.inova.kotlinova.core.time.AndroidDateTimeFormatterImpl
@@ -29,5 +35,13 @@ interface CommonInjectionsProviders {
    @Provides
    fun provideAndroidTimeProvider(): AndroidTimeProvider {
       return DefaultAndroidTimeProvider
+   }
+
+   @Provides
+   @SingleIn(AppScope::class)
+   fun provideDefaultPreferences(context: Context, ioCoroutineScope: IOCoroutineScope): DataStore<Preferences> {
+      return PreferenceDataStoreFactory.create(scope = ioCoroutineScope) {
+         context.preferencesDataStoreFile("preferences")
+      }
    }
 }

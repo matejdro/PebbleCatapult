@@ -46,6 +46,17 @@
                 android:name="android.window.PROPERTY_SUPPORTS_MULTI_INSTANCE_SYSTEM_UI"
                 android:value="true" />
         </activity>
+
+        <provider
+            android:name=".logging.LogFileProvider"
+            android:authorities="com.matejdro.catapult.logs"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/logging_file_paths" />
+        </provider>
+
     </application>
 
 </manifest>
