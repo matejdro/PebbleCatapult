@@ -6,6 +6,7 @@ plugins {
    navigation
    parcelize
    showkase
+   sqldelight
    id("com.slack.keeper")
    id("androidx.baselineprofile")
 }
@@ -121,6 +122,18 @@ custom {
    enableEmulatorTests.set(true)
 }
 
+sqldelight {
+   databases {
+      create("Database") {
+         packageName.set("com.matejdro.catapult")
+         schemaOutputDirectory.set(file("src/main/sqldelight/databases"))
+
+         // Use project() wrapper as a workaround for the https://github.com/sqldelight/sqldelight/pull/5801
+         dependency(project(projects.tasklist.data.path))
+      }
+   }
+}
+
 dependencies {
    implementation(projects.common)
    implementation(projects.commonNavigation)
@@ -129,6 +142,8 @@ dependencies {
    implementation(projects.logging.api)
    implementation(projects.logging.crashreport)
    implementation(projects.logging.data)
+   implementation(projects.tasklist.api)
+   implementation(projects.tasklist.data)
    implementation(projects.tasklist.ui)
    implementation(projects.tools.ui)
 
@@ -149,6 +164,7 @@ dependencies {
    implementation(libs.kotlinova.core)
    implementation(libs.kotlinova.navigation)
    implementation(libs.simpleStack)
+   implementation(libs.sqldelight.android)
    implementation(libs.tinylog.api)
 
 

@@ -41,6 +41,7 @@ dependencies {
    implementation(libs.moshi.ir)
    implementation(libs.orgJson)
    implementation(libs.ksp)
+   implementation(libs.sqldelight.gradle)
    implementation(libs.tomlj)
    implementation(libs.unmock.plugin)
 
