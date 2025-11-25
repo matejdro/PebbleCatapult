@@ -1,5 +1,6 @@
 package com.matejdro.catapult.tasklist.ui
 
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import com.matejdro.catapult.common.logging.ActionLogger
 import com.matejdro.catapult.tasklist.api.CatapultDirectory
@@ -36,8 +37,15 @@ class FolderListViewModel(
          )
       }
    }
+
+   fun add(title: String) = resources.launchWithExceptionReporting {
+      actionLogger.logAction { "FolderListViewModel.add(title = $title)" }
+
+      directoryListRepository.insertDirectory(CatapultDirectory(0, title))
+   }
 }
 
+@Immutable
 data class FolderListState(
    val folders: List<CatapultDirectory>,
 )
