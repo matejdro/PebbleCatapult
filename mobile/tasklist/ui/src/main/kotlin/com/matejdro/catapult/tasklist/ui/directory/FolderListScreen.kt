@@ -1,4 +1,4 @@
-package com.matejdro.catapult.tasklist.ui
+package com.matejdro.catapult.tasklist.ui.directory
 
 import android.widget.Toast
 import androidx.compose.foundation.combinedClickable
@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import com.airbnb.android.showkase.annotation.ShowkaseComposable
 import com.matejdro.catapult.navigation.keys.FolderListKey
 import com.matejdro.catapult.tasklist.api.CatapultDirectory
+import com.matejdro.catapult.tasklist.ui.R
 import com.matejdro.catapult.ui.components.AlertDialogWithContent
 import com.matejdro.catapult.ui.components.ProgressErrorSuccessScaffold
 import com.matejdro.catapult.ui.debugging.FullScreenPreviews

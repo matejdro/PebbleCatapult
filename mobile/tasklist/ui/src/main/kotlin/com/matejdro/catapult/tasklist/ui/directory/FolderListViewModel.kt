@@ -1,4 +1,4 @@
-package com.matejdro.catapult.tasklist.ui
+package com.matejdro.catapult.tasklist.ui.directory
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable

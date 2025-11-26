@@ -1,4 +1,4 @@
-package com.matejdro.catapult.tasklist.ui
+package com.matejdro.catapult.tasklist.ui.directory
 
 import com.matejdro.catapult.tasklist.api.CatapultDirectory
 import com.matejdro.catapult.tasklist.test.FakeDirectoryListRepository
