@@ -3,4 +3,7 @@
     <string name="add">Add</string>
     <string name="cancel">Cancel</string>
     <string name="ok">OK</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+    <string name="starting_directory_cannot_be_edited">Starting Directory cannot be edited</string>
 </resources>

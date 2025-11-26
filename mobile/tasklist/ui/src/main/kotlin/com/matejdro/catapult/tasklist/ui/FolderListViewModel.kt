@@ -43,6 +43,18 @@ class FolderListViewModel(
 
       directoryListRepository.insertDirectory(CatapultDirectory(0, title))
    }
+
+   fun edit(id: Int, newTitle: String) = resources.launchWithExceptionReporting {
+      actionLogger.logAction { "FolderListViewModel.edit(id = $id, newTitle = $newTitle)" }
+
+      directoryListRepository.updateDirectory(CatapultDirectory(id, newTitle))
+   }
+
+   fun delete(id: Int) = resources.launchWithExceptionReporting {
+      actionLogger.logAction { "FolderListViewModel.delete(id = $id)" }
+
+      directoryListRepository.deleteDirectory(id)
+   }
 }
 
 @Immutable

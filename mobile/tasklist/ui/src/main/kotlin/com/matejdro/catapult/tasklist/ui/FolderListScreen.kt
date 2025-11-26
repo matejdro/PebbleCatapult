@@ -1,5 +1,7 @@
 package com.matejdro.catapult.tasklist.ui
 
+import android.widget.Toast
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -27,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -55,17 +58,26 @@ class FolderListScreen(
       val stateOutcome = viewModel.uiState.collectAsStateWithLifecycleAndBlinkingPrevention().value
 
       var addDialog by remember { mutableStateOf(false) }
+      var editDialog by remember { mutableStateOf<Int?>(null) }
+      val context = LocalContext.current
 
       ProgressErrorSuccessScaffold(
          stateOutcome,
          Modifier
             .fillMaxSize()
             .safeDrawingPadding()
-      ) {
+      ) { state ->
          FolderListScreenContent(
-            it,
+            state,
             addNew = {
                addDialog = true
+            },
+            edit = {
+               if (it == 1) {
+                  Toast.makeText(context, R.string.starting_directory_cannot_be_edited, Toast.LENGTH_SHORT).show()
+               } else {
+                  editDialog = it
+               }
             }
          )
       }
@@ -80,12 +92,61 @@ class FolderListScreen(
                addDialog = false
             }
          )
+      } else if (editDialog != null) {
+         NameEntryDialog(
+            title = stringResource(R.string.edit),
+            initialText = stateOutcome?.data?.folders?.firstOrNull { it.id == editDialog }?.title.orEmpty(),
+            dismiss = { editDialog = null },
+            accept = { newTitle ->
+               editDialog?.let { id -> viewModel.edit(id, newTitle) }
+               editDialog = null
+            },
+            delete = {
+               editDialog?.let { id -> viewModel.delete(id) }
+               editDialog = null
+            }
+         )
       }
    }
 }
 
 @Composable
-private fun NameEntryDialog(title: String, initialText: String, dismiss: () -> Unit, accept: (text: String) -> Unit) {
+private fun FolderListScreenContent(state: FolderListState, addNew: () -> Unit, edit: (Int) -> Unit) {
+   Box(Modifier.fillMaxSize()) {
+      LazyColumn(
+         contentPadding = WindowInsets.safeDrawing.asPaddingValues()
+      ) {
+         itemsWithDivider(state.folders, key = { it.id }) {
+            Text(
+               it.title,
+               Modifier
+                  .combinedClickable(onClick = {}, onLongClick = { edit(it.id) })
+                  .padding(32.dp)
+                  .fillMaxWidth()
+                  .animateItem()
+            )
+         }
+      }
+
+      FloatingActionButton(
+         onClick = addNew,
+         modifier = Modifier
+            .align(Alignment.BottomEnd)
+            .padding(32.dp)
+      ) {
+         Icon(painterResource(R.drawable.ic_add), stringResource(R.string.add))
+      }
+   }
+}
+
+@Composable
+private fun NameEntryDialog(
+   title: String,
+   initialText: String,
+   dismiss: () -> Unit,
+   accept: (text: String) -> Unit,
+   delete: (() -> Unit)? = null,
+) {
    val textFieldState = rememberTextFieldState(initialText)
 
    AlertDialogWithContent(
@@ -113,6 +174,17 @@ private fun NameEntryDialog(title: String, initialText: String, dismiss: () -> U
             Text(stringResource(R.string.cancel))
          }
       },
+      neutralButton = {
+         if (delete != null) {
+            TextButton(
+               onClick = {
+                  delete()
+               }
+            ) {
+               Text(stringResource(R.string.delete))
+            }
+         }
+      }
    ) {
       val focusRequester = remember { FocusRequester() }
 
@@ -132,28 +204,6 @@ private fun NameEntryDialog(title: String, initialText: String, dismiss: () -> U
    }
 }
 
-@Composable
-private fun FolderListScreenContent(state: FolderListState, addNew: () -> Unit) {
-   Box(Modifier.fillMaxSize()) {
-      LazyColumn(
-         contentPadding = WindowInsets.safeDrawing.asPaddingValues()
-      ) {
-         itemsWithDivider(state.folders) {
-            Text(it.title, Modifier.padding(32.dp))
-         }
-      }
-
-      FloatingActionButton(
-         onClick = addNew,
-         modifier = Modifier
-            .align(Alignment.BottomEnd)
-            .padding(32.dp)
-      ) {
-         Icon(painterResource(R.drawable.ic_add), stringResource(R.string.add))
-      }
-   }
-}
-
 @FullScreenPreviews
 @Composable
 @ShowkaseComposable(group = "test")
@@ -167,6 +217,7 @@ internal fun FolderListScreenContentPreview() {
                CatapultDirectory(3, "Directory 3")
             )
          ),
+         {},
          {}
       )
    }
