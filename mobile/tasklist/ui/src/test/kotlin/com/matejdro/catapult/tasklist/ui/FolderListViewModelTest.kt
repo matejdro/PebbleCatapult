@@ -22,7 +22,7 @@ class FolderListViewModelTest {
 
    @Test
    fun `Pass directories to the UI State`() = scope.runTest {
-      repo.insertDirectory(CatapultDirectory(1, "Hello Directory"))
+      repo.insert(CatapultDirectory(1, "Hello Directory"))
 
       vm.onServiceRegistered()
       runCurrent()
@@ -35,26 +35,26 @@ class FolderListViewModelTest {
       vm.add("New Directory")
       runCurrent()
 
-      repo.getAllDirectories().first() shouldBeSuccessWithData listOf(CatapultDirectory(0, "New Directory"))
+      repo.getAll().first() shouldBeSuccessWithData listOf(CatapultDirectory(0, "New Directory"))
    }
 
    @Test
    fun `Edit should edit the existing directory`() = scope.runTest {
-      repo.insertDirectory(CatapultDirectory(1, "Hello Directory"))
+      repo.insert(CatapultDirectory(1, "Hello Directory"))
 
       vm.edit(1, "New Directory Name")
       runCurrent()
 
-      repo.getAllDirectories().first() shouldBeSuccessWithData listOf(CatapultDirectory(1, "New Directory Name"))
+      repo.getAll().first() shouldBeSuccessWithData listOf(CatapultDirectory(1, "New Directory Name"))
    }
 
    @Test
    fun `Delete should delete the existing directory`() = scope.runTest {
-      repo.insertDirectory(CatapultDirectory(1, "Hello Directory"))
+      repo.insert(CatapultDirectory(1, "Hello Directory"))
 
       vm.delete(1)
       runCurrent()
 
-      repo.getAllDirectories().first() shouldBeSuccessWithData emptyList()
+      repo.getAll().first() shouldBeSuccessWithData emptyList()
    }
 }

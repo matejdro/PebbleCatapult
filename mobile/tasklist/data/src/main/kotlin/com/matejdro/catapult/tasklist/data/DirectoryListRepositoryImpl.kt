@@ -18,13 +18,13 @@ import si.inova.kotlinova.core.outcome.Outcome
 class DirectoryListRepositoryImpl(
    private val dbDirectoryQueries: DbDirectoryQueries,
 ) : DirectoryListRepository {
-   override fun getAllDirectories(): Flow<Outcome<List<CatapultDirectory>>> {
+   override fun getAll(): Flow<Outcome<List<CatapultDirectory>>> {
       return dbDirectoryQueries.selectAll().asFlow().map {
          withDefault {
             val list = it.awaitAsList()
 
             if (list.isEmpty()) {
-               insertDirectory(CatapultDirectory(0, "Starting Directory"))
+               insert(CatapultDirectory(0, "Starting Directory"))
             }
 
             Outcome.Success(list.map { it.toDirectory() })
@@ -32,11 +32,11 @@ class DirectoryListRepositoryImpl(
       }
    }
 
-   override suspend fun insertDirectory(directory: CatapultDirectory) = withDefault<Unit> {
+   override suspend fun insert(directory: CatapultDirectory) = withDefault<Unit> {
       dbDirectoryQueries.insert(directory.toDb())
    }
 
-   override suspend fun updateDirectory(directory: CatapultDirectory) {
+   override suspend fun update(directory: CatapultDirectory) {
       require(directory.id > 1) { "Starting directory cannot be updated" }
 
       withDefault {
@@ -44,7 +44,7 @@ class DirectoryListRepositoryImpl(
       }
    }
 
-   override suspend fun deleteDirectory(id: Int) {
+   override suspend fun delete(id: Int) {
       require(id > 1) { "Starting directory cannot be deleted" }
 
       withDefault {

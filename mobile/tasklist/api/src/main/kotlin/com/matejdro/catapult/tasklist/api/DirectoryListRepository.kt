@@ -4,8 +4,8 @@ import kotlinx.coroutines.flow.Flow
 import si.inova.kotlinova.core.outcome.Outcome
 
 interface DirectoryListRepository {
-   fun getAllDirectories(): Flow<Outcome<List<CatapultDirectory>>>
-   suspend fun insertDirectory(directory: CatapultDirectory)
-   suspend fun updateDirectory(directory: CatapultDirectory)
-   suspend fun deleteDirectory(id: Int)
+   fun getAll(): Flow<Outcome<List<CatapultDirectory>>>
+   suspend fun insert(directory: CatapultDirectory)
+   suspend fun update(directory: CatapultDirectory)
+   suspend fun delete(id: Int)
 }

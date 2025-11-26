@@ -31,7 +31,7 @@ class FolderListViewModel(
 
       resources.launchResourceControlTask(_uiState) {
          emitAll(
-            directoryListRepository.getAllDirectories().map { outcome ->
+            directoryListRepository.getAll().map { outcome ->
                outcome.mapData { FolderListState(it) }
             }
          )
@@ -41,19 +41,19 @@ class FolderListViewModel(
    fun add(title: String) = resources.launchWithExceptionReporting {
       actionLogger.logAction { "FolderListViewModel.add(title = $title)" }
 
-      directoryListRepository.insertDirectory(CatapultDirectory(0, title))
+      directoryListRepository.insert(CatapultDirectory(0, title))
    }
 
    fun edit(id: Int, newTitle: String) = resources.launchWithExceptionReporting {
       actionLogger.logAction { "FolderListViewModel.edit(id = $id, newTitle = $newTitle)" }
 
-      directoryListRepository.updateDirectory(CatapultDirectory(id, newTitle))
+      directoryListRepository.update(CatapultDirectory(id, newTitle))
    }
 
    fun delete(id: Int) = resources.launchWithExceptionReporting {
       actionLogger.logAction { "FolderListViewModel.delete(id = $id)" }
 
-      directoryListRepository.deleteDirectory(id)
+      directoryListRepository.delete(id)
    }
 }
 

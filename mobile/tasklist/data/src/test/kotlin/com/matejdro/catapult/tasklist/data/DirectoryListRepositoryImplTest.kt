@@ -18,7 +18,7 @@ class DirectoryListRepositoryImplTest {
 
    @Test
    fun `Return starting directory by default`() = scope.runTest {
-      repo.getAllDirectories().test {
+      repo.getAll().test {
          runCurrent()
          expectMostRecentItem() shouldBeSuccessWithData listOf(CatapultDirectory(1, "Starting Directory"))
       }
@@ -26,10 +26,10 @@ class DirectoryListRepositoryImplTest {
 
    @Test
    fun `Return added directories`() = scope.runTest {
-      repo.getAllDirectories().test {
+      repo.getAll().test {
          runCurrent()
 
-         repo.insertDirectory(CatapultDirectory(0, "Directory A"))
+         repo.insert(CatapultDirectory(0, "Directory A"))
          runCurrent()
 
          expectMostRecentItem() shouldBeSuccessWithData listOf(
@@ -41,11 +41,11 @@ class DirectoryListRepositoryImplTest {
 
    @Test
    fun `Allow updating directories`() = scope.runTest {
-      repo.getAllDirectories().test {
+      repo.getAll().test {
          runCurrent()
 
-         repo.insertDirectory(CatapultDirectory(0, "Directory A"))
-         repo.updateDirectory(CatapultDirectory(2, "Directory B"))
+         repo.insert(CatapultDirectory(0, "Directory A"))
+         repo.update(CatapultDirectory(2, "Directory B"))
          runCurrent()
 
          expectMostRecentItem() shouldBeSuccessWithData listOf(
@@ -57,11 +57,11 @@ class DirectoryListRepositoryImplTest {
 
    @Test
    fun `Allow deleting directories`() = scope.runTest {
-      repo.getAllDirectories().test {
+      repo.getAll().test {
          runCurrent()
 
-         repo.insertDirectory(CatapultDirectory(0, "Directory A"))
-         repo.deleteDirectory(2)
+         repo.insert(CatapultDirectory(0, "Directory A"))
+         repo.delete(2)
          runCurrent()
 
          expectMostRecentItem() shouldBeSuccessWithData listOf(
@@ -73,14 +73,14 @@ class DirectoryListRepositoryImplTest {
    @Test
    fun `Disallow deleting starting directory`() = scope.runTest {
       assertThrows<IllegalArgumentException> {
-         repo.deleteDirectory(1)
+         repo.delete(1)
       }
    }
 
    @Test
    fun `Disallow updating starting directory`() = scope.runTest {
       assertThrows<IllegalArgumentException> {
-         repo.updateDirectory(CatapultDirectory(1, "Nonstarting directory"))
+         repo.update(CatapultDirectory(1, "Nonstarting directory"))
       }
    }
 }

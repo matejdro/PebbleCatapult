@@ -11,19 +11,19 @@ import si.inova.kotlinova.core.outcome.Outcome
 class FakeDirectoryListRepository : DirectoryListRepository {
    private val direcories = MutableStateFlow<List<CatapultDirectory>>(emptyList())
 
-   override fun getAllDirectories(): Flow<Outcome<List<CatapultDirectory>>> {
+   override fun getAll(): Flow<Outcome<List<CatapultDirectory>>> {
       return direcories.map { Outcome.Success(it) }
    }
 
-   override suspend fun insertDirectory(directory: CatapultDirectory) {
+   override suspend fun insert(directory: CatapultDirectory) {
       direcories.update { it + directory }
    }
 
-   override suspend fun updateDirectory(directory: CatapultDirectory) {
+   override suspend fun update(directory: CatapultDirectory) {
       direcories.update { list -> list.filter { it.id != directory.id } + directory }
    }
 
-   override suspend fun deleteDirectory(id: Int) {
+   override suspend fun delete(id: Int) {
       direcories.update { list -> list.filter { it.id != id } }
    }
 }
