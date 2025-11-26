@@ -4,12 +4,15 @@ import android.widget.Toast
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldLineLimits
@@ -56,6 +59,12 @@ class FolderListScreen(
 ) : Screen<FolderListKey>() {
    @Composable
    override fun Content(key: FolderListKey) {
+      Content({})
+   }
+
+   @Composable
+   @Suppress("ModifierMissing") // Full screen
+   fun Content(selectFolder: (Int) -> Unit) {
       val stateOutcome = viewModel.uiState.collectAsStateWithLifecycleAndBlinkingPrevention().value
 
       var addDialog by remember { mutableStateOf(false) }
@@ -65,7 +74,6 @@ class FolderListScreen(
       ProgressErrorSuccessScaffold(
          stateOutcome,
          Modifier
-            .fillMaxSize()
             .safeDrawingPadding()
       ) { state ->
          FolderListScreenContent(
@@ -79,7 +87,8 @@ class FolderListScreen(
                } else {
                   editDialog = it
                }
-            }
+            },
+            select = selectFolder
          )
       }
 
@@ -112,7 +121,7 @@ class FolderListScreen(
 }
 
 @Composable
-private fun FolderListScreenContent(state: FolderListState, addNew: () -> Unit, edit: (Int) -> Unit) {
+private fun FolderListScreenContent(state: FolderListState, addNew: () -> Unit, edit: (Int) -> Unit, select: (Int) -> Unit) {
    Box(Modifier.fillMaxSize()) {
       LazyColumn(
          contentPadding = WindowInsets.safeDrawing.asPaddingValues()
@@ -121,7 +130,7 @@ private fun FolderListScreenContent(state: FolderListState, addNew: () -> Unit, 
             Text(
                it.title,
                Modifier
-                  .combinedClickable(onClick = {}, onLongClick = { edit(it.id) })
+                  .combinedClickable(onClick = { select(it.id) }, onLongClick = { edit(it.id) })
                   .padding(32.dp)
                   .fillMaxWidth()
                   .animateItem()
@@ -219,6 +228,7 @@ internal fun FolderListScreenContentPreview() {
                CatapultDirectory(3, "Directory 3")
             )
          ),
+         {},
          {},
          {}
       )

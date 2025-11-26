@@ -1,9 +1,11 @@
 package com.matejdro.catapult.tasklist.data
 
 import app.cash.sqldelight.async.coroutines.awaitAsList
+import app.cash.sqldelight.async.coroutines.awaitAsOneOrNull
 import app.cash.sqldelight.coroutines.asFlow
 import com.matejdro.catapult.tasklist.api.CatapultDirectory
 import com.matejdro.catapult.tasklist.api.DirectoryListRepository
+import com.matejdro.catapult.tasklist.exception.MissingDirectoryException
 import com.matejdro.catapult.tasklist.sqldelight.generated.DbDirectoryQueries
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
@@ -28,6 +30,20 @@ class DirectoryListRepositoryImpl(
             }
 
             Outcome.Success(list.map { it.toDirectory() })
+         }
+      }
+   }
+
+   override fun getSingle(id: Int): Flow<Outcome<CatapultDirectory>> {
+      return dbDirectoryQueries.selectSingle(id.toLong()).asFlow().map {
+         withDefault {
+            val value = it.awaitAsOneOrNull()
+
+            if (value == null) {
+               Outcome.Error(MissingDirectoryException())
+            } else {
+               Outcome.Success(value.toDirectory())
+            }
          }
       }
    }

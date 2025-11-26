@@ -2,17 +2,32 @@ package com.matejdro.catapult.tasklist.test
 
 import com.matejdro.catapult.tasklist.api.CatapultDirectory
 import com.matejdro.catapult.tasklist.api.DirectoryListRepository
+import com.matejdro.catapult.tasklist.exception.MissingDirectoryException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 import si.inova.kotlinova.core.outcome.Outcome
 
 class FakeDirectoryListRepository : DirectoryListRepository {
+   var numCollections = 0
+
    private val direcories = MutableStateFlow<List<CatapultDirectory>>(emptyList())
 
    override fun getAll(): Flow<Outcome<List<CatapultDirectory>>> {
-      return direcories.map { Outcome.Success(it) }
+      return direcories.map { Outcome.Success(it) }.onStart { numCollections++ }
+   }
+
+   override fun getSingle(id: Int): Flow<Outcome<CatapultDirectory>> {
+      return direcories.map { list ->
+         val entry = list.firstOrNull { it.id == id }
+         if (entry == null) {
+            Outcome.Error(MissingDirectoryException())
+         } else {
+            Outcome.Success(entry)
+         }
+      }.onStart { numCollections++ }
    }
 
    override suspend fun insert(directory: CatapultDirectory) {

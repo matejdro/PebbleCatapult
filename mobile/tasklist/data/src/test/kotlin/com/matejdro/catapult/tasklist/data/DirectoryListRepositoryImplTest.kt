@@ -3,6 +3,7 @@ package com.matejdro.catapult.tasklist.data
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import app.cash.turbine.test
 import com.matejdro.catapult.tasklist.api.CatapultDirectory
+import com.matejdro.catapult.tasklist.exception.MissingDirectoryException
 import com.matejdro.catapult.tasklist.sqldelight.generated.Database
 import com.matejdro.catapult.tasklist.sqldelight.generated.DbDirectoryQueries
 import kotlinx.coroutines.test.runCurrent
@@ -10,6 +11,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import si.inova.kotlinova.core.test.TestScopeWithDispatcherProvider
+import si.inova.kotlinova.core.test.outcomes.shouldBeErrorWith
 import si.inova.kotlinova.core.test.outcomes.shouldBeSuccessWithData
 
 class DirectoryListRepositoryImplTest {
@@ -36,6 +38,29 @@ class DirectoryListRepositoryImplTest {
             CatapultDirectory(1, "Starting Directory"),
             CatapultDirectory(2, "Directory A")
          )
+      }
+   }
+
+   @Test
+   fun `Return a single directory`() = scope.runTest {
+      repo.insert(CatapultDirectory(0, "Directory A"))
+      runCurrent()
+
+      repo.getSingle(1).test {
+         runCurrent()
+
+         expectMostRecentItem() shouldBeSuccessWithData CatapultDirectory(1, "Directory A")
+      }
+   }
+
+   @Test
+   fun `Return outcome with missing directory when requested ID is missing`() = scope.runTest {
+      runCurrent()
+
+      repo.getSingle(1).test {
+         runCurrent()
+
+         expectMostRecentItem().shouldBeErrorWith(exceptionType = MissingDirectoryException::class.java)
       }
    }
 

@@ -92,6 +92,11 @@ dependencyAnalysis {
       bundle("tinylog") {
          includeGroup("org.tinylog")
       }
+
+      bundle("windowManagement") {
+         includeGroup("androidx.window")
+         includeDependency("com.google.accompanist:accompanist-adaptive")
+      }
    }
 }
 

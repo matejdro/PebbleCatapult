@@ -6,6 +6,9 @@ CREATE TABLE dbDirectory (
 selectAll:
 SELECT * FROM dbDirectory;
 
+selectSingle:
+SELECT * FROM dbDirectory WHERE id = ? LIMIT 1;
+
 insert:
 INSERT INTO dbDirectory (title) VALUES ?;
 

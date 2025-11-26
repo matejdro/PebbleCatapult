@@ -6,4 +6,5 @@
     <string name="edit">Edit</string>
     <string name="delete">Delete</string>
     <string name="starting_directory_cannot_be_edited">Starting Directory cannot be edited</string>
+    <string name="this_directory_does_not_exist_anymore">This directory does not exist anymore.</string>
 </resources>
