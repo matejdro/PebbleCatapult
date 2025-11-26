@@ -4,9 +4,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -31,7 +36,7 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import com.airbnb.android.showkase.annotation.ShowkaseComposable
 import com.matejdro.catapult.home.ui.R
-import com.matejdro.catapult.navigation.keys.FolderListKey
+import com.matejdro.catapult.navigation.keys.FolderTaskListCombinedKey
 import com.matejdro.catapult.navigation.keys.HomeScreenKey
 import com.matejdro.catapult.navigation.keys.ToolsScreenKey
 import com.matejdro.catapult.ui.debugging.FullScreenPreviews
@@ -47,7 +52,7 @@ import si.inova.kotlinova.navigation.screens.Screen
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 class HomeScreen(
    private val navigator: Navigator,
-   private val foldersScreen: Screen<FolderListKey>,
+   private val foldersScreen: Screen<FolderTaskListCombinedKey>,
    private val toolsScreen: Screen<ToolsScreenKey>,
 ) : Screen<HomeScreenKey>() {
    @Composable
@@ -78,7 +83,7 @@ class HomeScreen(
       // We must provide name here, not the enum, because name stays the same after process kill, while enum object is different
       stateHolder.SaveableStateProvider(tab.javaClass.name) {
          when (tab) {
-            is FolderListKey -> foldersScreen.Content(tab)
+            is FolderTaskListCombinedKey -> foldersScreen.Content(tab)
             is ToolsScreenKey -> toolsScreen.Content(tab)
             else -> error("Unhandled screen type $tab")
          }
@@ -111,14 +116,15 @@ private fun NavigationBarContent(
          Modifier
             .fillMaxWidth()
             .weight(1f)
+            .consumeWindowInsets(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom))
       ) {
          mainContent()
       }
 
       NavigationBar {
          NavigationBarItem(
-            selected = selectedScreen is FolderListKey,
-            onClick = { switchScreen(FolderListKey) },
+            selected = selectedScreen is FolderTaskListCombinedKey,
+            onClick = { switchScreen(FolderTaskListCombinedKey) },
             icon = { Icon(painter = painterResource(id = R.drawable.folders), contentDescription = null) },
             label = { Text(stringResource(R.string.folders)) }
          )
@@ -142,8 +148,8 @@ private fun NavigationRailContent(
    Row {
       NavigationRail {
          NavigationRailItem(
-            selected = selectedScreen is FolderListKey,
-            onClick = { switchScreen(FolderListKey) },
+            selected = selectedScreen is FolderTaskListCombinedKey,
+            onClick = { switchScreen(FolderTaskListCombinedKey) },
             icon = { Icon(painter = painterResource(id = R.drawable.folders), contentDescription = null) },
             label = { Text(stringResource(R.string.folders)) }
          )
@@ -173,7 +179,7 @@ internal fun HomePhonePreview() {
    PreviewTheme {
       HomeScreenContent(
          tabletMode = false,
-         selectedScreen = FolderListKey,
+         selectedScreen = FolderTaskListCombinedKey,
          mainContent = {
             Box(
                Modifier
@@ -193,7 +199,7 @@ internal fun HomeTabletPreview() {
    PreviewTheme {
       HomeScreenContent(
          tabletMode = true,
-         selectedScreen = FolderListKey,
+         selectedScreen = FolderTaskListCombinedKey,
          mainContent = {
             Box(
                Modifier

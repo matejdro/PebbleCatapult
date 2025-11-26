@@ -134,6 +134,7 @@ private fun FolderListScreenContent(state: FolderListState, addNew: () -> Unit, 
          modifier = Modifier
             .align(Alignment.BottomEnd)
             .padding(32.dp)
+            .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom))
       ) {
          Icon(painterResource(R.drawable.ic_add), stringResource(R.string.add))
       }
