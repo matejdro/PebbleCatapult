@@ -92,13 +92,13 @@ class ActionListScreen(
       LaunchedEffect(key.id) {
          viewModel.load(key.id)
       }
-      val addDialogState = rememberSaveable { mutableStateOf<AddDialogAction?>(null) }
-      val editDialogState = rememberSaveable { mutableStateOf<CatapultAction?>(null) }
+      var addDialog by rememberSaveable { mutableStateOf<AddDialogAction?>(null) }
+      var editDialog by rememberSaveable { mutableStateOf<CatapultAction?>(null) }
       var showDirectoryPicker by remember { mutableStateOf(false) }
 
       val taskerSelectResult = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
          val taskName = it.data?.dataString ?: return@rememberLauncherForActivityResult
-         addDialogState.value = AddDialogAction.TaskerTask(taskName)
+         addDialog = AddDialogAction.TaskerTask(taskName)
       }
 
       val context = LocalContext.current
@@ -125,7 +125,7 @@ class ActionListScreen(
                }
             },
             editAction = {
-               editDialogState.value = it
+               editDialog = it
             },
             addDirectoryLink = {
                showDirectoryPicker = true
@@ -133,65 +133,26 @@ class ActionListScreen(
          )
       }
 
-      val addDialog = addDialogState.value
-      if (addDialog != null) {
-         ActionEntryDialog(
-            title = context.getString(
-               when (addDialog) {
-                  is AddDialogAction.Directory -> R.string.open_directory
-                  is AddDialogAction.TaskerTask -> R.string.tasker_task
-               }
-            ),
-            initialText = addDialog.title,
-            actionPrefixText = when (addDialog) {
-               is AddDialogAction.Directory -> stringResource(R.string.will_open_a_directory)
-               is AddDialogAction.TaskerTask -> stringResource(R.string.will_start_a_tasker_task)
-            },
-            actionNameText = addDialog.title,
-            dismiss = {
-               addDialogState.value = null
-            },
-            accept = {
-               addDialogState.value = null
+      addDialog?.let { action ->
+         AddDialog(
+            action,
+            {
                viewModel.add(
                   title = it,
-                  targetTask = (addDialog as? AddDialogAction.TaskerTask)?.name,
-                  targetDirectory = (addDialog as? AddDialogAction.Directory)?.id
+                  targetTask = (action as? AddDialogAction.TaskerTask)?.name,
+                  targetDirectory = (action as? AddDialogAction.Directory)?.id
                )
-            }
+            },
+            { addDialog = null },
          )
       }
 
-      val editDialog = editDialogState.value
-      if (editDialog != null) {
-         ActionEntryDialog(
-            title = context.getString(
-               if (editDialog.taskerTaskName != null) {
-                  R.string.tasker_task
-               } else {
-                  R.string.open_directory
-               }
-            ),
-            initialText = editDialog.title,
-            actionPrefixText = context.getString(
-               if (editDialog.taskerTaskName != null) {
-                  R.string.will_start_a_tasker_task
-               } else {
-                  R.string.will_open_a_directory
-               }
-            ),
-            actionNameText = editDialog.taskerTaskName ?: editDialog.targetDirectoryName.orEmpty(),
-            dismiss = {
-               editDialogState.value = null
-            },
-            accept = {
-               editDialogState.value = null
-               viewModel.editActionTitle(editDialog.id, it)
-            },
-            delete = {
-               editDialogState.value = null
-               viewModel.deleteAction(editDialog.id)
-            }
+      editDialog?.let { action ->
+         EditDialog(
+            action,
+            { viewModel.editActionTitle(action.id, it) },
+            { editDialog = null },
+            { viewModel.deleteAction(action.id) }
          )
       }
 
@@ -199,7 +160,7 @@ class ActionListScreen(
          directoryPicker.Content(
             context.getString(R.string.open_directory),
             onDirectorySelect = {
-               addDialogState.value = AddDialogAction.Directory(it.title, it.id)
+               addDialog = AddDialogAction.Directory(it.title, it.id)
                showDirectoryPicker = false
             },
             onDismiss = {
@@ -327,6 +288,66 @@ private fun AddButtons(
          Icon(painterResource(R.drawable.ic_add), stringResource(R.string.add))
       }
    }
+}
+
+@Composable
+private fun AddDialog(addingAction: AddDialogAction, confirm: (String) -> Unit, dismissDialog: () -> Unit) {
+   val context = LocalContext.current
+
+   ActionEntryDialog(
+      title = context.getString(
+         when (addingAction) {
+            is AddDialogAction.Directory -> R.string.open_directory
+            is AddDialogAction.TaskerTask -> R.string.tasker_task
+         }
+      ),
+      initialText = addingAction.title,
+      actionPrefixText = when (addingAction) {
+         is AddDialogAction.Directory -> stringResource(R.string.will_open_a_directory)
+         is AddDialogAction.TaskerTask -> stringResource(R.string.will_start_a_tasker_task)
+      },
+      actionNameText = addingAction.title,
+      dismiss = dismissDialog,
+      accept = {
+         confirm(it)
+         dismissDialog()
+      }
+   )
+}
+
+@Composable
+private fun EditDialog(editingAction: CatapultAction, confirm: (String) -> Unit, dismissDialog: () -> Unit, delete: () -> Unit) {
+   val context = LocalContext.current
+
+   ActionEntryDialog(
+      title = context.getString(
+         if (editingAction.taskerTaskName != null) {
+            R.string.tasker_task
+         } else {
+            R.string.open_directory
+         }
+      ),
+      initialText = editingAction.title,
+      actionPrefixText = context.getString(
+         if (editingAction.taskerTaskName != null) {
+            R.string.will_start_a_tasker_task
+         } else {
+            R.string.will_open_a_directory
+         }
+      ),
+      actionNameText = editingAction.taskerTaskName ?: editingAction.targetDirectoryName.orEmpty(),
+      dismiss = {
+         dismissDialog()
+      },
+      accept = {
+         confirm(it)
+         dismissDialog()
+      },
+      delete = {
+         delete()
+         dismissDialog()
+      }
+   )
 }
 
 @Composable
