@@ -64,6 +64,7 @@ import androidx.compose.ui.unit.dp
 import com.matejdro.catapult.actionlist.api.CatapultAction
 import com.matejdro.catapult.actionlist.api.CatapultDirectory
 import com.matejdro.catapult.actionlist.ui.R
+import com.matejdro.catapult.actionlist.ui.directorypicker.DirectoryPickerScreen
 import com.matejdro.catapult.actionlist.ui.errors.taskListUserFriendlyMessage
 import com.matejdro.catapult.navigation.keys.ActionListKey
 import com.matejdro.catapult.ui.components.AlertDialogWithContent
@@ -81,6 +82,7 @@ import com.matejdro.catapult.sharedresources.R as sharedR
 @InjectNavigationScreen
 class ActionListScreen(
    private val viewModel: ActionListViewModel,
+   private val directoryPicker: DirectoryPickerScreen,
 ) : Screen<ActionListKey>() {
    @Composable
    override fun Content(key: ActionListKey) {
@@ -90,6 +92,7 @@ class ActionListScreen(
          viewModel.load(key.id)
       }
       val addDialogState = rememberSaveable { mutableStateOf<AddDialogAction?>(null) }
+      var showDirectoryPicker by remember { mutableStateOf(false) }
 
       val taskerSelectResult = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
          val taskName = it.data?.dataString ?: return@rememberLauncherForActivityResult
@@ -119,7 +122,9 @@ class ActionListScreen(
                   }
                }
             },
-            addDirectoryLink = {}
+            addDirectoryLink = {
+               showDirectoryPicker = true
+            }
          )
       }
 
@@ -148,6 +153,19 @@ class ActionListScreen(
                   targetTask = (addDialog as? AddDialogAction.TaskerTask)?.name,
                   targetDirectory = (addDialog as? AddDialogAction.Directory)?.id
                )
+            }
+         )
+      }
+
+      if (showDirectoryPicker) {
+         directoryPicker.Content(
+            context.getString(R.string.open_directory),
+            onDirectorySelect = {
+               addDialogState.value = AddDialogAction.Directory(it.title, it.id)
+               showDirectoryPicker = false
+            },
+            onDismiss = {
+               showDirectoryPicker = false
             }
          )
       }
