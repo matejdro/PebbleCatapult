@@ -7,4 +7,7 @@
     <string name="delete">Delete</string>
     <string name="starting_directory_cannot_be_edited">Starting Directory cannot be edited</string>
     <string name="this_directory_does_not_exist_anymore">This directory does not exist anymore.</string>
+    <string name="open_directory">Open Directory</string>
+    <string name="tasker_task">Tasker Task</string>
+    <string name="error_no_tasker">Cannot open Task selector. Is the Tasker installed?</string>
 </resources>

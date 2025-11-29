@@ -47,6 +47,7 @@ import si.inova.kotlinova.navigation.navigator.Navigator
 import si.inova.kotlinova.navigation.screenkeys.ScreenKey
 import si.inova.kotlinova.navigation.screens.InjectNavigationScreen
 import si.inova.kotlinova.navigation.screens.Screen
+import com.matejdro.catapult.sharedresources.R as sharedR
 
 @InjectNavigationScreen
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
@@ -125,7 +126,7 @@ private fun NavigationBarContent(
          NavigationBarItem(
             selected = selectedScreen is FolderTaskListCombinedKey,
             onClick = { switchScreen(FolderTaskListCombinedKey) },
-            icon = { Icon(painter = painterResource(id = R.drawable.folders), contentDescription = null) },
+            icon = { Icon(painter = painterResource(id = sharedR.drawable.folders), contentDescription = null) },
             label = { Text(stringResource(R.string.folders)) }
          )
 
@@ -150,7 +151,7 @@ private fun NavigationRailContent(
          NavigationRailItem(
             selected = selectedScreen is FolderTaskListCombinedKey,
             onClick = { switchScreen(FolderTaskListCombinedKey) },
-            icon = { Icon(painter = painterResource(id = R.drawable.folders), contentDescription = null) },
+            icon = { Icon(painter = painterResource(id = sharedR.drawable.folders), contentDescription = null) },
             label = { Text(stringResource(R.string.folders)) }
          )
 

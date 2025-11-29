@@ -2,6 +2,7 @@ package com.matejdro.catapult.tasklist.data.di
 
 import app.cash.sqldelight.db.SqlDriver
 import com.matejdro.catapult.tasklist.sqldelight.generated.Database
+import com.matejdro.catapult.tasklist.sqldelight.generated.DbActionQueries
 import com.matejdro.catapult.tasklist.sqldelight.generated.DbDirectoryQueries
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesTo
@@ -17,7 +18,12 @@ interface TasklistDataProviders {
    }
 
    @Provides
-   fun provideStopQueries(database: Database): DbDirectoryQueries {
+   fun provideDirectoryQueries(database: Database): DbDirectoryQueries {
       return database.dbDirectoryQueries
+   }
+
+   @Provides
+   fun provideActionQueries(database: Database): DbActionQueries {
+      return database.dbActionQueries
    }
 }

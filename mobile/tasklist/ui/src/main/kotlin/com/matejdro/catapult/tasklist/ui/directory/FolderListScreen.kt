@@ -1,8 +1,6 @@
 package com.matejdro.catapult.tasklist.ui.directory
 
-import android.widget.Toast
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
@@ -19,6 +17,9 @@ import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -27,8 +28,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -46,6 +48,7 @@ import com.matejdro.catapult.ui.components.AlertDialogWithContent
 import com.matejdro.catapult.ui.components.ProgressErrorSuccessScaffold
 import com.matejdro.catapult.ui.debugging.FullScreenPreviews
 import com.matejdro.catapult.ui.debugging.PreviewTheme
+import kotlinx.coroutines.launch
 import si.inova.kotlinova.compose.components.itemsWithDivider
 import si.inova.kotlinova.compose.flow.collectAsStateWithLifecycleAndBlinkingPrevention
 import si.inova.kotlinova.navigation.di.ContributesScreenBinding
@@ -67,9 +70,12 @@ class FolderListScreen(
    fun Content(selectFolder: (Int) -> Unit) {
       val stateOutcome = viewModel.uiState.collectAsStateWithLifecycleAndBlinkingPrevention().value
 
-      var addDialog by remember { mutableStateOf(false) }
-      var editDialog by remember { mutableStateOf<Int?>(null) }
+      var addDialog by rememberSaveable { mutableStateOf(false) }
+      var editDialog by rememberSaveable { mutableStateOf<Int?>(null) }
       val context = LocalContext.current
+
+      val scope = rememberCoroutineScope()
+      val snackbarHostState = remember { SnackbarHostState() }
 
       ProgressErrorSuccessScaffold(
          stateOutcome,
@@ -78,12 +84,15 @@ class FolderListScreen(
       ) { state ->
          FolderListScreenContent(
             state,
+            snackbarHostState,
             addNew = {
                addDialog = true
             },
             edit = {
                if (it == 1) {
-                  Toast.makeText(context, R.string.starting_directory_cannot_be_edited, Toast.LENGTH_SHORT).show()
+                  scope.launch {
+                     snackbarHostState.showSnackbar(context.getString(R.string.starting_directory_cannot_be_edited))
+                  }
                } else {
                   editDialog = it
                }
@@ -121,10 +130,30 @@ class FolderListScreen(
 }
 
 @Composable
-private fun FolderListScreenContent(state: FolderListState, addNew: () -> Unit, edit: (Int) -> Unit, select: (Int) -> Unit) {
-   Box(Modifier.fillMaxSize()) {
+private fun FolderListScreenContent(
+   state: FolderListState,
+   snackbarHostState: SnackbarHostState,
+   addNew: () -> Unit,
+   edit: (Int) -> Unit,
+   select: (Int) -> Unit,
+) {
+   Scaffold(
+      Modifier.fillMaxSize(),
+      contentWindowInsets = WindowInsets(),
+      floatingActionButton = {
+         FloatingActionButton(
+            onClick = addNew,
+            modifier = Modifier
+               .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom))
+         ) {
+            Icon(painterResource(R.drawable.ic_add), stringResource(R.string.add))
+         }
+      },
+      snackbarHost = { SnackbarHost(snackbarHostState) }
+   ) { paddingValues ->
       LazyColumn(
-         contentPadding = WindowInsets.safeDrawing.asPaddingValues()
+         contentPadding = WindowInsets.safeDrawing.asPaddingValues(),
+         modifier = Modifier.padding(paddingValues)
       ) {
          itemsWithDivider(state.folders, key = { it.id }) {
             Text(
@@ -136,16 +165,6 @@ private fun FolderListScreenContent(state: FolderListState, addNew: () -> Unit, 
                   .animateItem()
             )
          }
-      }
-
-      FloatingActionButton(
-         onClick = addNew,
-         modifier = Modifier
-            .align(Alignment.BottomEnd)
-            .padding(32.dp)
-            .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom))
-      ) {
-         Icon(painterResource(R.drawable.ic_add), stringResource(R.string.add))
       }
    }
 }
@@ -228,6 +247,7 @@ internal fun FolderListScreenContentPreview() {
                CatapultDirectory(3, "Directory 3")
             )
          ),
+         SnackbarHostState(),
          {},
          {},
          {}

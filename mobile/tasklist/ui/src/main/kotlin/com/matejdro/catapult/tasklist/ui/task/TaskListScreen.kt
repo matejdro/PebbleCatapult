@@ -1,24 +1,82 @@
 package com.matejdro.catapult.tasklist.ui.task
 
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.os.Parcelable
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.matejdro.catapult.navigation.keys.TaskListKey
+import com.matejdro.catapult.tasklist.api.CatapultAction
 import com.matejdro.catapult.tasklist.api.CatapultDirectory
+import com.matejdro.catapult.tasklist.ui.R
 import com.matejdro.catapult.tasklist.ui.errors.taskListUserFriendlyMessage
+import com.matejdro.catapult.ui.components.AlertDialogWithContent
 import com.matejdro.catapult.ui.components.ProgressErrorSuccessScaffold
 import com.matejdro.catapult.ui.debugging.FullScreenPreviews
 import com.matejdro.catapult.ui.debugging.PreviewTheme
+import kotlinx.coroutines.launch
+import kotlinx.parcelize.Parcelize
+import si.inova.kotlinova.compose.components.itemsWithDivider
 import si.inova.kotlinova.compose.flow.collectAsStateWithLifecycleAndBlinkingPrevention
 import si.inova.kotlinova.navigation.screens.InjectNavigationScreen
 import si.inova.kotlinova.navigation.screens.Screen
+import com.matejdro.catapult.sharedresources.R as sharedR
 
 @InjectNavigationScreen
 class TaskListScreen(
@@ -31,6 +89,16 @@ class TaskListScreen(
       LaunchedEffect(key.id) {
          viewModel.load(key.id)
       }
+      val addDialogState = rememberSaveable { mutableStateOf<AddDialogAction?>(null) }
+
+      val taskerSelectResult = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+         val taskName = it.data?.dataString ?: return@rememberLauncherForActivityResult
+         addDialogState.value = AddDialogAction.TaskerTask(taskName)
+      }
+
+      val context = LocalContext.current
+      val scope = rememberCoroutineScope()
+      val snackbarHostState = remember { SnackbarHostState() }
 
       ProgressErrorSuccessScaffold(
          stateOutcome,
@@ -38,24 +106,300 @@ class TaskListScreen(
             .safeDrawingPadding(),
          { it.taskListUserFriendlyMessage() }
       ) { state ->
-         TaskListScreenContent(state)
+         TaskListScreenContent(
+            state = state,
+            snackbarHostState = snackbarHostState,
+            addTaskerTask = {
+               val taskerSelectIntent = Intent("net.dinglisch.android.tasker.ACTION_TASK_SELECT")
+               try {
+                  taskerSelectResult.launch(taskerSelectIntent)
+               } catch (_: ActivityNotFoundException) {
+                  scope.launch {
+                     snackbarHostState.showSnackbar(context.getString(R.string.error_no_tasker))
+                  }
+               }
+            },
+            addDirectoryLink = {}
+         )
+      }
+
+      val addDialog = addDialogState.value
+      if (addDialog != null) {
+         ActionEntryDialog(
+            title = context.getString(
+               when (addDialog) {
+                  is AddDialogAction.Folder -> R.string.open_directory
+                  is AddDialogAction.TaskerTask -> R.string.tasker_task
+               }
+            ),
+            initialText = addDialog.title,
+            actionPrefixText = when (addDialog) {
+               is AddDialogAction.Folder -> "Will open a directory "
+               is AddDialogAction.TaskerTask -> "Will start a Tasker task "
+            },
+            actionNameText = addDialog.title,
+            dismiss = {
+               addDialogState.value = null
+            },
+            accept = {
+               addDialogState.value = null
+               viewModel.add(
+                  title = it,
+                  targetTask = (addDialog as? AddDialogAction.TaskerTask)?.taskName,
+                  targetDirectory = (addDialog as? AddDialogAction.Folder)?.folderId
+               )
+            }
+         )
       }
    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TaskListScreenContent(state: TaskListState) {
-   Column {
-      TopAppBar(title = { Text(state.directory.title) })
-      HorizontalDivider(color = MaterialTheme.colorScheme.onSurface)
+private fun TaskListScreenContent(
+   state: TaskListState,
+   snackbarHostState: SnackbarHostState,
+   addTaskerTask: () -> Unit,
+   addDirectoryLink: () -> Unit,
+   addButtonsShown: Boolean = false,
+) {
+   Scaffold(
+      Modifier.fillMaxSize(),
+      contentWindowInsets = WindowInsets(),
+      floatingActionButton = {
+         AddButtons(addTaskerTask, addDirectoryLink, addButtonsShown)
+      },
+      snackbarHost = { SnackbarHost(snackbarHostState) }
+   ) { paddingValues ->
+      Column(
+         Modifier
+            .fillMaxWidth()
+            .padding(paddingValues)
+      ) {
+         TopAppBar(title = { Text(state.directory.title) })
+         HorizontalDivider(color = MaterialTheme.colorScheme.onSurface)
+
+         LazyColumn(
+            contentPadding = WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom).asPaddingValues()
+         ) {
+            itemsWithDivider(state.actions, key = { it.id }) {
+               Text(
+                  it.title,
+                  Modifier
+                     // .combinedClickable(onClick = { select(it.id) }, onLongClick = { edit(it.id) })
+                     .padding(16.dp)
+                     .fillMaxWidth()
+                     .animateItem()
+               )
+            }
+         }
+      }
    }
 }
 
+@Composable
+private fun AddButtons(
+   addTaskerTask: () -> Unit,
+   addDirectoryLink: () -> Unit,
+   shown: Boolean = false,
+) {
+   var showFabs by remember { mutableStateOf(shown) }
+   val fabRotation by animateFloatAsState(if (showFabs) ROTATION_QUARTER_CIRCLE_DEG else 0f)
+
+   Column(
+      modifier = Modifier
+         .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom)),
+      horizontalAlignment = Alignment.End,
+   ) {
+      AnimatedVisibility(
+         visible = showFabs,
+         enter = slideInVertically(initialOffsetY = { it / 2 }) + fadeIn(),
+         exit = slideOutVertically(targetOffsetY = { it / 2 }) + fadeOut()
+      ) {
+         Column(
+            Modifier.padding(end = 10.dp),
+            horizontalAlignment = Alignment.End,
+         ) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(8.dp)) {
+               Text(stringResource(R.string.tasker_task))
+
+               FloatingActionButton(
+                  containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                  onClick = {
+                     showFabs = false
+                     addTaskerTask()
+                  },
+                  modifier = Modifier
+                     .padding(start = 8.dp)
+                     .size(48.dp)
+               ) {
+                  Icon(painterResource(R.drawable.ic_cog), stringResource(R.string.add))
+               }
+            }
+
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(8.dp)) {
+               Text(stringResource(R.string.open_directory))
+
+               FloatingActionButton(
+                  containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                  onClick = {
+                     showFabs = false
+                     addDirectoryLink()
+                  },
+                  modifier = Modifier
+                     .padding(start = 8.dp)
+                     .size(48.dp)
+               ) {
+                  Icon(painterResource(sharedR.drawable.folders), stringResource(R.string.add))
+               }
+            }
+         }
+      }
+
+      FloatingActionButton(
+         containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+         onClick = {
+            showFabs = !showFabs
+         },
+         modifier = Modifier
+            .graphicsLayer {
+               rotationZ = fabRotation
+            }
+            .padding(16.dp)
+      ) {
+         Icon(painterResource(R.drawable.ic_add), stringResource(R.string.add))
+      }
+   }
+}
+
+@Composable
+private fun ActionEntryDialog(
+   title: String,
+   initialText: String,
+   actionPrefixText: String,
+   actionNameText: String,
+   dismiss: () -> Unit,
+   accept: (text: String) -> Unit,
+   delete: (() -> Unit)? = null,
+) {
+   val textFieldState = rememberTextFieldState(initialText)
+
+   AlertDialogWithContent(
+      title = {
+         Text(text = title)
+      },
+      onDismissRequest = {
+         dismiss()
+      },
+      confirmButton = {
+         TextButton(
+            onClick = {
+               accept(textFieldState.text.toString())
+            }
+         ) {
+            Text(stringResource(R.string.ok))
+         }
+      },
+      dismissButton = {
+         TextButton(
+            onClick = {
+               dismiss()
+            }
+         ) {
+            Text(stringResource(R.string.cancel))
+         }
+      },
+      neutralButton = {
+         if (delete != null) {
+            TextButton(
+               onClick = {
+                  delete()
+               }
+            ) {
+               Text(stringResource(R.string.delete))
+            }
+         }
+      }
+   ) {
+      val focusRequester = remember { FocusRequester() }
+
+      Column {
+         TextField(
+            textFieldState,
+            Modifier
+               .fillMaxWidth()
+               .focusRequester(focusRequester)
+               .padding(bottom = 8.dp),
+            onKeyboardAction = { accept(textFieldState.text.toString()) },
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+            lineLimits = TextFieldLineLimits.SingleLine,
+         )
+
+         FlowRow {
+            Text(actionPrefixText)
+            Text(actionNameText, fontWeight = FontWeight.Bold)
+         }
+      }
+
+      LaunchedEffect(Unit) {
+         focusRequester.requestFocus()
+      }
+   }
+}
+
+private sealed class AddDialogAction : Parcelable {
+   abstract val title: String
+
+   @Parcelize
+   class TaskerTask(val taskName: String) : AddDialogAction() {
+      override val title: String
+         get() = taskName
+   }
+
+   @Parcelize
+   class Folder(val folderName: String, val folderId: Int) : AddDialogAction() {
+      override val title: String
+         get() = folderName
+   }
+}
+
+private const val ROTATION_QUARTER_CIRCLE_DEG = 45f
+
 @FullScreenPreviews
 @Composable
-private fun TaskListScreenContentPreview() {
+internal fun TaskListScreenContentPreview() {
    PreviewTheme {
-      TaskListScreenContent(TaskListState(CatapultDirectory(1, "Test Directory")))
+      TaskListScreenContent(
+         TaskListState(
+            CatapultDirectory(1, "Test Directory"),
+            listOf(
+               CatapultAction("Action A", 1, taskerTaskName = "Task A", id = 1),
+               CatapultAction("Action B", 1, taskerTaskName = "Task B", id = 2),
+            )
+         ),
+         SnackbarHostState(),
+         {},
+         {}
+      )
+   }
+}
+
+@Preview
+@Composable
+internal fun TaskListScreenAddPreview() {
+   PreviewTheme {
+      TaskListScreenContent(
+         TaskListState(
+            CatapultDirectory(1, "Test Directory"),
+            listOf(
+               CatapultAction("Action A", 1, taskerTaskName = "Task A", id = 1),
+               CatapultAction("Action B", 1, taskerTaskName = "Task B", id = 2),
+            )
+         ),
+         SnackbarHostState(),
+         {},
+         {},
+         addButtonsShown = true
+      )
    }
 }

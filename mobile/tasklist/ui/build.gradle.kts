@@ -3,6 +3,7 @@ plugins {
    compose
    di
    navigation
+   parcelize
    showkase
 }
 
@@ -22,6 +23,8 @@ dependencies {
    api(libs.kotlin.coroutines)
 
    implementation(projects.commonCompose)
+   implementation(projects.sharedResources)
+   implementation(libs.androidx.activity.compose)
 
    testImplementation(projects.tasklist.test)
    testImplementation(libs.kotlinova.core.test)

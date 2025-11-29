@@ -3,6 +3,8 @@ package com.matejdro.catapult.tasklist.ui.task
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import com.matejdro.catapult.common.logging.ActionLogger
+import com.matejdro.catapult.tasklist.api.CatapultAction
+import com.matejdro.catapult.tasklist.api.CatapultActionRepository
 import com.matejdro.catapult.tasklist.api.CatapultDirectory
 import com.matejdro.catapult.tasklist.api.DirectoryListRepository
 import dev.zacsweers.metro.Inject
@@ -11,6 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import si.inova.kotlinova.core.outcome.CoroutineResourceManager
 import si.inova.kotlinova.core.outcome.Outcome
+import si.inova.kotlinova.core.outcome.flatMapLatestOutcome
 import si.inova.kotlinova.core.outcome.mapData
 import si.inova.kotlinova.navigation.services.ContributesScopedService
 import si.inova.kotlinova.navigation.services.CoroutineScopedService
@@ -21,6 +24,7 @@ import si.inova.kotlinova.navigation.services.CoroutineScopedService
 class TaskListViewModel(
    private val resources: CoroutineResourceManager,
    private val directoryRepo: DirectoryListRepository,
+   private val actionsRepo: CatapultActionRepository,
    private val actionLogger: ActionLogger,
 ) : CoroutineScopedService(resources.scope) {
    private val _uiState = MutableStateFlow<Outcome<TaskListState>>(Outcome.Progress())
@@ -34,16 +38,39 @@ class TaskListViewModel(
       selectedDirectory = id
 
       resources.launchResourceControlTask(_uiState) {
-         emitAll(
-            directoryRepo.getSingle(id).map { outcome ->
-               outcome.mapData { TaskListState(it) }
+         val flow = directoryRepo.getSingle(id).flatMapLatestOutcome { directory ->
+            actionsRepo.getAll(directory.id).map { outcome ->
+               outcome.mapData { list ->
+                  TaskListState(directory, list)
+               }
             }
-         )
+         }
+
+         emitAll(flow)
       }
+   }
+
+   fun add(title: String, targetTask: String?, targetDirectory: Int?) = resources.launchWithExceptionReporting {
+      actionLogger.logAction {
+         "TaskListViewModel.add(" +
+            "title = $title, targetTask = ${targetTask ?: "null"}, targetDirectory = ${targetDirectory ?: "null"}" +
+            ")"
+      }
+
+      val directoryId = selectedDirectory ?: return@launchWithExceptionReporting
+      actionsRepo.insert(
+         CatapultAction(
+            title = title,
+            directoryId = directoryId,
+            taskerTaskName = targetTask,
+            targetDirectoryId = targetDirectory
+         )
+      )
    }
 }
 
 @Immutable
 data class TaskListState(
    val directory: CatapultDirectory,
+   val actions: List<CatapultAction>,
 )

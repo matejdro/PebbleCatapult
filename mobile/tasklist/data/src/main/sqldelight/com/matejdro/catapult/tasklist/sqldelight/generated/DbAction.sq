@@ -1,0 +1,66 @@
+CREATE TABLE dbCatapultAction (
+    id INTEGER PRIMARY KEY NOT NULL,
+    directoryId INTEGER NOT NULL,
+    title TEXT NOT NULL,
+    taskerTaskName TEXT,
+    targetDirectoryId INTEGER,
+    sortOrder INTEGER NOT NULL
+);
+
+selectAll:
+SELECT dbCatapultAction.id,
+    dbCatapultAction.title,
+    dbCatapultAction.directoryId,
+    dbCatapultAction.taskerTaskName,
+    dbCatapultAction.targetDirectoryId,
+    dbCatapultAction.sortOrder,
+    dbDirectory.title AS targetDirectoryName
+    FROM
+        dbCatapultAction LEFT JOIN
+            dbDirectory ON dbDirectory.id = dbCatapultAction.targetDirectoryId
+    WHERE dbCatapultAction.directoryId = :directoryId
+    ORDER BY sortOrder ASC;
+
+selectSingleRaw:
+    SELECT * FROM dbCatapultAction WHERE id = ?;
+
+insert:
+   INSERT INTO dbCatapultAction (title, directoryId, taskerTaskName, targetDirectoryId, sortOrder)
+   VALUES (
+       :title,
+       :directoryId,
+       :taskerTaskName,
+       :targetDirectoryId,
+       (SELECT COALESCE(MAX(sortOrder) + 1, 0) FROM dbCatapultAction WHERE directoryId = :directoryId)
+   );
+
+delete {
+    UPDATE dbCatapultAction
+    SET sortOrder = sortOrder - 1
+    WHERE sortOrder > (SELECT sortOrder FROM dbCatapultAction WHERE id = :id) AND directoryId = (SELECT directoryId FROM dbCatapultAction WHERE id = :id);
+
+    DELETE FROM dbCatapultAction WHERE id = :id;
+}
+
+updateTitle:
+    UPDATE dbCatapultAction SET title = ? WHERE id = ?;
+
+reorderUpwards {
+    UPDATE dbCatapultAction
+    SET sortOrder = sortOrder - 1
+    WHERE (sortOrder BETWEEN :fromIndex AND :toIndex) AND directoryId = :directoryId;
+
+    UPDATE dbCatapultAction
+    SET sortOrder = :toIndex
+    WHERE id = :id;
+}
+
+reorderDownwards {
+    UPDATE dbCatapultAction
+    SET sortOrder = sortOrder + 1
+    WHERE (sortOrder BETWEEN :toIndex AND :fromIndex) AND directoryId = :directoryId;
+
+    UPDATE dbCatapultAction
+    SET sortOrder = :toIndex
+    WHERE id = :id;
+}
