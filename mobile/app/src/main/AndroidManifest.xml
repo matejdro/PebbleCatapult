@@ -2,10 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.INTERNET" />
-
     <!-- Required for crash reporting -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- List reordering vibration -->
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
         android:name=".CatapultApplication"

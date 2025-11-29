@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.rememberTextFieldState
@@ -72,6 +73,7 @@ import com.matejdro.catapult.ui.components.AlertDialogWithContent
 import com.matejdro.catapult.ui.components.ProgressErrorSuccessScaffold
 import com.matejdro.catapult.ui.debugging.FullScreenPreviews
 import com.matejdro.catapult.ui.debugging.PreviewTheme
+import com.matejdro.catapult.ui.lists.ReorderableListContainer
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import si.inova.kotlinova.compose.components.itemsWithDivider
@@ -129,6 +131,9 @@ class ActionListScreen(
             },
             addDirectoryLink = {
                showDirectoryPicker = true
+            },
+            reorderAction = { id, toIndex ->
+               viewModel.reorder(id, toIndex)
             }
          )
       }
@@ -179,6 +184,7 @@ private fun TaskListScreenContent(
    addTaskerTask: () -> Unit,
    addDirectoryLink: () -> Unit,
    editAction: (CatapultAction) -> Unit,
+   reorderAction: (id: Int, toIndex: Int) -> Unit,
    addButtonsShown: Boolean = false,
 ) {
    Scaffold(
@@ -197,18 +203,27 @@ private fun TaskListScreenContent(
          TopAppBar(title = { Text(state.directory.title) })
          HorizontalDivider(color = MaterialTheme.colorScheme.onSurface)
 
-         LazyColumn(
-            contentPadding = WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom).asPaddingValues()
-         ) {
-            itemsWithDivider(state.actions, key = { it.id }) {
-               Text(
-                  it.title,
-                  Modifier
-                     .clickable(onClick = { editAction(it) })
-                     .padding(16.dp)
-                     .fillMaxWidth()
-                     .animateItem()
-               )
+         val listState = rememberLazyListState()
+         ReorderableListContainer(state.actions, listState) { list ->
+            LazyColumn(
+               contentPadding = WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom).asPaddingValues()
+            ) {
+               itemsWithDivider(list, key = { it.id }) { action ->
+                  ReorderableListItem(
+                     action.id,
+                     action,
+                     setOrder = { reorderAction(action.id, it) },
+                  ) { modifier ->
+                     Text(
+                        action.title,
+                        modifier
+                           .clickable(onClick = { editAction(action) })
+                           .padding(16.dp)
+                           .fillMaxWidth()
+                           .animateItem()
+                     )
+                  }
+               }
             }
          }
       }
@@ -458,7 +473,8 @@ internal fun TaskListScreenContentPreview() {
          SnackbarHostState(),
          {},
          {},
-         {}
+         {},
+         { _, _ -> },
       )
    }
 }
@@ -479,6 +495,7 @@ internal fun TaskListScreenAddPreview() {
          {},
          {},
          {},
+         { _, _ -> },
          addButtonsShown = true
       )
    }

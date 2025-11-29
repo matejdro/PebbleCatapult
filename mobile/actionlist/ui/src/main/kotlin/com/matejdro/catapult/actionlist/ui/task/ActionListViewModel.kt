@@ -79,6 +79,12 @@ class ActionListViewModel(
 
       actionsRepo.delete(id)
    }
+
+   fun reorder(id: Int, to: Int) = resources.launchWithExceptionReporting {
+      actionLogger.logAction { "ActionListViewModel.reorder($id, $to)" }
+
+      actionsRepo.reorder(id, to)
+   }
 }
 
 @Immutable

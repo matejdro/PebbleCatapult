@@ -131,6 +131,22 @@ class ActionListViewModelTest {
       )
    }
 
+   @Test
+   fun `Allow reordering name of the existing actions`() = scope.runTest {
+      initDirectories()
+      actionsRepo.insert(CatapultAction("Action A", 1, taskerTaskName = "Task A", id = 1))
+      actionsRepo.insert(CatapultAction("Action B", 1, taskerTaskName = "Task B", id = 2))
+
+      vm.load(1)
+      vm.reorder(1, 1)
+      runCurrent()
+
+      actionsRepo.getAll(1).first() shouldBeSuccessWithData listOf(
+         CatapultAction("Action B", 1, taskerTaskName = "Task B", id = 2),
+         CatapultAction("Action A", 1, taskerTaskName = "Task A", id = 1),
+      )
+   }
+
    private suspend fun initDirectories() {
       directoryRepo.insert(CatapultDirectory(1, "Directory"))
       directoryRepo.insert(CatapultDirectory(2, "Another Directory"))
