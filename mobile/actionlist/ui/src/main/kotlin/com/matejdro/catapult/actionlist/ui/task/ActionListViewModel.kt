@@ -67,6 +67,18 @@ class ActionListViewModel(
          )
       )
    }
+
+   fun editActionTitle(id: Int, title: String) = resources.launchWithExceptionReporting {
+      actionLogger.logAction { "ActionListViewModel.editActionTitle(id = $id, title = $title)" }
+
+      actionsRepo.updateTitle(id, title)
+   }
+
+   fun deleteAction(id: Int) = resources.launchWithExceptionReporting {
+      actionLogger.logAction { "TaskListViewModel.deleteAction(id = $id)" }
+
+      actionsRepo.delete(id)
+   }
 }
 
 @Immutable

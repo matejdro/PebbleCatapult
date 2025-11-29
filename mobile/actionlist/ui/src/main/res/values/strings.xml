@@ -10,4 +10,6 @@
     <string name="open_directory">Open Directory</string>
     <string name="tasker_task">Tasker Task</string>
     <string name="error_no_tasker">Cannot open Task selector. Is the Tasker installed?</string>
+    <string name="will_open_a_directory">"Will open a directory "</string>
+    <string name="will_start_a_tasker_task">"Will start a Tasker task "</string>
 </resources>

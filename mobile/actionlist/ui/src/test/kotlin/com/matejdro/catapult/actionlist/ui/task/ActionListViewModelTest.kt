@@ -100,6 +100,37 @@ class ActionListViewModelTest {
       )
    }
 
+   @Test
+   fun `Allow editing name of the existing action`() = scope.runTest {
+      initDirectories()
+      actionsRepo.insert(CatapultAction("Action A", 1, taskerTaskName = "Task A", id = 1))
+      actionsRepo.insert(CatapultAction("Action B", 1, taskerTaskName = "Task B", id = 2))
+
+      vm.load(1)
+      vm.editActionTitle(2, "Action C")
+      runCurrent()
+
+      actionsRepo.getAll(1).first() shouldBeSuccessWithData listOf(
+         CatapultAction("Action A", 1, taskerTaskName = "Task A", id = 1),
+         CatapultAction("Action C", 1, taskerTaskName = "Task B", id = 2)
+      )
+   }
+
+   @Test
+   fun `Allow deleting the existing action`() = scope.runTest {
+      initDirectories()
+      actionsRepo.insert(CatapultAction("Action A", 1, taskerTaskName = "Task A", id = 1))
+      actionsRepo.insert(CatapultAction("Action B", 1, taskerTaskName = "Task B", id = 2))
+
+      vm.load(1)
+      vm.deleteAction(1)
+      runCurrent()
+
+      actionsRepo.getAll(1).first() shouldBeSuccessWithData listOf(
+         CatapultAction("Action B", 1, taskerTaskName = "Task B", id = 2)
+      )
+   }
+
    private suspend fun initDirectories() {
       directoryRepo.insert(CatapultDirectory(1, "Directory"))
       directoryRepo.insert(CatapultDirectory(2, "Another Directory"))

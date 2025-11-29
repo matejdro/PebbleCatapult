@@ -11,6 +11,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
@@ -92,6 +93,7 @@ class ActionListScreen(
          viewModel.load(key.id)
       }
       val addDialogState = rememberSaveable { mutableStateOf<AddDialogAction?>(null) }
+      val editDialogState = rememberSaveable { mutableStateOf<CatapultAction?>(null) }
       var showDirectoryPicker by remember { mutableStateOf(false) }
 
       val taskerSelectResult = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -122,6 +124,9 @@ class ActionListScreen(
                   }
                }
             },
+            editAction = {
+               editDialogState.value = it
+            },
             addDirectoryLink = {
                showDirectoryPicker = true
             }
@@ -139,8 +144,8 @@ class ActionListScreen(
             ),
             initialText = addDialog.title,
             actionPrefixText = when (addDialog) {
-               is AddDialogAction.Directory -> "Will open a directory "
-               is AddDialogAction.TaskerTask -> "Will start a Tasker task "
+               is AddDialogAction.Directory -> stringResource(R.string.will_open_a_directory)
+               is AddDialogAction.TaskerTask -> stringResource(R.string.will_start_a_tasker_task)
             },
             actionNameText = addDialog.title,
             dismiss = {
@@ -153,6 +158,39 @@ class ActionListScreen(
                   targetTask = (addDialog as? AddDialogAction.TaskerTask)?.name,
                   targetDirectory = (addDialog as? AddDialogAction.Directory)?.id
                )
+            }
+         )
+      }
+
+      val editDialog = editDialogState.value
+      if (editDialog != null) {
+         ActionEntryDialog(
+            title = context.getString(
+               if (editDialog.taskerTaskName != null) {
+                  R.string.tasker_task
+               } else {
+                  R.string.open_directory
+               }
+            ),
+            initialText = editDialog.title,
+            actionPrefixText = context.getString(
+               if (editDialog.taskerTaskName != null) {
+                  R.string.will_start_a_tasker_task
+               } else {
+                  R.string.will_open_a_directory
+               }
+            ),
+            actionNameText = editDialog.taskerTaskName ?: editDialog.targetDirectoryName.orEmpty(),
+            dismiss = {
+               editDialogState.value = null
+            },
+            accept = {
+               editDialogState.value = null
+               viewModel.editActionTitle(editDialog.id, it)
+            },
+            delete = {
+               editDialogState.value = null
+               viewModel.deleteAction(editDialog.id)
             }
          )
       }
@@ -179,6 +217,7 @@ private fun TaskListScreenContent(
    snackbarHostState: SnackbarHostState,
    addTaskerTask: () -> Unit,
    addDirectoryLink: () -> Unit,
+   editAction: (CatapultAction) -> Unit,
    addButtonsShown: Boolean = false,
 ) {
    Scaffold(
@@ -204,7 +243,7 @@ private fun TaskListScreenContent(
                Text(
                   it.title,
                   Modifier
-                     // .combinedClickable(onClick = { select(it.id) }, onLongClick = { edit(it.id) })
+                     .clickable(onClick = { editAction(it) })
                      .padding(16.dp)
                      .fillMaxWidth()
                      .animateItem()
@@ -397,6 +436,7 @@ internal fun TaskListScreenContentPreview() {
          ),
          SnackbarHostState(),
          {},
+         {},
          {}
       )
    }
@@ -415,6 +455,7 @@ internal fun TaskListScreenAddPreview() {
             )
          ),
          SnackbarHostState(),
+         {},
          {},
          {},
          addButtonsShown = true
