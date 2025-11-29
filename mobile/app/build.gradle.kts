@@ -129,7 +129,7 @@ sqldelight {
          schemaOutputDirectory.set(file("src/main/sqldelight/databases"))
 
          // Use project() wrapper as a workaround for the https://github.com/sqldelight/sqldelight/pull/5801
-         dependency(project(projects.tasklist.data.path))
+         dependency(project(projects.actionlist.data.path))
       }
    }
 }
@@ -142,9 +142,9 @@ dependencies {
    implementation(projects.logging.api)
    implementation(projects.logging.crashreport)
    implementation(projects.logging.data)
-   implementation(projects.tasklist.api)
-   implementation(projects.tasklist.data)
-   implementation(projects.tasklist.ui)
+   implementation(projects.actionlist.api)
+   implementation(projects.actionlist.data)
+   implementation(projects.actionlist.ui)
    implementation(projects.tools.ui)
 
    implementation(libs.androidx.activity.compose)

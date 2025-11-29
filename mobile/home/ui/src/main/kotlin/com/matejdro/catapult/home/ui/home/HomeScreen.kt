@@ -36,7 +36,7 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import com.airbnb.android.showkase.annotation.ShowkaseComposable
 import com.matejdro.catapult.home.ui.R
-import com.matejdro.catapult.navigation.keys.FolderTaskListCombinedKey
+import com.matejdro.catapult.navigation.keys.DirectoryTaskListCombinedKey
 import com.matejdro.catapult.navigation.keys.HomeScreenKey
 import com.matejdro.catapult.navigation.keys.ToolsScreenKey
 import com.matejdro.catapult.ui.debugging.FullScreenPreviews
@@ -53,7 +53,7 @@ import com.matejdro.catapult.sharedresources.R as sharedR
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 class HomeScreen(
    private val navigator: Navigator,
-   private val foldersScreen: Screen<FolderTaskListCombinedKey>,
+   private val directoriesScreen: Screen<DirectoryTaskListCombinedKey>,
    private val toolsScreen: Screen<ToolsScreenKey>,
 ) : Screen<HomeScreenKey>() {
    @Composable
@@ -84,7 +84,7 @@ class HomeScreen(
       // We must provide name here, not the enum, because name stays the same after process kill, while enum object is different
       stateHolder.SaveableStateProvider(tab.javaClass.name) {
          when (tab) {
-            is FolderTaskListCombinedKey -> foldersScreen.Content(tab)
+            is DirectoryTaskListCombinedKey -> directoriesScreen.Content(tab)
             is ToolsScreenKey -> toolsScreen.Content(tab)
             else -> error("Unhandled screen type $tab")
          }
@@ -124,10 +124,10 @@ private fun NavigationBarContent(
 
       NavigationBar {
          NavigationBarItem(
-            selected = selectedScreen is FolderTaskListCombinedKey,
-            onClick = { switchScreen(FolderTaskListCombinedKey) },
-            icon = { Icon(painter = painterResource(id = sharedR.drawable.folders), contentDescription = null) },
-            label = { Text(stringResource(R.string.folders)) }
+            selected = selectedScreen is DirectoryTaskListCombinedKey,
+            onClick = { switchScreen(DirectoryTaskListCombinedKey) },
+            icon = { Icon(painter = painterResource(id = sharedR.drawable.directories), contentDescription = null) },
+            label = { Text(stringResource(R.string.directories)) }
          )
 
          NavigationBarItem(
@@ -149,10 +149,10 @@ private fun NavigationRailContent(
    Row {
       NavigationRail {
          NavigationRailItem(
-            selected = selectedScreen is FolderTaskListCombinedKey,
-            onClick = { switchScreen(FolderTaskListCombinedKey) },
-            icon = { Icon(painter = painterResource(id = sharedR.drawable.folders), contentDescription = null) },
-            label = { Text(stringResource(R.string.folders)) }
+            selected = selectedScreen is DirectoryTaskListCombinedKey,
+            onClick = { switchScreen(DirectoryTaskListCombinedKey) },
+            icon = { Icon(painter = painterResource(id = sharedR.drawable.directories), contentDescription = null) },
+            label = { Text(stringResource(R.string.directories)) }
          )
 
          NavigationRailItem(
@@ -180,7 +180,7 @@ internal fun HomePhonePreview() {
    PreviewTheme {
       HomeScreenContent(
          tabletMode = false,
-         selectedScreen = FolderTaskListCombinedKey,
+         selectedScreen = DirectoryTaskListCombinedKey,
          mainContent = {
             Box(
                Modifier
@@ -200,7 +200,7 @@ internal fun HomeTabletPreview() {
    PreviewTheme {
       HomeScreenContent(
          tabletMode = true,
-         selectedScreen = FolderTaskListCombinedKey,
+         selectedScreen = DirectoryTaskListCombinedKey,
          mainContent = {
             Box(
                Modifier
