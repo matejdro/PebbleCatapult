@@ -1,0 +1,62 @@
+package com.matejdro.catapult.bluetooth
+
+import com.matejdro.bucketsync.BucketSyncRepository
+import com.matejdro.catapult.actionlist.api.CatapultActionRepository
+import com.matejdro.catapult.actionlist.api.DirectoryListRepository
+import com.matejdro.catapult.bluetooth.util.writeUByte
+import com.matejdro.catapult.bluetooth.util.writeUShort
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.Inject
+import dispatch.core.withDefault
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import okio.Buffer
+import si.inova.kotlinova.core.outcome.Outcome
+
+@Inject
+@ContributesBinding(AppScope::class)
+class WatchSyncerImpl(
+   private val bucketSyncRepository: BucketSyncRepository,
+   private val actionRepository: Lazy<CatapultActionRepository>,
+   private val directoryRepository: Lazy<DirectoryListRepository>,
+) : WatchSyncer {
+   override suspend fun init() {
+      val reloadAllData = !bucketSyncRepository.init(PROTOCOL_VERSION.toInt())
+      if (reloadAllData) {
+         val allDirectories = directoryRepository.value.getAll().firstData()
+         for (directory in allDirectories) {
+            syncDirectory(directory.id)
+         }
+      }
+   }
+
+   override suspend fun syncDirectory(id: Int) = withDefault {
+      val items = actionRepository.value.getAll(id).firstData()
+
+      val buffer = Buffer()
+
+      buffer.writeUByte(items.size.toUByte())
+      for (item in items) {
+         buffer.writeUShort(item.id.toUShort())
+         buffer.writeUByte(item.targetDirectoryId?.toUByte() ?: 0u)
+         buffer.writeUByte(0u) // Flags, unused for now
+         buffer.writeUtf8(item.title)
+         buffer.writeUByte(0u) // Null terminator
+      }
+
+      bucketSyncRepository.updateBucket(id.toUByte(), buffer.readByteArray())
+   }
+
+   override suspend fun deleteDirectory(id: Int) {
+      bucketSyncRepository.deleteBucket(id.toUShort())
+   }
+}
+
+private fun <T> Outcome<T>.unwrap(): T = when (this) {
+   is Outcome.Error -> throw exception
+   is Outcome.Progress -> error("Outcome should not be progress")
+   is Outcome.Success -> data
+}
+
+private suspend fun <T> Flow<Outcome<T>>.firstData() = first { it !is Outcome.Progress }.unwrap()
