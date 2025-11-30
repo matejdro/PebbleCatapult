@@ -1,5 +1,8 @@
 package com.matejdro.catapult.actionlist.api
 
+import androidx.compose.runtime.Immutable
+
+@Immutable
 data class CatapultAction(
    public val title: String,
    public val directoryId: Int,
