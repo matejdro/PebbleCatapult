@@ -16,6 +16,7 @@ dependencies {
    api(projects.bucketsync.api)
    api(libs.androidx.datastore.preferences.core)
 
+   implementation(libs.kotlinova.core)
    implementation(libs.kotlin.coroutines)
    implementation(libs.dispatch)
 

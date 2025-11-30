@@ -15,6 +15,7 @@ import dispatch.core.withIO
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import si.inova.kotlinova.core.logging.logcat
 import kotlin.time.Duration.Companion.milliseconds
 
 @Inject
@@ -25,6 +26,7 @@ class BucketsyncRepositoryImpl(
 ) : BucketSyncRepository {
    override suspend fun init(protocolVersion: Int): Boolean {
       val version = preferences.data.first()[lastVersionKey]
+      logcat { "Bucket sync init from $version to $protocolVersion" }
       return if (version != protocolVersion) {
          preferences.edit { it[lastVersionKey] = protocolVersion }
          withIO {
@@ -37,15 +39,21 @@ class BucketsyncRepositoryImpl(
    }
 
    override suspend fun updateBucket(id: UByte, data: ByteArray) = withIO<Unit> {
+      logcat { "Update bucket $id" }
       queries.insert(id.toLong(), data)
    }
 
    override suspend fun awaitNextUpdate(currentVersion: UShort): BucketUpdate = withIO {
+      logcat { "Await next update" }
       val versionFlow = queries.getLatestVersion().asFlow().map { it.executeAsOne().MAX?.toUShort() ?: 0u }
       val newVersion = versionFlow.debounce(BUCKET_UPDATE_DEBOUNCE).first { it > currentVersion }
 
+      logcat { "Update $newVersion detected" }
+
       val bucketsToUpdate = queries.getUpdatedBuckets(currentVersion.toLong()).executeAsList()
       val activeBuckets = queries.getActiveBuckets().executeAsList().map { it.toUShort() }
+
+      logcat { "Active buckets: $activeBuckets, bucketsToUpdate: ${bucketsToUpdate.map { it.id }}" }
 
       BucketUpdate(
          newVersion,
@@ -55,6 +63,7 @@ class BucketsyncRepositoryImpl(
    }
 
    override suspend fun deleteBucket(id: UShort) = withIO<Unit> {
+      logcat { "Delete bucket $id" }
       queries.insert(id.toLong(), null)
    }
 }
