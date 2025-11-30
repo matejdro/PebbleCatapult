@@ -1,0 +1,25 @@
+CREATE TABLE dbBucket (
+    id INTEGER PRIMARY KEY NOT NULL,
+    data BLOB,
+    version INTEGER NOT NULL
+);
+
+insert:
+   REPLACE INTO dbBucket (id, version, data)
+   VALUES (
+       :id,
+       (SELECT COALESCE(MOD(MAX(version) + 1, 65536), 1) FROM dbBucket),
+       :data
+   );
+
+getUpdatedBuckets:
+   SELECT * FROM dbBucket WHERE version > :oldVersion AND data IS NOT NULL;
+
+getActiveBuckets:
+   SELECT id FROM dbBucket WHERE data IS NOT NULL;
+
+getLatestVersion:
+   SELECT MAX(version) FROM dbBucket;
+
+deleteAll:
+    DELETE FROM dbBucket;
