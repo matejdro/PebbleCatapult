@@ -26,7 +26,7 @@ class BucketsyncRepositoryImpl(
 ) : BucketSyncRepository {
    override suspend fun init(protocolVersion: Int): Boolean {
       val version = preferences.data.first()[lastVersionKey]
-      logcat { "Bucket sync init from $version to $protocolVersion" }
+      logcat { "Bucket sync init from ${version ?: "START"} to $protocolVersion" }
       return if (version != protocolVersion) {
          preferences.edit { it[lastVersionKey] = protocolVersion }
          withIO {
@@ -39,7 +39,8 @@ class BucketsyncRepositoryImpl(
    }
 
    override suspend fun updateBucket(id: UByte, data: ByteArray) = withIO<Unit> {
-      logcat { "Update bucket $id" }
+      require(data.size <= MAX_BUCKET_SIZE) { "bucket size (${data.size}) must be at most 256 bytes" }
+      logcat { "Update bucket $id (${data.size} bytes)" }
       queries.insert(id.toLong(), data)
    }
 
@@ -68,5 +69,8 @@ class BucketsyncRepositoryImpl(
    }
 }
 
+// Matching PERSIST_DATA_MAX_LENGTH of the watch SDK
 private val BUCKET_UPDATE_DEBOUNCE = 100.milliseconds
+private const val MAX_BUCKET_SIZE = 256
+
 private val lastVersionKey = intPreferencesKey("bucketsync_last_version")

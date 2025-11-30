@@ -14,6 +14,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import si.inova.kotlinova.core.test.TestScopeWithDispatcherProvider
 import kotlin.time.Duration.Companion.seconds
 
@@ -192,6 +193,15 @@ class BucketsyncRepositoryImplTest {
             Bucket(2u, byteArrayOf(3))
          )
       )
+   }
+
+   @Test
+   fun `Disallow adding buckets larger than 256 bytes`() = scope.runTest {
+      repo.init(1)
+
+      assertThrows<IllegalArgumentException> {
+         repo.updateBucket(1u, ByteArray(300))
+      }
    }
 }
 

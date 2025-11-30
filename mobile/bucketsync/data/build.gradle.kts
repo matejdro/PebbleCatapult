@@ -19,6 +19,7 @@ dependencies {
    implementation(libs.kotlinova.core)
    implementation(libs.kotlin.coroutines)
    implementation(libs.dispatch)
+   implementation(libs.pebblekit.api)
 
    testImplementation(projects.common.test)
    testImplementation(libs.kotlinova.core.test)
