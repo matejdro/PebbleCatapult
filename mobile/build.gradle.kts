@@ -97,6 +97,12 @@ dependencyAnalysis {
          includeGroup("androidx.window")
          includeDependency("com.google.accompanist:accompanist-adaptive")
       }
+
+      bundle("PebbleKit2") {
+         includeGroup("io.rebble.pebblekit2")
+         includeDependency("PebbleKitAndroid2:common-api")
+         includeDependency("PebbleKitAndroid2:common")
+      }
    }
 }
 

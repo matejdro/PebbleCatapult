@@ -54,6 +54,7 @@ moshi-ir = "0.32.0"
 okhttp = "5.1.0"
 okio = "3.16.0"
 orgJson = "20250517"
+pebblekit = "1.0.0"
 paparazzi = "2.0.0-alpha02"
 rebugger = "1.0.1"
 retrofit = "3.0.0"
@@ -161,6 +162,8 @@ okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 okhttp-mockWebServer = { module = "com.squareup.okhttp3:mockwebserver", version.ref = "okhttp" }
 okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 orgJson = { module = "org.json:json", version.ref = "orgJson" }
+pebblekit = { module = "io.rebble.pebblekit2:client", version.ref = "pebblekit" }
+pebblekit-api = { module = "io.rebble.pebblekit2:client-api", version.ref = "pebblekit" }
 paparazzi = { module = "app.cash.paparazzi:paparazzi", version.ref = "paparazzi" }
 rebugger = { module = "io.github.theapache64:rebugger", version.ref = "rebugger" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }

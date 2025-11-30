@@ -23,6 +23,15 @@ dependencyResolutionManagement {
    }
 }
 
+includeBuild("libs/PebbleKitAndroid2") {
+   dependencySubstitution {
+      substitute(module("io.rebble.pebblekit2:client"))
+         .using(project(":client"))
+      substitute(module("io.rebble.pebblekit2:client-api"))
+         .using(project(":client-api"))
+   }
+}
+
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 rootProject.name = "PebbleCatapult"
@@ -45,6 +54,9 @@ include(":actionlist:api")
 include(":actionlist:data")
 include(":actionlist:ui")
 include(":actionlist:test")
+include(":bluetooth:api")
+include(":bluetooth:data")
+include(":bluetooth:test")
 include(":bucketsync:api")
 include(":bucketsync:data")
 include(":bucketsync:test")
