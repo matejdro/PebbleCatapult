@@ -32,7 +32,7 @@ class WatchSyncerImpl(
    }
 
    override suspend fun syncDirectory(id: Int) = withDefault {
-      val items = actionRepository.value.getAll(id).firstData()
+      val items = actionRepository.value.getAll(id, limit = MAX_ACTIONS_TO_SYNC).firstData()
 
       val buffer = Buffer()
 
@@ -60,3 +60,5 @@ private fun <T> Outcome<T>.unwrap(): T = when (this) {
 }
 
 private suspend fun <T> Flow<Outcome<T>>.firstData() = first { it !is Outcome.Progress }.unwrap()
+
+private const val MAX_ACTIONS_TO_SYNC = 13

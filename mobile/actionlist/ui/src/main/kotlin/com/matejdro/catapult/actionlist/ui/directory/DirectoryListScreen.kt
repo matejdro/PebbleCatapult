@@ -86,7 +86,13 @@ class DirectoryListScreen(
             state,
             snackbarHostState,
             addNew = {
-               addDialog = true
+               if (state.directories.size >= 15) {
+                  scope.launch {
+                     snackbarHostState.showSnackbar(context.getString(R.string.you_can_only_have_up_to_15_directories))
+                  }
+               } else {
+                  addDialog = true
+               }
             },
             edit = {
                if (it == 1) {

@@ -68,6 +68,7 @@ import com.matejdro.catapult.actionlist.api.CatapultDirectory
 import com.matejdro.catapult.actionlist.ui.R
 import com.matejdro.catapult.actionlist.ui.directorypicker.DirectoryPickerScreen
 import com.matejdro.catapult.actionlist.ui.errors.taskListUserFriendlyMessage
+import com.matejdro.catapult.actionlist.ui.util.MaxStringSizeBytesInputTransformation
 import com.matejdro.catapult.navigation.keys.ActionListKey
 import com.matejdro.catapult.ui.components.AlertDialogWithContent
 import com.matejdro.catapult.ui.components.ProgressErrorSuccessScaffold
@@ -412,7 +413,7 @@ private fun ActionEntryDialog(
                Text(stringResource(R.string.delete))
             }
          }
-      }
+      },
    ) {
       val focusRequester = remember { FocusRequester() }
 
@@ -426,6 +427,7 @@ private fun ActionEntryDialog(
             onKeyboardAction = { accept(textFieldState.text.toString()) },
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
             lineLimits = TextFieldLineLimits.SingleLine,
+            inputTransformation = remember { MaxStringSizeBytesInputTransformation(MAX_ACTION_TITLE_BYTES) }
          )
 
          FlowRow {
@@ -439,6 +441,8 @@ private fun ActionEntryDialog(
       }
    }
 }
+
+private const val MAX_ACTION_TITLE_BYTES = 14
 
 private sealed class AddDialogAction : Parcelable {
    abstract val title: String

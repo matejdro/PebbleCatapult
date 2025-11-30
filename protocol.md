@@ -18,7 +18,7 @@ Data in every bucket:
   * ID (uint16)
   * Target directory (uint8) - If item should open another directory, 0 otherwise
   * Flags (uint8) - For future use
-  * Title (cstring) - up to 14 characters + null terminator
+  * Title (cstring) - up to 14 bytes + null terminator
 
 Every bucket is stored in the `2001` - `2015` storage keys
 

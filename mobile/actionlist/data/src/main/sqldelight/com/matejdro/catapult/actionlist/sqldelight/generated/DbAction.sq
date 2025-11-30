@@ -19,7 +19,8 @@ SELECT dbCatapultAction.id,
         dbCatapultAction LEFT JOIN
             dbDirectory ON dbDirectory.id = dbCatapultAction.targetDirectoryId
     WHERE dbCatapultAction.directoryId = :directoryId
-    ORDER BY sortOrder ASC;
+    ORDER BY sortOrder ASC
+    LIMIT :limit;
 
 selectSingleRaw:
     SELECT * FROM dbCatapultAction WHERE id = ?;

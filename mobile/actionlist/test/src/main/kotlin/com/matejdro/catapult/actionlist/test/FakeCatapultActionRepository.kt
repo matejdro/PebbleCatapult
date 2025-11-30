@@ -14,9 +14,9 @@ class FakeCatapultActionRepository : CatapultActionRepository {
 
    private val actions = MutableStateFlow<List<CatapultAction>>(emptyList())
 
-   override fun getAll(directory: Int): Flow<Outcome<List<CatapultAction>>> {
+   override fun getAll(directory: Int, limit: Int): Flow<Outcome<List<CatapultAction>>> {
       return actions
-         .map { list -> Outcome.Success(list.filter { it.directoryId == directory }) }
+         .map { list -> Outcome.Success(list.filter { it.directoryId == directory }.take(limit)) }
          .onStart { numCollections++ }
    }
 

@@ -23,14 +23,15 @@ import si.inova.kotlinova.core.outcome.Outcome
 class CatapultActionRepositoryImpl(
    private val dbActionQueries: DbActionQueries,
 ) : CatapultActionRepository {
-   override fun getAll(directory: Int): Flow<Outcome<List<CatapultAction>>> {
-      return dbActionQueries.selectAll(directory.toLong()).asFlow().map<Query<SelectAll>, Outcome<List<CatapultAction>>> {
-         withDefault {
-            val list = it.awaitAsList()
+   override fun getAll(directory: Int, limit: Int): Flow<Outcome<List<CatapultAction>>> {
+      return dbActionQueries.selectAll(directory.toLong(), limit.toLong()).asFlow()
+         .map<Query<SelectAll>, Outcome<List<CatapultAction>>> {
+            withDefault {
+               val list = it.awaitAsList()
 
-            Outcome.Success(list.map { it.toCatapultAction() })
+               Outcome.Success(list.map { it.toCatapultAction() })
+            }
          }
-      }
          .catch { emit(Outcome.Error(UnknownCauseException(cause = it))) }
    }
 

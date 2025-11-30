@@ -7,6 +7,8 @@ import com.matejdro.catapult.actionlist.api.CatapultAction
 import com.matejdro.catapult.actionlist.api.CatapultDirectory
 import com.matejdro.catapult.actionlist.sqldelight.generated.Database
 import com.matejdro.catapult.actionlist.sqldelight.generated.DbActionQueries
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldNotBeNull
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
@@ -193,6 +195,24 @@ class CatapultActionRepositoryImplTest {
             CatapultAction("Action 2C", 2, 7, taskerTaskName = "Task C"),
             CatapultAction("Action 2D", 2, 8, taskerTaskName = "Task D"),
          )
+      }
+   }
+
+   @Test
+   fun `Return added actions with a limit`() = scope.runTest {
+      setupDirectories()
+
+      repo.getAll(1, limit = 8).test {
+         runCurrent()
+
+         repeat(10) {
+            repo.insert(
+               CatapultAction("Action $it", 1),
+            )
+         }
+         runCurrent()
+
+         expectMostRecentItem().data.shouldNotBeNull().shouldHaveSize(8)
       }
    }
 

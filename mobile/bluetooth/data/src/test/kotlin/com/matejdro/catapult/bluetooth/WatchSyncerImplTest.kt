@@ -131,4 +131,20 @@ class WatchSyncerImplTest {
       update.isCompleted shouldBe false
       update.cancel()
    }
+
+   @Test
+   fun `Only sync first 13 actions to the watch`() = scope.runTest {
+      watchSyncer.init()
+
+      directoryRepository.insert(CatapultDirectory(1, "Directory 1"))
+      repeat(15) {
+         val id = it + 1
+         actionRepository.insert(CatapultAction("Action $it", directoryId = 1, id = id))
+      }
+
+      watchSyncer.syncDirectory(1)
+      delay(1.seconds)
+
+      bucketSyncRepository.awaitNextUpdate(0u).bucketsToUpdate.first().data.first() shouldBe 13
+   }
 }
