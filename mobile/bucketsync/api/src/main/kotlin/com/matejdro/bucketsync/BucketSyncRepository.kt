@@ -28,5 +28,5 @@ interface BucketSyncRepository {
    /**
     * Delete data of the passed bucket from the watch
     */
-   suspend fun deleteBucket(id: UShort)
+   suspend fun deleteBucket(id: UByte)
 }

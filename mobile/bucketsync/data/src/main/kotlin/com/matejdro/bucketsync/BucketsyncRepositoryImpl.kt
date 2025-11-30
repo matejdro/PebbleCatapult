@@ -63,7 +63,7 @@ class BucketsyncRepositoryImpl(
       )
    }
 
-   override suspend fun deleteBucket(id: UShort) = withIO<Unit> {
+   override suspend fun deleteBucket(id: UByte) = withIO<Unit> {
       logcat { "Delete bucket $id" }
       queries.insert(id.toLong(), null)
    }

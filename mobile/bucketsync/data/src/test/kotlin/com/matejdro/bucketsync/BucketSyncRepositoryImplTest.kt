@@ -18,7 +18,7 @@ import org.junit.jupiter.api.assertThrows
 import si.inova.kotlinova.core.test.TestScopeWithDispatcherProvider
 import kotlin.time.Duration.Companion.seconds
 
-class BucketsyncRepositoryImplTest {
+class BucketSyncRepositoryImplTest {
    private val scope = TestScopeWithDispatcherProvider()
    private val repo = BucketsyncRepositoryImpl(createTestBucketQueries(), InMemoryDataStore(preferencesOf()))
 
@@ -202,6 +202,24 @@ class BucketsyncRepositoryImplTest {
       assertThrows<IllegalArgumentException> {
          repo.updateBucket(1u, ByteArray(300))
       }
+   }
+
+   @Test
+   fun `Do not trigger an update when the bucket does not change`() = scope.runTest {
+      repo.init(1)
+
+      repo.updateBucket(1u, byteArrayOf(1))
+      repo.updateBucket(2u, byteArrayOf(2))
+      delay(1.seconds)
+
+      repo.updateBucket(2u, byteArrayOf(2))
+      delay(1.seconds)
+
+      val bucketsToUpdate = async { repo.awaitNextUpdate(2u) }
+      delay(1.seconds)
+
+      bucketsToUpdate.isCompleted shouldBe false
+      bucketsToUpdate.cancel()
    }
 }
 
