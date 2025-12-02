@@ -49,8 +49,6 @@ open class CatapultApplication : Application() {
          return
       }
 
-      AndroidLogcatLogger.installOnDebuggableApp(this, minPriority = LogPriority.VERBOSE)
-
       DefaultDispatcherProvider.set(
          AccessCallbackDispatcherProvider(DefaultDispatcherProvider.get()) {
             if (BuildConfig.DEBUG) {

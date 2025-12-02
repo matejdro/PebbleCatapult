@@ -130,6 +130,7 @@ sqldelight {
 
          // Use project() wrapper as a workaround for the https://github.com/sqldelight/sqldelight/pull/5801
          dependency(project(projects.actionlist.data.path))
+         dependency(project(projects.bucketsync.data.path))
       }
    }
 }
