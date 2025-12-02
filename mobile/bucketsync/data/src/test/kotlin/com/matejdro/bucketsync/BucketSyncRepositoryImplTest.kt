@@ -18,7 +18,7 @@ import org.junit.jupiter.api.assertThrows
 import si.inova.kotlinova.core.test.TestScopeWithDispatcherProvider
 import kotlin.time.Duration.Companion.seconds
 
-class BucketsyncRepositoryImplTest {
+class BucketSyncRepositoryImplTest {
    private val scope = TestScopeWithDispatcherProvider()
    private val repo = BucketsyncRepositoryImpl(createTestBucketQueries(), InMemoryDataStore(preferencesOf()))
 
@@ -202,6 +202,97 @@ class BucketsyncRepositoryImplTest {
       assertThrows<IllegalArgumentException> {
          repo.updateBucket(1u, ByteArray(300))
       }
+   }
+
+   @Test
+   fun `Do not trigger an update when the bucket does not change`() = scope.runTest {
+      repo.init(1)
+
+      repo.updateBucket(1u, byteArrayOf(1))
+      repo.updateBucket(2u, byteArrayOf(2))
+      delay(1.seconds)
+
+      repo.updateBucket(2u, byteArrayOf(2))
+      delay(1.seconds)
+
+      val bucketsToUpdate = async { repo.awaitNextUpdate(2u) }
+      delay(1.seconds)
+
+      bucketsToUpdate.isCompleted shouldBe false
+      bucketsToUpdate.cancel()
+   }
+
+   @Test
+   fun `Resync all data if requested version is higher than the database version`() = scope.runTest {
+      repo.init(1)
+
+      repo.updateBucket(1u, byteArrayOf(1))
+      repo.updateBucket(2u, byteArrayOf(2))
+      delay(1.seconds)
+
+      repo.updateBucket(2u, byteArrayOf(3))
+      delay(1.seconds)
+
+      repo.awaitNextUpdate(6u) shouldBe BucketUpdate(
+         3u,
+         listOf(1u, 2u),
+         listOf(
+            Bucket(1u, byteArrayOf(1)),
+            Bucket(2u, byteArrayOf(3))
+         )
+      )
+   }
+
+   @Test
+   fun `Report all added buckets when peeking from version 0`() = scope.runTest {
+      repo.init(1)
+
+      repo.updateBucket(1u, byteArrayOf(1))
+      repo.updateBucket(2u, byteArrayOf(2))
+      delay(1.seconds)
+
+      val bucketsToUpdate = repo.checkForNextUpdate(0u)
+
+      bucketsToUpdate shouldBe BucketUpdate(
+         2u,
+         listOf(1u, 2u),
+         listOf(
+            Bucket(1u, byteArrayOf(1)),
+            Bucket(2u, byteArrayOf(2))
+         )
+      )
+   }
+
+   @Test
+   fun `Return null if there is no update ready during update peek`() = scope.runTest {
+      repo.init(1)
+
+      repo.updateBucket(1u, byteArrayOf(1))
+      repo.updateBucket(2u, byteArrayOf(2))
+      delay(1.seconds)
+
+      repo.checkForNextUpdate(2u) shouldBe null
+   }
+
+   @Test
+   fun `Resync all data if requested version is higher than the database version during check`() = scope.runTest {
+      repo.init(1)
+
+      repo.updateBucket(1u, byteArrayOf(1))
+      repo.updateBucket(2u, byteArrayOf(2))
+      delay(1.seconds)
+
+      repo.updateBucket(2u, byteArrayOf(3))
+      delay(1.seconds)
+
+      repo.checkForNextUpdate(6u) shouldBe BucketUpdate(
+         3u,
+         listOf(1u, 2u),
+         listOf(
+            Bucket(1u, byteArrayOf(1)),
+            Bucket(2u, byteArrayOf(3))
+         )
+      )
    }
 }
 

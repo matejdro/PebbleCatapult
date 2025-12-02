@@ -45,25 +45,54 @@ class BucketsyncRepositoryImpl(
    }
 
    override suspend fun awaitNextUpdate(currentVersion: UShort): BucketUpdate = withIO {
-      logcat { "Await next update" }
+      logcat { "Await next update from $currentVersion" }
       val versionFlow = queries.getLatestVersion().asFlow().map { it.executeAsOne().MAX?.toUShort() ?: 0u }
-      val newVersion = versionFlow.debounce(BUCKET_UPDATE_DEBOUNCE).first { it > currentVersion }
+      val newVersion = versionFlow.debounce(BUCKET_UPDATE_DEBOUNCE).first { it != currentVersion }
 
       logcat { "Update $newVersion detected" }
 
-      val bucketsToUpdate = queries.getUpdatedBuckets(currentVersion.toLong()).executeAsList()
+      val requestVersion = if (newVersion > currentVersion) {
+         currentVersion
+      } else {
+         // Do a full sync if watch's version is somehow higher than ours
+         0u
+      }
+
+      createBucketUpdate(requestVersion, newVersion)
+   }
+
+   override suspend fun checkForNextUpdate(currentVersion: UShort): BucketUpdate? = withIO {
+      logcat { "Check next update from $currentVersion" }
+      val latestVersion = queries.getLatestVersion().executeAsOne().MAX?.toUShort() ?: 0u
+
+      logcat { "Latest version is $latestVersion" }
+
+      val requestVersion = if (currentVersion == latestVersion) {
+         return@withIO null
+      } else if (latestVersion > currentVersion) {
+         currentVersion
+      } else {
+         // Do a full sync if watch's version is somehow higher than ours
+         0u
+      }
+
+      createBucketUpdate(requestVersion, latestVersion)
+   }
+
+   private fun createBucketUpdate(requestVersion: UShort, newVersion: UShort): BucketUpdate {
+      val bucketsToUpdate = queries.getUpdatedBuckets(requestVersion.toLong()).executeAsList()
       val activeBuckets = queries.getActiveBuckets().executeAsList().map { it.toUShort() }
 
       logcat { "Active buckets: $activeBuckets, bucketsToUpdate: ${bucketsToUpdate.map { it.id }}" }
 
-      BucketUpdate(
+      return BucketUpdate(
          newVersion,
          activeBuckets,
          bucketsToUpdate.map { Bucket(it.id.toUByte(), it.data_) }
       )
    }
 
-   override suspend fun deleteBucket(id: UShort) = withIO<Unit> {
+   override suspend fun deleteBucket(id: UByte) = withIO<Unit> {
       logcat { "Delete bucket $id" }
       queries.insert(id.toLong(), null)
    }

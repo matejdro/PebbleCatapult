@@ -18,15 +18,21 @@ interface BucketSyncRepository {
    suspend fun updateBucket(id: UByte, data: ByteArray)
 
    /**
-    * Method will suspend until a newer version than the [currentVersion] is available. Then it will return a BucketUpdate
-    * with the new version and all buckets that need to update.
-    *
-    * This may be debounced (e.g. quick successive updates will only trigger a single update).
+    * Method will check whether a different version than the [currentVersion] is available. It will return a BucketUpdate
+    * with the new version and all buckets that need to update or *null* if there is no such update
     */
    suspend fun awaitNextUpdate(currentVersion: UShort): BucketUpdate
 
    /**
+    * Method will suspend until a different version than the [currentVersion] is available. Then it will return a BucketUpdate
+    * with the new version and all buckets that need to update.
+    *
+    * This may be debounced (e.g. quick successive updates will only trigger a single update).
+    */
+   suspend fun checkForNextUpdate(currentVersion: UShort): BucketUpdate?
+
+   /**
     * Delete data of the passed bucket from the watch
     */
-   suspend fun deleteBucket(id: UShort)
+   suspend fun deleteBucket(id: UByte)
 }

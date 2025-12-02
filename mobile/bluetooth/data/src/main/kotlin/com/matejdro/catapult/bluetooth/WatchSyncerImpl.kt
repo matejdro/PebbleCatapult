@@ -49,7 +49,7 @@ class WatchSyncerImpl(
    }
 
    override suspend fun deleteDirectory(id: Int) {
-      bucketSyncRepository.deleteBucket(id.toUShort())
+      bucketSyncRepository.deleteBucket(id.toUByte())
    }
 }
 
