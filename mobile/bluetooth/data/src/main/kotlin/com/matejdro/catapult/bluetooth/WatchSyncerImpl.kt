@@ -12,6 +12,7 @@ import dispatch.core.withDefault
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import okio.Buffer
+import si.inova.kotlinova.core.logging.logcat
 import si.inova.kotlinova.core.outcome.Outcome
 
 @Inject
@@ -24,6 +25,7 @@ class WatchSyncerImpl(
    override suspend fun init() {
       val reloadAllData = !bucketSyncRepository.init(PROTOCOL_VERSION.toInt())
       if (reloadAllData) {
+         logcat { "Got different protocol version, resetting all data" }
          val allDirectories = directoryRepository.value.getAll().firstData()
          for (directory in allDirectories) {
             syncDirectory(directory.id)
@@ -33,6 +35,7 @@ class WatchSyncerImpl(
 
    override suspend fun syncDirectory(id: Int) = withDefault {
       val items = actionRepository.value.getAll(id, limit = MAX_ACTIONS_TO_SYNC).firstData()
+      logcat { "Syncing directory $id, ${items.size} items" }
 
       val buffer = Buffer()
 
@@ -44,11 +47,14 @@ class WatchSyncerImpl(
          buffer.writeUtf8(item.title)
          buffer.writeUByte(0u) // Null terminator
       }
+      val data = buffer.readByteArray()
+      logcat { "Size: ${data.size} bytes" }
 
-      bucketSyncRepository.updateBucket(id.toUByte(), buffer.readByteArray())
+      bucketSyncRepository.updateBucket(id.toUByte(), data)
    }
 
    override suspend fun deleteDirectory(id: Int) {
+      logcat { "Deleting directory $id" }
       bucketSyncRepository.deleteBucket(id.toUByte())
    }
 }
