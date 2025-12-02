@@ -15,10 +15,12 @@ sqldelight {
 
 dependencies {
    api(projects.actionlist.api)
+   api(projects.bluetooth.api)
    api(libs.kotlin.coroutines)
    implementation(libs.kotlinova.core)
    implementation(libs.dispatch)
 
+   testImplementation(projects.bluetooth.test)
    testImplementation(libs.kotlinova.core.test)
    testImplementation(libs.turbine)
 }

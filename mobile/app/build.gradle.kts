@@ -145,6 +145,10 @@ dependencies {
    implementation(projects.actionlist.api)
    implementation(projects.actionlist.data)
    implementation(projects.actionlist.ui)
+   implementation(projects.bluetooth.api)
+   implementation(projects.bluetooth.data)
+   implementation(projects.bucketsync.api)
+   implementation(projects.bucketsync.data)
    implementation(projects.tools.ui)
 
    implementation(libs.androidx.activity.compose)

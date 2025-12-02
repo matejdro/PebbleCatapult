@@ -7,6 +7,8 @@ import com.matejdro.catapult.actionlist.api.CatapultDirectory
 import com.matejdro.catapult.actionlist.exception.MissingDirectoryException
 import com.matejdro.catapult.actionlist.sqldelight.generated.Database
 import com.matejdro.catapult.actionlist.sqldelight.generated.DbDirectoryQueries
+import com.matejdro.catapult.bluetooth.FakeWatchSyncer
+import io.kotest.matchers.collections.shouldContainExactly
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
@@ -16,7 +18,8 @@ import si.inova.kotlinova.core.test.outcomes.shouldBeErrorWith
 import si.inova.kotlinova.core.test.outcomes.shouldBeSuccessWithData
 
 class DirectoryListRepositoryImplTest {
-   private val repo = DirectoryListRepositoryImpl(createTestDirectoryQueries())
+   private val syncer = FakeWatchSyncer()
+   private val repo = DirectoryListRepositoryImpl(createTestDirectoryQueries(), syncer)
    private val scope = TestScopeWithDispatcherProvider()
 
    @Test
@@ -108,6 +111,15 @@ class DirectoryListRepositoryImplTest {
       assertThrows<IllegalArgumentException> {
          repo.update(CatapultDirectory(1, "Nonstarting directory"))
       }
+   }
+
+   @Test
+   fun `Deleting a directory should trigger sync`() = scope.runTest {
+      repo.insert(CatapultDirectory(0, "Directory A"))
+      repo.delete(2)
+      runCurrent()
+
+      syncer.deletedDirectories.shouldContainExactly(2)
    }
 }
 

@@ -7,6 +7,8 @@ import com.matejdro.catapult.actionlist.api.CatapultAction
 import com.matejdro.catapult.actionlist.api.CatapultDirectory
 import com.matejdro.catapult.actionlist.sqldelight.generated.Database
 import com.matejdro.catapult.actionlist.sqldelight.generated.DbActionQueries
+import com.matejdro.catapult.bluetooth.FakeWatchSyncer
+import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import kotlinx.coroutines.test.runCurrent
@@ -19,7 +21,10 @@ class CatapultActionRepositoryImplTest {
    private val driver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY).apply {
       Database.Schema.create(this)
    }
-   private val repo = CatapultActionRepositoryImpl(createTestActionQueries(driver))
+
+   private val syncer = FakeWatchSyncer()
+
+   private val repo = CatapultActionRepositoryImpl(createTestActionQueries(driver), syncer)
    private val scope = TestScopeWithDispatcherProvider()
 
    @Test
@@ -216,8 +221,69 @@ class CatapultActionRepositoryImplTest {
       }
    }
 
+   @Test
+   fun `Inserting action should trigger folder sync`() = scope.runTest {
+      runCurrent()
+
+      repo.insert(
+         CatapultAction("Action A", 1, taskerTaskName = "Task A"),
+      )
+      runCurrent()
+
+      syncer.syncedDirectories.shouldContainExactly(1)
+   }
+
+   @Test
+   fun `Updating action name should trigger folder sync`() = scope.runTest {
+      runCurrent()
+
+      repo.insert(
+         CatapultAction("Action A", 1, taskerTaskName = "Task A"),
+      )
+      runCurrent()
+
+      syncer.syncedDirectories.clear()
+      repo.updateTitle(1, "Action B")
+      runCurrent()
+
+      syncer.syncedDirectories.shouldContainExactly(1)
+   }
+
+   @Test
+   fun `Deleting actions should trigger folder sync`() = scope.runTest {
+      runCurrent()
+
+      repo.insert(
+         CatapultAction("Action A", 1, taskerTaskName = "Task A"),
+      )
+      runCurrent()
+
+      syncer.syncedDirectories.clear()
+      repo.delete(1)
+      runCurrent()
+
+      syncer.syncedDirectories.shouldContainExactly(1)
+   }
+
+   @Test
+   fun `Reordering actions should trigger folder sync`() = scope.runTest {
+      setupDirectories()
+
+      runCurrent()
+
+      repo.insert(CatapultAction("Action A", 1, taskerTaskName = "Task A"))
+      repo.insert(CatapultAction("Action B", 1, taskerTaskName = "Task B"))
+      runCurrent()
+
+      syncer.syncedDirectories.clear()
+      repo.reorder(1, 2)
+      runCurrent()
+
+      syncer.syncedDirectories.shouldContainExactly(1)
+   }
+
    private suspend fun setupDirectories() {
-      val directoryRepo = DirectoryListRepositoryImpl(createTestDirectoryQueries(driver))
+      val directoryRepo = DirectoryListRepositoryImpl(createTestDirectoryQueries(driver), syncer)
 
       directoryRepo.insert(CatapultDirectory(0, "Directory A"))
       directoryRepo.insert(CatapultDirectory(1, "Directory B"))

@@ -19,6 +19,7 @@ import com.matejdro.catapult.logging.TinyLogLogcatLogger
 import dev.zacsweers.metro.createGraphFactory
 import dispatch.core.DefaultDispatcherProvider
 import dispatch.core.defaultDispatcher
+import kotlinx.coroutines.launch
 import si.inova.kotlinova.core.dispatchers.AccessCallbackDispatcherProvider
 import si.inova.kotlinova.core.logging.AndroidLogcatLogger
 import si.inova.kotlinova.core.logging.LogPriority
@@ -68,6 +69,10 @@ open class CatapultApplication : Application() {
 
       setupLogging()
       enableStrictMode()
+
+      applicationGraph.getDefaultCoroutineScope().launch {
+         applicationGraph.getWatchSyncer().init()
+      }
    }
 
    private fun enableStrictMode() {

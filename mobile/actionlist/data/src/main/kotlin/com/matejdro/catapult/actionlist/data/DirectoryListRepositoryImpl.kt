@@ -7,6 +7,7 @@ import com.matejdro.catapult.actionlist.api.CatapultDirectory
 import com.matejdro.catapult.actionlist.api.DirectoryListRepository
 import com.matejdro.catapult.actionlist.exception.MissingDirectoryException
 import com.matejdro.catapult.actionlist.sqldelight.generated.DbDirectoryQueries
+import com.matejdro.catapult.bluetooth.WatchSyncer
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
@@ -19,6 +20,7 @@ import si.inova.kotlinova.core.outcome.Outcome
 @ContributesBinding(AppScope::class)
 class DirectoryListRepositoryImpl(
    private val dbDirectoryQueries: DbDirectoryQueries,
+   private val watchSyncer: WatchSyncer,
 ) : DirectoryListRepository {
    override fun getAll(): Flow<Outcome<List<CatapultDirectory>>> {
       return dbDirectoryQueries.selectAll().asFlow().map {
@@ -65,6 +67,7 @@ class DirectoryListRepositoryImpl(
 
       withDefault {
          dbDirectoryQueries.delete(id.toLong())
+         watchSyncer.deleteDirectory(id)
       }
    }
 }

@@ -1,14 +1,15 @@
 package com.matejdro.catapult.di
 
 import android.app.Application
-import dev.zacsweers.metro.AppScope
-import dev.zacsweers.metro.DependencyGraph
-import dev.zacsweers.metro.Provides
-import dispatch.core.DefaultCoroutineScope
 import com.matejdro.catapult.MainViewModel
+import com.matejdro.catapult.bluetooth.WatchSyncer
 import com.matejdro.catapult.logging.FileLoggingController
 import com.matejdro.catapult.logging.TinyLogLoggingThread
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metro.Multibinds
+import dev.zacsweers.metro.Provides
+import dispatch.core.DefaultCoroutineScope
 import si.inova.kotlinova.core.reporting.ErrorReporter
 import si.inova.kotlinova.core.time.AndroidDateTimeFormatter
 import si.inova.kotlinova.navigation.conditions.ConditionalNavigationHandler
@@ -32,6 +33,7 @@ interface MainApplicationGraph : ApplicationGraph {
    fun provideEmptyConditionalMultibinds(): Map<KClass<*>, ConditionalNavigationHandler>
 }
 
+@Suppress("ComplexInterface") // DI
 interface ApplicationGraph {
    fun getErrorReporter(): ErrorReporter
    fun getDefaultCoroutineScope(): DefaultCoroutineScope
@@ -42,4 +44,5 @@ interface ApplicationGraph {
    fun getMainViewModelFactory(): MainViewModel.Factory
    fun getFileLoggingController(): FileLoggingController
    fun getTinyLogLoggingThread(): TinyLogLoggingThread
+   fun getWatchSyncer(): WatchSyncer
 }

@@ -7,6 +7,7 @@ import com.matejdro.catapult.actionlist.api.CatapultAction
 import com.matejdro.catapult.actionlist.api.CatapultActionRepository
 import com.matejdro.catapult.actionlist.sqldelight.generated.DbActionQueries
 import com.matejdro.catapult.actionlist.sqldelight.generated.SelectAll
+import com.matejdro.catapult.bluetooth.WatchSyncer
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
@@ -22,6 +23,7 @@ import si.inova.kotlinova.core.outcome.Outcome
 @ContributesBinding(AppScope::class)
 class CatapultActionRepositoryImpl(
    private val dbActionQueries: DbActionQueries,
+   private val watchSyncer: WatchSyncer,
 ) : CatapultActionRepository {
    override fun getAll(directory: Int, limit: Int): Flow<Outcome<List<CatapultAction>>> {
       return dbActionQueries.selectAll(directory.toLong(), limit.toLong()).asFlow()
@@ -42,17 +44,25 @@ class CatapultActionRepositoryImpl(
          taskerTaskName = action.taskerTaskName,
          targetDirectoryId = action.targetDirectoryId?.toLong()
       )
+
+      watchSyncer.syncDirectory(action.directoryId)
    }
 
    override suspend fun updateTitle(id: Int, title: String) {
       withIO {
+         val directoryId = dbActionQueries.getDirectoryId(id.toLong()).executeAsOne().toInt()
          dbActionQueries.updateTitle(title, id.toLong())
+
+         watchSyncer.syncDirectory(directoryId)
       }
    }
 
    override suspend fun delete(id: Int) {
       withIO {
+         val directoryId = dbActionQueries.getDirectoryId(id.toLong()).executeAsOne().toInt()
          dbActionQueries.delete(id.toLong())
+
+         watchSyncer.syncDirectory(directoryId)
       }
    }
 
@@ -77,6 +87,8 @@ class CatapultActionRepositoryImpl(
                directoryId = directoryId
             )
          }
+
+         watchSyncer.syncDirectory(directoryId.toInt())
       }
    }
 }

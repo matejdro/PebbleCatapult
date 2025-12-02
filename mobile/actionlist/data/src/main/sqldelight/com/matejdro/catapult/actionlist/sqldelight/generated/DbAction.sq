@@ -65,3 +65,6 @@ reorderDownwards {
     SET sortOrder = :toIndex
     WHERE id = :id;
 }
+
+getDirectoryId:
+SELECT directoryId FROM dbCatapultAction WHERE id = :id;
