@@ -8,10 +8,16 @@ insert:
    REPLACE INTO dbBucket (id, version, data)
    SELECT
     :id,
-    (SELECT COALESCE(MOD(MAX(version) + 1, 65536), 1) FROM dbBucket),
+    (SELECT COALESCE(MAX(version) + 1, 1) FROM dbBucket),
     :data
    WHERE NOT EXISTS
     (SELECT 1 FROM dbBucket WHERE id = :id AND data = :data);
+
+getBucket:
+    SELECT * FROM dbBucket WHERE id = :id;
+
+resetAllVersions:
+    UPDATE dbBucket SET version = 1;
 
 getUpdatedBuckets:
    SELECT * FROM dbBucket WHERE version > :oldVersion AND data IS NOT NULL;
@@ -24,3 +30,6 @@ getLatestVersion:
 
 deleteAll:
     DELETE FROM dbBucket;
+
+insertRaw:
+   REPLACE INTO dbBucket (id, version, data) VALUES ?;

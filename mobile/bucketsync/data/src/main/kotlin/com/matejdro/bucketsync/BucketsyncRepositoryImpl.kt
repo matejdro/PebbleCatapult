@@ -39,9 +39,16 @@ class BucketsyncRepositoryImpl(
    }
 
    override suspend fun updateBucket(id: UByte, data: ByteArray) = withIO<Unit> {
-      require(data.size <= MAX_BUCKET_SIZE) { "bucket size (${data.size}) must be at most 256 bytes" }
-      logcat { "Update bucket $id (${data.size} bytes)" }
-      queries.insert(id.toLong(), data)
+      queries.transaction {
+         require(data.size <= MAX_BUCKET_SIZE) { "bucket size (${data.size}) must be at most 256 bytes" }
+         logcat { "Update bucket $id (${data.size} bytes)" }
+         queries.insert(id.toLong(), data)
+         val updatedBucket = queries.getBucket(id.toLong()).executeAsOne()
+         if (updatedBucket.version > UShort.MAX_VALUE.toLong()) {
+            logcat { "Got over UShort_MAX, wrapping around" }
+            queries.resetAllVersions()
+         }
+      }
    }
 
    override suspend fun awaitNextUpdate(currentVersion: UShort): BucketUpdate = withIO {

@@ -6,6 +6,7 @@ import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import com.matejdro.bucketsync.api.Bucket
 import com.matejdro.bucketsync.api.BucketUpdate
 import com.matejdro.bucketsync.sqldelight.generated.Database
+import com.matejdro.bucketsync.sqldelight.generated.DbBucket
 import com.matejdro.bucketsync.sqldelight.generated.DbBucketQueries
 import com.matejdro.catapult.common.test.datastore.InMemoryDataStore
 import io.kotest.matchers.shouldBe
@@ -20,7 +21,8 @@ import kotlin.time.Duration.Companion.seconds
 
 class BucketSyncRepositoryImplTest {
    private val scope = TestScopeWithDispatcherProvider()
-   private val repo = BucketsyncRepositoryImpl(createTestBucketQueries(), InMemoryDataStore(preferencesOf()))
+   private val db = createTestBucketQueries()
+   private val repo = BucketsyncRepositoryImpl(db, InMemoryDataStore(preferencesOf()))
 
    @Test
    fun `Report all added buckets when updating from version 0`() = scope.runTest {
@@ -291,6 +293,28 @@ class BucketSyncRepositoryImplTest {
          listOf(
             Bucket(1u, byteArrayOf(1)),
             Bucket(2u, byteArrayOf(3))
+         )
+      )
+   }
+
+   @Test
+   fun `When version passes 65535 (ushort max), it should wrap around back to one`() = scope.runTest {
+      db.insertRaw(
+         DbBucket(1, byteArrayOf(1), 65535)
+      )
+
+      repo.init(1)
+
+      repo.updateBucket(1u, byteArrayOf(1))
+      delay(1.seconds)
+
+      val bucketsToUpdate = repo.checkForNextUpdate(65535u)
+
+      bucketsToUpdate shouldBe BucketUpdate(
+         1u,
+         listOf(1u),
+         listOf(
+            Bucket(1u, byteArrayOf(1)),
          )
       )
    }
