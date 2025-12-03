@@ -12,8 +12,10 @@ SELECT * FROM dbDirectory WHERE id = ? LIMIT 1;
 insert:
 INSERT INTO dbDirectory (title) VALUES ?;
 
-delete:
-DELETE FROM dbDirectory WHERE id = ?;
+delete {
+    DELETE FROM dbDirectory WHERE id = :id;
+    DELETE FROM dbCatapultAction WHERE directoryId = :id;
+}
 
 update:
 REPLACE INTO dbDirectory VALUES ?;
