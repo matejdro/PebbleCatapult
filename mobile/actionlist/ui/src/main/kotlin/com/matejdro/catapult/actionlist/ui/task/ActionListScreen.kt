@@ -376,7 +376,8 @@ private fun ActionEntryDialog(
    accept: (text: String) -> Unit,
    delete: (() -> Unit)? = null,
 ) {
-   val textFieldState = rememberTextFieldState(initialText)
+   val inputTransformation = remember { MaxStringSizeBytesInputTransformation(MAX_ACTION_TITLE_BYTES) }
+   val textFieldState = rememberTextFieldState(inputTransformation.trim(initialText))
 
    AlertDialogWithContent(
       title = {
@@ -427,7 +428,7 @@ private fun ActionEntryDialog(
             onKeyboardAction = { accept(textFieldState.text.toString()) },
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
             lineLimits = TextFieldLineLimits.SingleLine,
-            inputTransformation = remember { MaxStringSizeBytesInputTransformation(MAX_ACTION_TITLE_BYTES) }
+            inputTransformation = inputTransformation
          )
 
          FlowRow {

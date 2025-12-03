@@ -14,14 +14,18 @@ class MaxStringSizeBytesInputTransformation(private val maxBytes: Int) : InputTr
    private val utf8Encoder = StandardCharsets.UTF_8.newEncoder()
    private val utf8Decoder = StandardCharsets.UTF_8.newDecoder()
    override fun TextFieldBuffer.transformInput() {
-      val charBuffer = CharBuffer.wrap(this.toString())
-      utf8Encoder.encode(charBuffer, buffer, true)
-      buffer.rewind()
-      val trimmedString = utf8Decoder.decode(buffer)
+      val trimmedString = trim(this.toString())
 
       if (length > trimmedString.length) {
          this.delete(trimmedString.length, length)
          this.placeCursorAtEnd()
       }
+   }
+
+   fun trim(text: String): String {
+      val charBuffer = CharBuffer.wrap(text)
+      utf8Encoder.encode(charBuffer, buffer, true)
+      buffer.rewind()
+      return utf8Decoder.decode(buffer).toString()
    }
 }
