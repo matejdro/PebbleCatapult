@@ -38,7 +38,6 @@ private fun createAdditionalPackets(
       var dataLeftForBuckets = watchBufferSize - SIZE_OF_STATIC_PART_OF_FOLLOW_UP_SYNC_PACKET
       val nextPacketBuffer = Buffer()
 
-      bucketsToSendInThisPacket = 0
       for (updatedBucket in bucketsToUpdate) {
          val sizeToSend = 2 + updatedBucket.data.size
          if (sizeToSend <= dataLeftForBuckets) {

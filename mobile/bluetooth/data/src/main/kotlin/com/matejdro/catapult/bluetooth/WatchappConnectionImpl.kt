@@ -13,6 +13,7 @@ import io.rebble.pebblekit2.common.model.PebbleDictionaryItem
 import io.rebble.pebblekit2.common.model.ReceiveResult
 import io.rebble.pebblekit2.common.model.WatchIdentifier
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import okio.Buffer
@@ -127,13 +128,13 @@ class WatchappConnectionImpl(
       observeForFutureSyncs(watchVersion, bucketsyncBuffer)
    }
 
-   private suspend fun CoroutineScope.observeForFutureSyncs(
+   private suspend fun observeForFutureSyncs(
       initialWatchVersion: UShort,
       bucketsyncBuffer: Buffer,
    ) {
       var watchVersion = initialWatchVersion
 
-      while (isActive) {
+      while (currentCoroutineContext().isActive) {
          val nextUpdate = bucketSyncRepository.awaitNextUpdate(watchVersion)
          logcat {
             "Phone updated while the watchapp is open: " +
