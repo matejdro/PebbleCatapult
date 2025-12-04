@@ -4,4 +4,6 @@ plugins {
 
 dependencies {
    api(libs.kotlinova.core)
+   api(libs.kotlin.coroutines)
+   api(libs.pebblekit.api)
 }

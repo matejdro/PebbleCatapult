@@ -66,3 +66,6 @@ class FakePebbleSender(
       val sentTime: Long,
    )
 }
+
+val FakePebbleSender.sentData: List<PebbleDictionary>
+   get() = sentPackets.map { it.data }
