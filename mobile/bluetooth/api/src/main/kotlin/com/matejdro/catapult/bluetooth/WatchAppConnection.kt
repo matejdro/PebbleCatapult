@@ -8,7 +8,7 @@ import kotlinx.coroutines.CoroutineScope
 interface WatchAppConnection {
    suspend fun onPacketReceived(data: PebbleDictionary): ReceiveResult
 
-   interface Factory {
+   fun interface Factory {
       fun create(
          watch: WatchIdentifier,
          scope: CoroutineScope,
