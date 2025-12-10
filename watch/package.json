@@ -1,0 +1,37 @@
+{
+  "name": "catapult",
+  "author": "matejdro",
+  "version": "0.0.0",
+  "keywords": [
+    "pebble-app"
+  ],
+  "private": false,
+  "dependencies": {},
+  "pebble": {
+    "displayName": "Catapult",
+    "uuid": "54be2d78-a70c-4573-a73e-5b0f1323d4cd",
+    "sdkVersion": "3",
+    "enableMultiJS": true,
+    "targetPlatforms": [
+      "basalt",
+      "diorite",
+      "emery"
+    ],
+    "watchapp": {
+      "watchface": false
+    },
+    "resources": {
+      "media": []
+    },
+    "companionApp": {
+      "android": {
+        "url": "https://github.com/matejdro/PebbleCatapult",
+        "apps": [
+          {
+            "package": "com.matejdro.catapult"
+          }
+        ]
+      }
+    }
+  }
+}
