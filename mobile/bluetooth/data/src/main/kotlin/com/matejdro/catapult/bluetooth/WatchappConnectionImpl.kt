@@ -8,6 +8,7 @@ import dev.zacsweers.metro.Assisted
 import dev.zacsweers.metro.AssistedFactory
 import dev.zacsweers.metro.AssistedInject
 import dev.zacsweers.metro.ContributesBinding
+import io.rebble.pebblekit2.client.PebbleSender
 import io.rebble.pebblekit2.common.model.PebbleDictionary
 import io.rebble.pebblekit2.common.model.PebbleDictionaryItem
 import io.rebble.pebblekit2.common.model.ReceiveResult
@@ -26,9 +27,10 @@ class WatchappConnectionImpl(
    private val watch: WatchIdentifier,
    @Assisted
    private val coroutineScope: CoroutineScope,
-   private val packetQueue: PacketQueue,
    private val bucketSyncRepository: BucketSyncRepository,
+   pebbleSender: PebbleSender,
 ) : WatchAppConnection {
+   private val packetQueue = PacketQueue(pebbleSender, watch, WATCHAPP_UUID)
    private var watchBufferSize: Int = 0
 
    init {

@@ -5,6 +5,7 @@ import com.matejdro.catapult.MainViewModel
 import com.matejdro.catapult.bluetooth.WatchSyncer
 import com.matejdro.catapult.logging.FileLoggingController
 import com.matejdro.catapult.logging.TinyLogLoggingThread
+import com.matejdro.catapult.receiving.PebbleListenerService
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metro.Multibinds
@@ -45,4 +46,6 @@ interface ApplicationGraph {
    fun getFileLoggingController(): FileLoggingController
    fun getTinyLogLoggingThread(): TinyLogLoggingThread
    fun getWatchSyncer(): WatchSyncer
+
+   fun inject(target: PebbleListenerService)
 }

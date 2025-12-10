@@ -8,6 +8,8 @@
     <!-- List reordering vibration -->
     <uses-permission android:name="android.permission.VIBRATE" />
 
+    <uses-permission android:name="io.rebble.pebblekit2.permission.SEND_DATA_TO_WATCH" />
+
     <application
         android:name=".CatapultApplication"
         android:allowBackup="true"
@@ -57,6 +59,14 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/logging_file_paths" />
         </provider>
+
+        <service android:name=".receiving.PebbleListenerService"
+                 android:exported="true"
+                 android:permission="io.rebble.pebblekit2.permission.RECEIVE_DATA_FROM_WATCH">
+            <intent-filter>
+                <action android:name="io.rebble.pebblekit2.RECEIVE_DATA_FROM_WATCH" />
+            </intent-filter>
+        </service>
 
     </application>
 

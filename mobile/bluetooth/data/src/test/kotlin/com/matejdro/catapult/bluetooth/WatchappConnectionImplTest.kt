@@ -24,8 +24,8 @@ class WatchappConnectionImplTest {
    private val connection = WatchappConnectionImpl(
       WatchIdentifier("watch"),
       scope.backgroundScope,
-      PacketQueue(sender, WatchIdentifier("watch"), WATCHAPP_UUID),
       bucketSyncRepository,
+      sender,
    )
 
    @Test

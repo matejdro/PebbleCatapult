@@ -1,5 +1,8 @@
 package com.matejdro.catapult.bluetooth
 
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.Inject
 import dispatch.core.DefaultCoroutineScope
 import io.rebble.pebblekit2.common.model.PebbleDictionary
 import io.rebble.pebblekit2.common.model.ReceiveResult
@@ -15,6 +18,8 @@ import si.inova.kotlinova.core.logging.logcat
 import si.inova.kotlinova.core.reporting.ErrorReporter
 import java.util.UUID
 
+@Inject
+@ContributesBinding(AppScope::class)
 class WatchappConnectionsManagerImpl(
    private val defaultScope: DefaultCoroutineScope,
    private val connectionFactory: WatchAppConnection.Factory,

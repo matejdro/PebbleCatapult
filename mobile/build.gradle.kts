@@ -102,6 +102,8 @@ dependencyAnalysis {
          includeGroup("io.rebble.pebblekit2")
          includeDependency("PebbleKitAndroid2:common-api")
          includeDependency("PebbleKitAndroid2:common")
+         includeDependency("PebbleKitAndroid2:client-api")
+         includeDependency("PebbleKitAndroid2:client")
       }
    }
 }

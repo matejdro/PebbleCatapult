@@ -135,6 +135,15 @@ sqldelight {
    }
 }
 
+dependencyAnalysis {
+   issues {
+      onUnusedDependencies {
+         // False positive
+         exclude(":common")
+      }
+   }
+}
+
 dependencies {
    implementation(projects.common)
    implementation(projects.commonNavigation)
@@ -168,6 +177,7 @@ dependencies {
    implementation(libs.kotlin.coroutines)
    implementation(libs.kotlinova.core)
    implementation(libs.kotlinova.navigation)
+   implementation(libs.pebblekit)
    implementation(libs.simpleStack)
    implementation(libs.sqldelight.android)
    implementation(libs.tinylog.api)
