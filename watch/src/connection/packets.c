@@ -4,6 +4,7 @@
 #include <pebble.h>
 
 static void receive_phone_welcome(const DictionaryIterator* iterator);
+static void receive_sync_restart(const DictionaryIterator* iterator);
 
 void send_watch_welcome()
 {
@@ -25,6 +26,9 @@ void receive_watch_packet(DictionaryIterator* received)
     case 1:
         receive_phone_welcome(received);
         break;
+    case 2:
+        receive_sync_restart(received);
+        break;
     default:
         break;
     }
@@ -41,5 +45,11 @@ void receive_phone_welcome(const DictionaryIterator* iterator)
 
     Tuple* dict_entry = dict_find(iterator, 2);
 
+    on_bucket_sync_start_received(dict_entry->value->data, dict_entry->length);
+}
+
+void receive_sync_restart(const DictionaryIterator* iterator)
+{
+    Tuple* dict_entry = dict_find(iterator, 1);
     on_bucket_sync_start_received(dict_entry->value->data, dict_entry->length);
 }
