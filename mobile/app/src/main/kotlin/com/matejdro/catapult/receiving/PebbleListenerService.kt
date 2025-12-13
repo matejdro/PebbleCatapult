@@ -27,8 +27,8 @@ class PebbleListenerService : BasePebbleListenerService() {
    private lateinit var watchappConnectionsManager: WatchappConnectionsManager
 
    override fun onCreate() {
-      super.onCreate()
       (application!! as CatapultApplication).applicationGraph.inject(this)
+      super.onCreate()
    }
 
    override suspend fun onMessageReceived(
