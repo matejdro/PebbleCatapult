@@ -237,7 +237,7 @@ static void delete_inactive_buckets(const uint8_t* data, const uint8_t new_activ
         const uint8_t old_bucket_id = buckets.data[i].id;
         for (int j = 0; j < new_active_buckets; j++)
         {
-            const uint8_t new_bucket_id = data[3 + i * sizeof(BucketMetadata)];
+            const uint8_t new_bucket_id = data[4 + j * sizeof(BucketMetadata)];
             if (new_bucket_id == old_bucket_id)
             {
                 bucket_exists = true;
