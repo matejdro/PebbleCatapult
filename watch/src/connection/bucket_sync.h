@@ -54,3 +54,4 @@ void bucket_set_bucket_data_change_callback(void(*callback)(BucketMetadata));
 void bucket_clear_bucket_data_change_callback(void(*callback)(BucketMetadata));
 
 void on_bucket_sync_start_received(uint8_t* data, size_t data_size);
+void on_bucket_sync_next_packet_received(uint8_t* data, size_t data_size);

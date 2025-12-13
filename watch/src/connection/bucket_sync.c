@@ -2,7 +2,7 @@
 #include "bluetooth.h"
 #include "../utils/bytes.h"
 
-static const uint16_t FILE_BUCKET_LiST = 1000;
+static const uint16_t FILE_BUCKET_LIST = 1000;
 static const uint16_t FILE_BUCKET_SYNC_VERSION = 1001;
 static const uint16_t FILE_PROTOCOL_VERSION = 1002;
 
@@ -11,8 +11,12 @@ static BucketList buckets;
 static void (*list_change_callback)() = NULL;
 static void (*data_change_callback)(BucketMetadata) = NULL;
 
+static uint16_t bucket_sync_pending_next_version = 0;
+
 static uint32_t get_bucket_persist_key(uint8_t bucket_id);
 static void delete_inactive_buckets(const uint8_t* data, const uint8_t new_active_buckets);
+static void save_bucket_data(const uint8_t* data, size_t data_size, uint8_t position);
+static void complete_sync(void);
 
 void bucket_sync_init()
 {
@@ -28,7 +32,7 @@ void bucket_sync_init()
         sizeof(bucket_sync_current_version)
     );
 
-    const uint16_t read_data = persist_read_data(FILE_BUCKET_LiST, buckets.data, sizeof(buckets.data));
+    const uint16_t read_data = persist_read_data(FILE_BUCKET_LIST, buckets.data, sizeof(buckets.data));
     buckets.count = read_data / sizeof(BucketMetadata);
 
     uint16_t written_protocol_version;
@@ -70,12 +74,12 @@ void bucket_set_bucket_list_change_callback(void (*callback)())
     list_change_callback = callback;
 }
 
-void bucket_set_bucket_data_change_callback(void(*callback)(BucketMetadata))
+void bucket_set_bucket_data_change_callback(void (*callback)(BucketMetadata))
 {
     data_change_callback = callback;
 }
 
-void bucket_clear_bucket_data_change_callback(void(*callback)(BucketMetadata))
+void bucket_clear_bucket_data_change_callback(void (*callback)(BucketMetadata))
 {
     if (data_change_callback == callback)
     {
@@ -91,7 +95,7 @@ void on_bucket_sync_start_received(uint8_t* data, size_t data_size)
         return;
     }
 
-    const uint16_t new_version = read_uint16_from_byte_array(data, 1);
+    bucket_sync_pending_next_version = read_uint16_from_byte_array(data, 1);
     const uint8_t new_active_buckets = data[3];
     delete_inactive_buckets(data, new_active_buckets);
 
@@ -103,7 +107,7 @@ void on_bucket_sync_start_received(uint8_t* data, size_t data_size)
         bucket_metadata->flags = data[4 + i * sizeof(BucketMetadata) + 1];
     }
 
-    persist_write_data(FILE_BUCKET_LiST, buckets.data, buckets.count * sizeof(BucketMetadata));
+    persist_write_data(FILE_BUCKET_LIST, buckets.data, buckets.count * sizeof(BucketMetadata));
 
     void (*local_list_change_callback)() = list_change_callback;
     if (local_list_change_callback != NULL)
@@ -111,20 +115,40 @@ void on_bucket_sync_start_received(uint8_t* data, size_t data_size)
         local_list_change_callback();
     }
 
-    uint8_t position = 4 + new_active_buckets * sizeof(BucketMetadata);
+    save_bucket_data(data, data_size, 4 + new_active_buckets * sizeof(BucketMetadata));
+    if (sync_status == 1)
+    {
+        complete_sync();
+    }
+}
 
+void on_bucket_sync_next_packet_received(uint8_t* data, size_t data_size)
+{
+    const uint8_t sync_status = data[0];
+
+    save_bucket_data(data, data_size, 1);
+
+    if (sync_status == 1)
+    {
+        complete_sync();
+    }
+}
+
+static void save_bucket_data(const uint8_t* data, size_t data_size, uint8_t position)
+{
     while (position < data_size)
     {
         const uint8_t id = data[position++];
         const uint8_t size = data[position++];
-        int status = persist_write_data(get_bucket_persist_key(id), &data[position], size);
+
+        const int status = persist_write_data(get_bucket_persist_key(id), &data[position], size);
         if (status < 0)
         {
             // TODO handle write failure
             return;
         };
 
-        void(*local_bucket_data_change_callback)(BucketMetadata) = data_change_callback;
+        void (*local_bucket_data_change_callback)(BucketMetadata) = data_change_callback;
         if (local_bucket_data_change_callback != NULL)
         {
             for (int j = 0; j < buckets.count; j++)
@@ -139,8 +163,11 @@ void on_bucket_sync_start_received(uint8_t* data, size_t data_size)
 
         position += size;
     }
+}
 
-    bucket_sync_current_version = new_version;
+static void complete_sync(void)
+{
+    bucket_sync_current_version = bucket_sync_pending_next_version;
     persist_write_data(
         FILE_BUCKET_SYNC_VERSION,
         &bucket_sync_current_version,

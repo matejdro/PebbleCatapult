@@ -5,6 +5,7 @@
 
 static void receive_phone_welcome(const DictionaryIterator* iterator);
 static void receive_sync_restart(const DictionaryIterator* iterator);
+static void receive_sync_next_packet(const DictionaryIterator* iterator);
 
 void send_watch_welcome()
 {
@@ -17,7 +18,7 @@ void send_watch_welcome()
     custom_app_mesage_outbox_send();
 }
 
-void receive_watch_packet(DictionaryIterator* received)
+void receive_watch_packet(const DictionaryIterator* received)
 {
     const uint8_t packet_id = dict_find(received, 0)->value->uint8;
 
@@ -28,6 +29,9 @@ void receive_watch_packet(DictionaryIterator* received)
         break;
     case 2:
         receive_sync_restart(received);
+        break;
+    case 3:
+        receive_sync_next_packet(received);
         break;
     default:
         break;
@@ -43,6 +47,7 @@ void receive_phone_welcome(const DictionaryIterator* iterator)
         return;
     }
 
+    // ReSharper disable once CppLocalVariableMayBeConst
     Tuple* dict_entry = dict_find(iterator, 2);
 
     on_bucket_sync_start_received(dict_entry->value->data, dict_entry->length);
@@ -50,6 +55,16 @@ void receive_phone_welcome(const DictionaryIterator* iterator)
 
 void receive_sync_restart(const DictionaryIterator* iterator)
 {
+    // ReSharper disable once CppLocalVariableMayBeConst
     Tuple* dict_entry = dict_find(iterator, 1);
+
     on_bucket_sync_start_received(dict_entry->value->data, dict_entry->length);
+}
+
+void receive_sync_next_packet(const DictionaryIterator* iterator)
+{
+    // ReSharper disable once CppLocalVariableMayBeConst
+    Tuple* dict_entry = dict_find(iterator, 1);
+
+    on_bucket_sync_next_packet_received(dict_entry->value->data, dict_entry->length);
 }

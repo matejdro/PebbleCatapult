@@ -5,4 +5,4 @@
 void send_watch_welcome();
 
 
-void receive_watch_packet(DictionaryIterator * received);
+void receive_watch_packet(const DictionaryIterator* received);

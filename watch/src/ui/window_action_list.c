@@ -28,9 +28,10 @@ static uint16_t menu_get_num_rows_callback(MenuLayer* me, uint16_t section_index
     return current_menu_data.count;
 }
 
+// ReSharper disable once CppParameterMayBeConstPtrOrRef
 static void menu_draw_row_callback(GContext* ctx, const Layer* cell_layer, MenuIndex* cell_index, void* data)
 {
-    int16_t row = cell_index->row;
+    const int16_t row = cell_index->row;
 
     menu_cell_basic_draw(ctx, cell_layer, current_menu_data.data[row].title, NULL, NULL);
 }
@@ -99,7 +100,7 @@ void load_menu(uint8_t directory_id)
 
     if (bucket_sync_load_bucket(directory_id, tmp))
     {
-        uint8_t count = tmp[0];
+        const uint8_t count = tmp[0];
         current_menu_data.count = count;
 
         int position = 1;
@@ -111,7 +112,7 @@ void load_menu(uint8_t directory_id)
             current_menu_data.data[i].target_directory = tmp[position++];
             current_menu_data.data[i].flags = tmp[position++];
 
-            char* title = strcpy(current_menu_data.data[i].title, (char*)&tmp[position]);
+            const char* title = strcpy(current_menu_data.data[i].title, (char*)&tmp[position]);
             position += strlen(title) + 1;
         }
         menu_layer_reload_data(menu);
