@@ -66,14 +66,14 @@ static void window_load(Window* window)
 
     layer_add_child(window_layer, menu_layer_get_layer(menu));
 
-    bucket_set_bucket_data_change_callback(bucket_update_callback);
+    bucket_sync_set_bucket_list_change_callback(bucket_update_callback);
 
     load_menu(1);
 }
 
 static void window_unload(Window* window)
 {
-    bucket_clear_bucket_data_change_callback(bucket_update_callback);
+    bucket_sync_clear_bucket_data_change_callback(bucket_update_callback);
     menu_layer_destroy(menu);
     window_destroy(window);
 }

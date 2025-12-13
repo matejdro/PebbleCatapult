@@ -15,7 +15,7 @@ void send_watch_welcome()
     dict_write_uint16(iterator, 1, PROTOCOL_VERSION);
     dict_write_uint16(iterator, 2, bucket_sync_current_version);
     dict_write_uint16(iterator, 3, appmessage_max_size);
-    custom_app_mesage_outbox_send();
+    bluetooth_app_message_outbox_send();
 }
 
 void receive_watch_packet(const DictionaryIterator* received)
@@ -50,7 +50,7 @@ void receive_phone_welcome(const DictionaryIterator* iterator)
     // ReSharper disable once CppLocalVariableMayBeConst
     Tuple* dict_entry = dict_find(iterator, 2);
 
-    on_bucket_sync_start_received(dict_entry->value->data, dict_entry->length);
+    bucket_sync_on_start_received(dict_entry->value->data, dict_entry->length);
 }
 
 void receive_sync_restart(const DictionaryIterator* iterator)
@@ -58,7 +58,7 @@ void receive_sync_restart(const DictionaryIterator* iterator)
     // ReSharper disable once CppLocalVariableMayBeConst
     Tuple* dict_entry = dict_find(iterator, 1);
 
-    on_bucket_sync_start_received(dict_entry->value->data, dict_entry->length);
+    bucket_sync_on_start_received(dict_entry->value->data, dict_entry->length);
 }
 
 void receive_sync_next_packet(const DictionaryIterator* iterator)
@@ -66,5 +66,5 @@ void receive_sync_next_packet(const DictionaryIterator* iterator)
     // ReSharper disable once CppLocalVariableMayBeConst
     Tuple* dict_entry = dict_find(iterator, 1);
 
-    on_bucket_sync_next_packet_received(dict_entry->value->data, dict_entry->length);
+    bucket_sync_on_start_received(dict_entry->value->data, dict_entry->length);
 }

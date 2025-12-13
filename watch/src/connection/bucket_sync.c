@@ -69,17 +69,17 @@ BucketList* bucket_sync_get_bucket_list()
     return &buckets;
 }
 
-void bucket_set_bucket_list_change_callback(void (*callback)())
+void bucket_sync_set_bucket_list_change_callback(void (*callback)())
 {
     list_change_callback = callback;
 }
 
-void bucket_set_bucket_data_change_callback(void (*callback)(BucketMetadata))
+void bucket_sync_set_bucket_data_change_callback(void (*callback)(BucketMetadata))
 {
     data_change_callback = callback;
 }
 
-void bucket_clear_bucket_data_change_callback(void (*callback)(BucketMetadata))
+void bucket_sync_clear_bucket_data_change_callback(void (*callback)(BucketMetadata))
 {
     if (data_change_callback == callback)
     {
@@ -87,7 +87,7 @@ void bucket_clear_bucket_data_change_callback(void (*callback)(BucketMetadata))
     }
 }
 
-void on_bucket_sync_start_received(uint8_t* data, size_t data_size)
+void bucket_sync_on_start_received(uint8_t* data, size_t data_size)
 {
     const uint8_t sync_status = data[0];
     if (sync_status == 2)
@@ -122,7 +122,7 @@ void on_bucket_sync_start_received(uint8_t* data, size_t data_size)
     }
 }
 
-void on_bucket_sync_next_packet_received(uint8_t* data, size_t data_size)
+void bucket_sync_on_next_packet_received(uint8_t* data, size_t data_size)
 {
     const uint8_t sync_status = data[0];
 

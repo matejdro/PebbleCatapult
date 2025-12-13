@@ -66,7 +66,7 @@ static void on_sent_data(DictionaryIterator* iterator, void* context)
     }
 }
 
-void custom_app_mesage_outbox_send()
+void bluetooth_app_message_outbox_send()
 {
     is_currently_sending_data = true;
     void (*local_sending_now_callback)() = sending_now_callback;
@@ -151,22 +151,22 @@ static void on_connection_changed(bool status)
     }
 }
 
-void register_bluetooth_sending_finish(void (*callback)(bool success))
+void bluetooth_register_sending_finish(void (*callback)(bool success))
 {
     sending_finish_callback = callback;
 }
 
-void register_phone_connected_change_callback(void (*callback)())
+void bluetooth_register_phone_connected_change_callback(void (*callback)())
 {
     phone_connected_change_callback = callback;
 }
 
-void register_sending_now_change_callback(void (*callback)())
+void bluetooth_register_sending_now_change_callback(void (*callback)())
 {
     sending_now_callback = callback;
 }
 
-void register_sending_error_status_callback(void (*callback)())
+void bluetooth_register_sending_error_status_callback(void (*callback)())
 {
     sending_error_callback = callback;
 }
