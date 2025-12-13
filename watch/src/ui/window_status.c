@@ -15,7 +15,7 @@ static void on_bucket_data_update(BucketMetadata bucket_metadata, void* context)
     if (auto_switch && bucket_metadata.id == 1)
     {
         window_stack_pop(true);
-        window_action_list_show();
+        window_action_list_show(1);
     }
 }
 
@@ -71,7 +71,7 @@ static void window_unload(Window* window)
 {
     text_layer_destroy(main_text);
     text_layer_destroy(app_name_text);
-    bucket_sync_clear_bucket_data_change_callback(on_bucket_data_update);
+    bucket_sync_clear_bucket_data_change_callback(on_bucket_data_update, NULL);
     window_destroy(window);
 }
 

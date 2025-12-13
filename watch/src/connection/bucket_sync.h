@@ -52,7 +52,7 @@ void bucket_sync_set_bucket_data_change_callback(void(*callback)(BucketMetadata,
 /**
  * Clear the callback if currently registered callback is the passed one.
  */
-void bucket_sync_clear_bucket_data_change_callback(void(*callback)(BucketMetadata, void*));
+void bucket_sync_clear_bucket_data_change_callback(void(*callback)(BucketMetadata, void*), void*context);
 
 void bucket_sync_register_syncing_status_changed_callback(void (*callback)());
 

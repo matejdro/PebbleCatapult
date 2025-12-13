@@ -103,9 +103,9 @@ void bucket_sync_set_bucket_data_change_callback(void (*callback)(BucketMetadata
     };
 }
 
-void bucket_sync_clear_bucket_data_change_callback(void (*callback)(BucketMetadata, void*))
+void bucket_sync_clear_bucket_data_change_callback(void (*callback)(BucketMetadata, void*), void* context)
 {
-    if (data_change_callback.data_change_callback == callback)
+    if (data_change_callback.data_change_callback == callback && data_change_callback.context == context)
     {
         data_change_callback = (DataChangeCallback){
             .data_change_callback = NULL,
