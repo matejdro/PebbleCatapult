@@ -20,6 +20,15 @@ void send_watch_welcome()
     bluetooth_app_message_outbox_send();
 }
 
+void send_trigger_action(const uint16_t id)
+{
+    DictionaryIterator* iterator;
+    app_message_outbox_begin(&iterator);
+    dict_write_uint8(iterator, 0, 4);
+    dict_write_uint16(iterator, 1, id);
+    bluetooth_app_message_outbox_send();
+}
+
 void receive_watch_packet(const DictionaryIterator* received)
 {
     const uint8_t packet_id = dict_find(received, 0)->value->uint8;

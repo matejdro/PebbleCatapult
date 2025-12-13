@@ -2,6 +2,7 @@
 #include "pebble.h"
 #include "window_status.h"
 #include "../connection/bucket_sync.h"
+#include "../connection/packets.h"
 #include "../utils/bytes.h"
 #include "layers/status_bar.h"
 
@@ -79,14 +80,11 @@ static void window_load(Window* window)
     menu_layer_set_callbacks(window_action_list->menu,
                              window_action_list,
                              (MenuLayerCallbacks)
-    {
-        .
-        get_num_rows = menu_get_num_rows_callback,
-        .
-        draw_row = menu_draw_row_callback,
-    }
-    )
-    ;
+                             {
+                                 .get_num_rows = menu_get_num_rows_callback,
+                                 .draw_row = menu_draw_row_callback,
+                             }
+    );
 
     layer_add_child(window_layer, menu_layer_get_layer(window_action_list->menu));
     layer_add_child(window_layer, window_action_list->status_bar->layer);
@@ -128,34 +126,26 @@ static void on_button_up_pressed(ClickRecognizerRef recognizer, void* context)
         menu_layer_set_selected_index(
             menu_layer,
             (MenuIndex)
-        {
-            .
-            row = last_index,
-            .
-            section = 0
-        }
-        ,
-        MenuRowAlignCenter,
+            {
+                .row = last_index,
+                .section = 0
+            },
+            MenuRowAlignCenter,
             true
-        )
-        ;
+        );
     }
     else
     {
         menu_layer_set_selected_index(
             menu_layer,
             (MenuIndex)
-        {
-            .
-            row = index.row - 1,
-            .
-            section = 0
-        }
-        ,
-        MenuRowAlignCenter,
+            {
+                .row = index.row - 1,
+                .section = 0
+            },
+            MenuRowAlignCenter,
             true
-        )
-        ;
+        );
     }
 }
 
@@ -171,34 +161,39 @@ static void on_button_down_pressed(ClickRecognizerRef recognizer, void* context)
         menu_layer_set_selected_index(
             menu_layer,
             (MenuIndex)
-        {
-            .
-            row = 0,
-            .
-            section = 0
-        }
-        ,
-        MenuRowAlignCenter,
+            {
+                .row = 0,
+                .section = 0
+            },
+            MenuRowAlignCenter,
             true
-        )
-        ;
+        );
     }
     else
     {
         menu_layer_set_selected_index(
             menu_layer,
             (MenuIndex)
-        {
-            .
-            row = index.row + 1,
-            .
-            section = 0
-        }
-        ,
-        MenuRowAlignCenter,
+            {
+                .row = index.row + 1,
+                .section = 0
+            },
+            MenuRowAlignCenter,
             true
-        )
-        ;
+        );
+    }
+}
+
+static void on_task_starting_result(bool success)
+{
+    if (success)
+    {
+        vibes_short_pulse();
+        window_stack_pop_all(true);
+    }
+    else
+    {
+        vibes_double_pulse();
     }
 }
 
@@ -212,6 +207,11 @@ static void on_button_select_pressed(ClickRecognizerRef recognizer, void* contex
     if (selected_item->target_directory != 0)
     {
         window_action_list_show(selected_item->target_directory);
+    }
+    else
+    {
+        bluetooth_register_sending_finish(on_task_starting_result);
+        send_trigger_action(selected_item->id);
     }
 }
 
@@ -231,18 +231,13 @@ void window_action_list_show(uint8_t directory_id)
     window_set_user_data(window, window_action_list);
 
     window_set_window_handlers(window, (WindowHandlers)
-    {
-        .
-        load = window_load,
-        .
-        unload = window_unload,
-        .
-        appear = window_show,
-        .
-        disappear = window_hide
-    }
-    )
-    ;
+                               {
+                                   .load = window_load,
+                                   .unload = window_unload,
+                                   .appear = window_show,
+                                   .disappear = window_hide
+                               }
+    );
     const bool animated = true;
     window_stack_push(window, animated);
 }

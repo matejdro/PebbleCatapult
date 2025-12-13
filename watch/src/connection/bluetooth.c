@@ -136,7 +136,7 @@ static void on_sending_failed(DictionaryIterator* iterator, const AppMessageResu
     case APP_MSG_SEND_TIMEOUT:
         if (local_sending_finish_callback != NULL)
         {
-            local_sending_finish_callback(true);
+            local_sending_finish_callback(false);
         }
 
         is_phone_connected = false;

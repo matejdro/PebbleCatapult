@@ -62,6 +62,12 @@ Sent from the watch when the app is opened.
 * `2` - current bucketsync watch version (uint16)
 * `3` - Appmessage incoming buffer size in bytes (uint16)
 
+### Trigger action (packet 4)
+
+Sent from the watch when the app is opened.
+
+* `1` - ID of the action to trigger (uint16)
+
 # Buckets
 
 Watch can store up to 15 of them, up to 256 bytes each
