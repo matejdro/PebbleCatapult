@@ -26,6 +26,8 @@ class MaxStringSizeBytesInputTransformation(private val maxBytes: Int) : InputTr
       val charBuffer = CharBuffer.wrap(text)
       utf8Encoder.encode(charBuffer, buffer, true)
       buffer.rewind()
-      return utf8Decoder.decode(buffer).toString()
+      val newLength = utf8Decoder.decode(buffer).toString().length
+
+      return text.take(newLength)
    }
 }
