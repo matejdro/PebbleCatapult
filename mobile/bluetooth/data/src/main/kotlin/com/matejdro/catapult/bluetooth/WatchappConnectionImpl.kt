@@ -1,8 +1,11 @@
 package com.matejdro.catapult.bluetooth
 
 import com.matejdro.bucketsync.BucketSyncRepository
+import com.matejdro.catapult.actionlist.api.CatapultActionRepository
 import com.matejdro.catapult.bluetooth.util.requireUint
 import com.matejdro.catapult.bluetooth.util.writeUByte
+import com.matejdro.catapult.common.flow.firstData
+import com.matejdro.catapult.tasker.TaskerTaskStarter
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.Assisted
 import dev.zacsweers.metro.AssistedFactory
@@ -28,6 +31,8 @@ class WatchappConnectionImpl(
    @Assisted
    private val coroutineScope: CoroutineScope,
    private val bucketSyncRepository: BucketSyncRepository,
+   private val actionRepository: CatapultActionRepository,
+   private val taskerTaskStarter: TaskerTaskStarter,
    pebbleSender: PebbleSender,
 ) : WatchAppConnection {
    private val packetQueue = PacketQueue(pebbleSender, watch, WATCHAPP_UUID)
@@ -43,20 +48,28 @@ class WatchappConnectionImpl(
       val id = (data.get(0u) as PebbleDictionaryItem.UInt32?)?.value
       logcat { "Received packet ${id ?: "null"} from $watch" }
 
+      return when (id) {
+         0u -> {
+            processWatchWelcomePacket(data)
+         }
+
+         4u -> {
+            processStartTaskPacket(data)
+         }
+
+         else -> {
+            logcat { "Unknown packet ID. Nacking..." }
+            ReceiveResult.Nack
+         }
+      }
+   }
+
+   private suspend fun processWatchWelcomePacket(data: PebbleDictionary): ReceiveResult {
       if (watchBufferSize != 0) {
          logcat { "Watch already sent init. Nacking..." }
          return ReceiveResult.Nack
       }
 
-      return if (id == 0u) {
-         processWatchWelcomePacket(data)
-      } else {
-         logcat { "Unknown packet ID. Nacking..." }
-         ReceiveResult.Nack
-      }
-   }
-
-   private suspend fun processWatchWelcomePacket(data: PebbleDictionary): ReceiveResult {
       val watchProtocolVersion = data.requireUint(1u)
       if (watchProtocolVersion != PROTOCOL_VERSION.toUInt()) {
          logcat { "Mismatch protocol version $watchProtocolVersion" }
@@ -76,6 +89,33 @@ class WatchappConnectionImpl(
       startBucketsyncLoop(watchVersion)
 
       return ReceiveResult.Ack
+   }
+
+   private suspend fun processStartTaskPacket(data: PebbleDictionary): ReceiveResult {
+      val actionId = data.requireUint(1u)
+      val action = actionRepository.getById(actionId.toInt()).firstData()
+      if (action == null) {
+         logcat { "Unknown action. Nacking..." }
+         return ReceiveResult.Nack
+      }
+
+      val taskerTask = action.taskerTaskName
+      if (taskerTask == null) {
+         logcat { "Target action has no task. Nacking..." }
+         return ReceiveResult.Nack
+      }
+
+      logcat { "Starting task $taskerTask" }
+
+      val success = taskerTaskStarter.startTask(taskerTask)
+
+      return if (success) {
+         logcat { "Task successfully started" }
+         ReceiveResult.Ack
+      } else {
+         logcat { "Tasker task launch failed" }
+         ReceiveResult.Nack
+      }
    }
 
    private fun startBucketsyncLoop(initialWatchVersion: UShort) = coroutineScope.launch {

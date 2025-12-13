@@ -1,6 +1,10 @@
 package com.matejdro.catapult.bluetooth
 
 import com.matejdro.bucketsync.FakeBucketSyncRepository
+import com.matejdro.catapult.actionlist.api.CatapultAction
+import com.matejdro.catapult.actionlist.test.FakeCatapultActionRepository
+import com.matejdro.catapult.tasker.FakeTaskerTaskStarter
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import io.rebble.pebblekit2.common.model.PebbleDictionaryItem
@@ -20,11 +24,15 @@ class WatchappConnectionImplTest {
 
    private val sender = FakePebbleSender(scope.virtualTimeProvider())
    private val bucketSyncRepository = FakeBucketSyncRepository()
+   private val actionRepository = FakeCatapultActionRepository()
+   private val taskerTaskStarter = FakeTaskerTaskStarter()
 
    private val connection = WatchappConnectionImpl(
       WatchIdentifier("watch"),
       scope.backgroundScope,
       bucketSyncRepository,
+      actionRepository,
+      taskerTaskStarter,
       sender,
    )
 
@@ -294,6 +302,72 @@ class WatchappConnectionImplTest {
       val result = connection.onPacketReceived(
          mapOf(
             0u to PebbleDictionaryItem.UInt32(255u),
+         )
+      )
+      runCurrent()
+
+      result shouldBe ReceiveResult.Nack
+   }
+
+   @Test
+   fun `Trigger tasker task when the watch requests it`() = scope.runTest {
+      taskerTaskStarter.reportStartSuccessful = true
+      actionRepository.insert(CatapultAction("Action A", 1, 1, "Tasker A"))
+
+      val result = connection.onPacketReceived(
+         mapOf(
+            0u to PebbleDictionaryItem.UInt32(4u),
+            1u to PebbleDictionaryItem.UInt32(1u),
+         )
+      )
+      runCurrent()
+
+      result shouldBe ReceiveResult.Ack
+      taskerTaskStarter.startedTasks.shouldContainExactly("Tasker A")
+   }
+
+   @Test
+   fun `Return nack when attempting to start missing task`() = scope.runTest {
+      taskerTaskStarter.reportStartSuccessful = true
+      actionRepository.insert(CatapultAction("Action A", 1, 1, "Tasker A"))
+
+      val result = connection.onPacketReceived(
+         mapOf(
+            0u to PebbleDictionaryItem.UInt32(4u),
+            1u to PebbleDictionaryItem.UInt32(2u),
+         )
+      )
+      runCurrent()
+
+      result shouldBe ReceiveResult.Nack
+      taskerTaskStarter.startedTasks.shouldBeEmpty()
+   }
+
+   @Test
+   fun `Return nack when the starting the task fails`() = scope.runTest {
+      taskerTaskStarter.reportStartSuccessful = false
+      actionRepository.insert(CatapultAction("Action A", 1, 1, "Tasker A"))
+
+      val result = connection.onPacketReceived(
+         mapOf(
+            0u to PebbleDictionaryItem.UInt32(4u),
+            1u to PebbleDictionaryItem.UInt32(1u),
+         )
+      )
+      runCurrent()
+
+      result shouldBe ReceiveResult.Nack
+   }
+
+   @Test
+   fun `Return nack when the target action has no tasker task`() = scope.runTest {
+      taskerTaskStarter.reportStartSuccessful = true
+      actionRepository.insert(CatapultAction("Action A", 1, 1))
+
+      val result = connection.onPacketReceived(
+         mapOf(
+            0u to PebbleDictionaryItem.UInt32(4u),
+            1u to PebbleDictionaryItem.UInt32(1u),
          )
       )
       runCurrent()

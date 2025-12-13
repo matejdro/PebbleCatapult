@@ -5,15 +5,13 @@ import com.matejdro.catapult.actionlist.api.CatapultActionRepository
 import com.matejdro.catapult.actionlist.api.DirectoryListRepository
 import com.matejdro.catapult.bluetooth.util.writeUByte
 import com.matejdro.catapult.bluetooth.util.writeUShort
+import com.matejdro.catapult.common.flow.firstData
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dispatch.core.withDefault
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
 import okio.Buffer
 import si.inova.kotlinova.core.logging.logcat
-import si.inova.kotlinova.core.outcome.Outcome
 
 @Inject
 @ContributesBinding(AppScope::class)
@@ -58,13 +56,5 @@ class WatchSyncerImpl(
       bucketSyncRepository.deleteBucket(id.toUByte())
    }
 }
-
-private fun <T> Outcome<T>.unwrap(): T = when (this) {
-   is Outcome.Error -> throw exception
-   is Outcome.Progress -> error("Outcome should not be progress")
-   is Outcome.Success -> data
-}
-
-private suspend fun <T> Flow<Outcome<T>>.firstData() = first { it !is Outcome.Progress }.unwrap()
 
 private const val MAX_ACTIONS_TO_SYNC = 13

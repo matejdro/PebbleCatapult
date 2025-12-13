@@ -159,6 +159,8 @@ dependencies {
    implementation(projects.bluetooth.data)
    implementation(projects.bucketsync.api)
    implementation(projects.bucketsync.data)
+   implementation(projects.tasker.api)
+   implementation(projects.tasker.data)
    implementation(projects.tools.ui)
 
    implementation(libs.androidx.activity.compose)

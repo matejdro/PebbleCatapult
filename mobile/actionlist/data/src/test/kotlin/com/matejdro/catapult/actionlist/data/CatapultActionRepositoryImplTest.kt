@@ -50,6 +50,31 @@ class CatapultActionRepositoryImplTest {
    }
 
    @Test
+   fun `Return single action`() = scope.runTest {
+      setupDirectories()
+
+      repo.getById(2).test {
+         runCurrent()
+
+         repo.insert(
+            CatapultAction("Action A", 1, taskerTaskName = "Task A"),
+         )
+         repo.insert(
+            CatapultAction("Action B", 1, targetDirectoryId = 2)
+         )
+         runCurrent()
+
+         expectMostRecentItem() shouldBeSuccessWithData CatapultAction(
+            "Action B",
+            1,
+            2,
+            targetDirectoryId = 2,
+            targetDirectoryName = "Directory B"
+         )
+      }
+   }
+
+   @Test
    fun `Allow updating action name`() = scope.runTest {
       repo.getAll(1).test {
          runCurrent()

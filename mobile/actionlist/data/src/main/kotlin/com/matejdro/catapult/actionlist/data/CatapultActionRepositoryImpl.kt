@@ -2,11 +2,13 @@ package com.matejdro.catapult.actionlist.data
 
 import app.cash.sqldelight.Query
 import app.cash.sqldelight.async.coroutines.awaitAsList
+import app.cash.sqldelight.async.coroutines.awaitAsOneOrNull
 import app.cash.sqldelight.coroutines.asFlow
 import com.matejdro.catapult.actionlist.api.CatapultAction
 import com.matejdro.catapult.actionlist.api.CatapultActionRepository
 import com.matejdro.catapult.actionlist.sqldelight.generated.DbActionQueries
 import com.matejdro.catapult.actionlist.sqldelight.generated.SelectAll
+import com.matejdro.catapult.actionlist.sqldelight.generated.SelectSingle
 import com.matejdro.catapult.bluetooth.WatchSyncer
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
@@ -32,6 +34,18 @@ class CatapultActionRepositoryImpl(
                val list = it.awaitAsList()
 
                Outcome.Success(list.map { it.toCatapultAction() })
+            }
+         }
+         .catch { emit(Outcome.Error(UnknownCauseException(cause = it))) }
+   }
+
+   override fun getById(id: Int): Flow<Outcome<CatapultAction?>> {
+      return dbActionQueries.selectSingle(id.toLong()).asFlow()
+         .map<Query<SelectSingle>, Outcome<CatapultAction?>> {
+            withDefault {
+               val entry = it.awaitAsOneOrNull()
+
+               Outcome.Success(entry?.toCatapultAction())
             }
          }
          .catch { emit(Outcome.Error(UnknownCauseException(cause = it))) }

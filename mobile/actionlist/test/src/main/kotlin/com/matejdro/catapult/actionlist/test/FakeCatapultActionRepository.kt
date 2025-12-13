@@ -20,6 +20,12 @@ class FakeCatapultActionRepository : CatapultActionRepository {
          .onStart { numCollections++ }
    }
 
+   override fun getById(id: Int): Flow<Outcome<CatapultAction?>> {
+      return actions
+         .map { list -> Outcome.Success(list.firstOrNull { it.id == id }) }
+         .onStart { numCollections++ }
+   }
+
    override suspend fun insert(action: CatapultAction) {
       actions.update { it + action }
    }

@@ -22,6 +22,19 @@ SELECT dbCatapultAction.id,
     ORDER BY sortOrder ASC
     LIMIT :limit;
 
+selectSingle:
+SELECT dbCatapultAction.id,
+    dbCatapultAction.title,
+    dbCatapultAction.directoryId,
+    dbCatapultAction.taskerTaskName,
+    dbCatapultAction.targetDirectoryId,
+    dbCatapultAction.sortOrder,
+    dbDirectory.title AS targetDirectoryName
+    FROM
+        dbCatapultAction LEFT JOIN
+            dbDirectory ON dbDirectory.id = dbCatapultAction.targetDirectoryId
+    WHERE dbCatapultAction.id = :id;
+
 selectSingleRaw:
     SELECT * FROM dbCatapultAction WHERE id = ?;
 
