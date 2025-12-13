@@ -1,5 +1,6 @@
 #include "bucket_sync.h"
 #include "bluetooth.h"
+#include "../ui/window_status.h"
 #include "../utils/bytes.h"
 
 static const uint16_t FILE_BUCKET_LIST = 1000;
@@ -175,7 +176,7 @@ static void save_bucket_data(const uint8_t* data, size_t data_size, uint8_t posi
         const int status = persist_write_data(get_bucket_persist_key(id), &data[position], size);
         if (status < 0)
         {
-            // TODO handle write failure
+            window_status_show_error("Failed writing data\n\nIs watch's storage full?");
             return;
         };
 

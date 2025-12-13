@@ -3,6 +3,8 @@
 #include "bucket_sync.h"
 #include <pebble.h>
 
+#include "../ui/window_status.h"
+
 static void receive_phone_welcome(const DictionaryIterator* iterator);
 static void receive_sync_restart(const DictionaryIterator* iterator);
 static void receive_sync_next_packet(const DictionaryIterator* iterator);
@@ -43,7 +45,14 @@ void receive_phone_welcome(const DictionaryIterator* iterator)
     const uint16_t phone_protocol_version = dict_find(iterator, 1)->value->uint16;
     if (phone_protocol_version != PROTOCOL_VERSION)
     {
-        // TODO show version mismatch error
+        if (phone_protocol_version > PROTOCOL_VERSION)
+        {
+            window_status_show_error("Version mismatch\n\nPlease update watch app");
+        }
+        else
+        {
+            window_status_show_error("Version mismatch\n\nPlease update phone app");
+        }
         return;
     }
 

@@ -71,19 +71,23 @@ void custom_status_bar_set_active(CustomStatusBarLayer* layer, bool active)
 {
     if (active)
     {
-        active_layer = layer;
-        if (!listeners_active)
+        if (active_layer != layer)
         {
-            // ReSharper disable once CppRedundantCastExpression
-            tick_timer_service_subscribe(MINUTE_UNIT, (TickHandler)minute_tick);
-            bluetooth_register_phone_connected_change_callback(update_data);
-            bluetooth_register_sending_error_status_callback(update_data);
-            bluetooth_register_sending_now_change_callback(update_data);
-            bucket_sync_register_syncing_status_changed_callback(update_data);
-            listeners_active = true;
-        }
+            active_layer = layer;
+            if (!listeners_active)
+            {
+                // ReSharper disable once CppRedundantCastExpression
+                tick_timer_service_subscribe(MINUTE_UNIT, (TickHandler)minute_tick);
+                bluetooth_register_phone_connected_change_callback(update_data);
+                bluetooth_register_sending_error_status_callback(update_data);
+                bluetooth_register_sending_now_change_callback(update_data);
+                bucket_sync_register_syncing_status_changed_callback(update_data);
+                listeners_active = true;
+            }
 
-        custom_status_bar_update_clock();
+            clock_text[0] = 0; // Clear clock cache to force clock to update
+            custom_status_bar_update_clock();
+        }
     }
     else if (active_layer == layer)
     {

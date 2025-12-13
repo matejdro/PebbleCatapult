@@ -1,5 +1,6 @@
 #include "window_action_list.h"
 #include "pebble.h"
+#include "window_status.h"
 #include "../connection/bucket_sync.h"
 #include "../utils/bytes.h"
 #include "layers/status_bar.h"
@@ -57,7 +58,7 @@ static void window_load(Window* window)
     Layer* window_layer = window_get_root_layer(window);
     const GRect screen_bounds = layer_get_bounds(window_layer);
     window_action_list->status_bar = custom_status_bar_layer_create(screen_bounds);
-    GRect status_bar_bounds = layer_get_bounds(window_action_list->status_bar->layer);
+    const GRect status_bar_bounds = layer_get_bounds(window_action_list->status_bar->layer);
 
     window_action_list->menu = menu_layer_create(
         GRect(
@@ -114,14 +115,10 @@ void window_action_list_show()
     Window* window = window_create();
     window_set_window_handlers(window, (WindowHandlers)
     {
-        .
-        load = window_load,
-        .
-        unload = window_unload,
-        .
-        appear = window_show,
-        .
-        disappear = window_hide
+        .load = window_load,
+        .unload = window_unload,
+        .appear = window_show,
+        .disappear = window_hide
     }
     )
     ;
@@ -137,6 +134,11 @@ static void load_menu(WindowActionList* window, uint8_t directory_id)
     if (bucket_sync_load_bucket(directory_id, tmp))
     {
         const uint8_t count = tmp[0];
+        if (count == 0 && directory_id == 1)
+        {
+            window_status_show_empty();
+            return;
+        }
         current_menu_data->count = count;
 
         int position = 1;
@@ -152,5 +154,9 @@ static void load_menu(WindowActionList* window, uint8_t directory_id)
             position += strlen(title) + 1;
         }
         menu_layer_reload_data(window->menu);
+    }
+    else if (directory_id == 1)
+    {
+        window_status_show_empty();
     }
 }
