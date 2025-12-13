@@ -88,3 +88,7 @@ Every bucket is stored in the `2001` - `2015` storage keys
 * Tuple: (2 bytes each)
   * Bucket id (uint8)
   * Flags (uint8) - For future use
+
+`1001` - Current version of the data on the watch (uint16)
+`1002` - Protocol version of the last data writing on the watch (uint16)
+  If this changes, the watch is wiped and re-synced to the phone
