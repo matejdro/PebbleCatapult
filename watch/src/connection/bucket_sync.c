@@ -44,8 +44,15 @@ void bucket_sync_init()
         sizeof(bucket_sync_current_version)
     );
 
-    const uint16_t read_data = persist_read_data(FILE_BUCKET_LIST, buckets.data, sizeof(buckets.data));
-    buckets.count = read_data / sizeof(BucketMetadata);
+    const int read_data = persist_read_data(FILE_BUCKET_LIST, buckets.data, sizeof(buckets.data));
+    if (read_data >= 0)
+    {
+        buckets.count = read_data / sizeof(BucketMetadata);
+    }
+    else
+    {
+        buckets.count = 0;
+    }
 
     uint16_t written_protocol_version;
     persist_read_data(
@@ -66,6 +73,8 @@ void bucket_sync_init()
             persist_delete(get_bucket_persist_key(buckets.data[i].id));
         }
         buckets.count = 0;
+        persist_delete(FILE_BUCKET_SYNC_VERSION);
+        persist_delete(FILE_BUCKET_LIST);
     }
 }
 
