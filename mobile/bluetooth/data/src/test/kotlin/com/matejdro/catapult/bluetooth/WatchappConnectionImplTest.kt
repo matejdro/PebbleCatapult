@@ -138,7 +138,7 @@ class WatchappConnectionImplTest {
          ),
          mapOf(
             0u to PebbleDictionaryItem.UInt8(3u),
-            2u to PebbleDictionaryItem.ByteArray(
+            1u to PebbleDictionaryItem.ByteArray(
                byteArrayOf(
                   1, // Status
                   2, 1, 2, // Sync data for bucket 2
@@ -177,7 +177,7 @@ class WatchappConnectionImplTest {
          ),
          mapOf(
             0u to PebbleDictionaryItem.UInt8(3u),
-            2u to PebbleDictionaryItem.ByteArray(
+            1u to PebbleDictionaryItem.ByteArray(
                byteArrayOf(
                   0, // Status
                   2, 1, 2, // Sync data for bucket 2
@@ -186,7 +186,7 @@ class WatchappConnectionImplTest {
          ),
          mapOf(
             0u to PebbleDictionaryItem.UInt8(3u),
-            2u to PebbleDictionaryItem.ByteArray(
+            1u to PebbleDictionaryItem.ByteArray(
                byteArrayOf(
                   1, // Status
                   3, 33 // Sync data for bucket 3
@@ -264,7 +264,7 @@ class WatchappConnectionImplTest {
          ),
          mapOf(
             0u to PebbleDictionaryItem.UInt8(3u),
-            2u to PebbleDictionaryItem.ByteArray(
+            1u to PebbleDictionaryItem.ByteArray(
                byteArrayOf(
                   0, // Status
                   2, 33, // Sync data for bucket 2
@@ -273,7 +273,7 @@ class WatchappConnectionImplTest {
          ),
          mapOf(
             0u to PebbleDictionaryItem.UInt8(3u),
-            2u to PebbleDictionaryItem.ByteArray(
+            1u to PebbleDictionaryItem.ByteArray(
                byteArrayOf(
                   1, // Status
                   3, 33 // Sync data for bucket 3

@@ -7,6 +7,7 @@ import com.matejdro.catapult.bluetooth.util.writeUShort
 import io.rebble.pebblekit2.common.model.PebbleDictionary
 import io.rebble.pebblekit2.common.model.PebbleDictionaryItem
 import okio.Buffer
+import si.inova.kotlinova.core.logging.logcat
 
 /**
  * Write bucketsync data to the [firstPacketBuffer] and, optionally, return additional packets if the first packet
@@ -40,6 +41,7 @@ private fun createAdditionalPackets(
 
       for (updatedBucket in bucketsToUpdate) {
          val sizeToSend = 2 + updatedBucket.data.size
+         logcat("AdditionalPackets") { "Size to send $sizeToSend $dataLeftForBuckets" }
          if (sizeToSend <= dataLeftForBuckets) {
             dataLeftForBuckets -= sizeToSend
             bucketsToSendInThisPacket++
@@ -65,7 +67,7 @@ private fun createAdditionalPackets(
       additionalPackets.add(
          mapOf(
             0u to PebbleDictionaryItem.UInt8(3u),
-            2u to PebbleDictionaryItem.ByteArray(nextPacketBuffer.readByteArray()),
+            1u to PebbleDictionaryItem.ByteArray(nextPacketBuffer.readByteArray()),
          ),
       )
 
