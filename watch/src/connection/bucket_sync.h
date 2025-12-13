@@ -19,6 +19,7 @@ typedef struct __attribute__ ((packed))
 BucketList;
 
 extern uint16_t bucket_sync_current_version;
+extern bool bucket_sync_is_currently_syncing;
 
 void bucket_sync_init();
 
@@ -46,12 +47,14 @@ void bucket_sync_set_bucket_list_change_callback(void (*callback)());
  *
  * Parameter in the callback returns the metadata of the bucket that changed.
  */
-void bucket_sync_set_bucket_data_change_callback(void(*callback)(BucketMetadata));
+void bucket_sync_set_bucket_data_change_callback(void(*callback)(BucketMetadata, void*), void*context);
 
 /**
  * Clear the callback if currently registered callback is the passed one.
  */
-void bucket_sync_clear_bucket_data_change_callback(void(*callback)(BucketMetadata));
+void bucket_sync_clear_bucket_data_change_callback(void(*callback)(BucketMetadata, void*));
 
-void bucket_sync_on_start_received(uint8_t* data, size_t data_size);
-void bucket_sync_on_next_packet_received(uint8_t* data, size_t data_size);
+void bucket_sync_register_syncing_status_changed_callback(void (*callback)());
+
+void bucket_sync_on_start_received(const uint8_t* data, size_t data_size);
+void bucket_sync_on_next_packet_received(const uint8_t* data, size_t data_size);

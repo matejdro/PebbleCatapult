@@ -10,3 +10,4 @@ file(GLOB SOURCES "src/*.c")
 add_executable(watch ${SOURCES})
 
 target_include_directories(watch PUBLIC ~/.pebble-sdk/SDKs/current/sdk-core/pebble/basalt/include)
+target_precompile_headers(watch PUBLIC build/basalt/src/resource_ids.auto.h)

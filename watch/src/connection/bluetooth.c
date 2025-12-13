@@ -3,7 +3,7 @@
 
 uint32_t appmessage_max_size = 0;
 bool is_currently_sending_data = false;
-bool is_phone_connected = false;
+bool is_phone_connected = true;
 bool got_sending_error = false;
 
 const uint16_t PROTOCOL_VERSION = 1;
@@ -42,6 +42,7 @@ void bluetooth_init()
     app_message_open(appmessage_max_size, 200);
 }
 
+// ReSharper disable once CppParameterMayBeConstPtrOrRef
 static void on_received_data(DictionaryIterator* iterator, void* context)
 {
     if (!is_phone_connected)
@@ -59,6 +60,13 @@ static void on_received_data(DictionaryIterator* iterator, void* context)
 
 static void on_sent_data(DictionaryIterator* iterator, void* context)
 {
+    void (*local_sending_now_callback)() = sending_now_callback;
+    is_currently_sending_data = false;
+    if (local_sending_now_callback != NULL)
+    {
+        local_sending_now_callback();
+    }
+
     void (*localCallback)(bool success) = sending_finish_callback;
     if (localCallback != NULL)
     {

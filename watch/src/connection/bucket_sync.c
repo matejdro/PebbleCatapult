@@ -6,12 +6,23 @@ static const uint16_t FILE_BUCKET_LIST = 1000;
 static const uint16_t FILE_BUCKET_SYNC_VERSION = 1001;
 static const uint16_t FILE_PROTOCOL_VERSION = 1002;
 
+typedef struct
+{
+    void (*data_change_callback)(BucketMetadata, void*);
+    void* context;
+} DataChangeCallback;
+
 uint16_t bucket_sync_current_version = 0;
 static BucketList buckets;
 static void (*list_change_callback)() = NULL;
-static void (*data_change_callback)(BucketMetadata) = NULL;
+static DataChangeCallback data_change_callback = {
+    .data_change_callback = NULL,
+    .context = NULL,
+};
+static void (*syncing_status_callback)() = NULL;
 
 static uint16_t bucket_sync_pending_next_version = 0;
+bool bucket_sync_is_currently_syncing = false;
 
 static uint32_t get_bucket_persist_key(uint8_t bucket_id);
 static void delete_inactive_buckets(const uint8_t* data, const uint8_t new_active_buckets);
@@ -74,25 +85,45 @@ void bucket_sync_set_bucket_list_change_callback(void (*callback)())
     list_change_callback = callback;
 }
 
-void bucket_sync_set_bucket_data_change_callback(void (*callback)(BucketMetadata))
+void bucket_sync_set_bucket_data_change_callback(void (*callback)(BucketMetadata, void*), void* context)
 {
-    data_change_callback = callback;
+    data_change_callback = (DataChangeCallback){
+        .data_change_callback = callback,
+        .context = context
+    };
 }
 
-void bucket_sync_clear_bucket_data_change_callback(void (*callback)(BucketMetadata))
+void bucket_sync_clear_bucket_data_change_callback(void (*callback)(BucketMetadata, void*))
 {
-    if (data_change_callback == callback)
+    if (data_change_callback.data_change_callback == callback)
     {
-        data_change_callback = NULL;
+        data_change_callback = (DataChangeCallback){
+            .data_change_callback = NULL,
+            .context = NULL
+        };
     }
 }
 
-void bucket_sync_on_start_received(uint8_t* data, size_t data_size)
+void bucket_sync_on_start_received(const uint8_t* data, size_t data_size)
 {
     const uint8_t sync_status = data[0];
     if (sync_status == 2)
     {
+        bucket_sync_is_currently_syncing = false;
+        void (*local_syncing_callback)() = syncing_status_callback;
+        if (local_syncing_callback != NULL)
+        {
+            local_syncing_callback();
+        }
+
         return;
+    }
+
+    bucket_sync_is_currently_syncing = true;
+    void (*local_syncing_callback)() = syncing_status_callback;
+    if (local_syncing_callback != NULL)
+    {
+        local_syncing_callback();
     }
 
     bucket_sync_pending_next_version = read_uint16_from_byte_array(data, 1);
@@ -122,7 +153,7 @@ void bucket_sync_on_start_received(uint8_t* data, size_t data_size)
     }
 }
 
-void bucket_sync_on_next_packet_received(uint8_t* data, size_t data_size)
+void bucket_sync_on_next_packet_received(const uint8_t* data, size_t data_size)
 {
     const uint8_t sync_status = data[0];
 
@@ -148,14 +179,15 @@ static void save_bucket_data(const uint8_t* data, size_t data_size, uint8_t posi
             return;
         };
 
-        void (*local_bucket_data_change_callback)(BucketMetadata) = data_change_callback;
-        if (local_bucket_data_change_callback != NULL)
+        const DataChangeCallback local_bucket_data_change_callback = data_change_callback;
+        if (local_bucket_data_change_callback.data_change_callback != NULL)
         {
             for (int j = 0; j < buckets.count; j++)
             {
                 if (buckets.data[j].id == id)
                 {
-                    local_bucket_data_change_callback(buckets.data[j]);
+                    local_bucket_data_change_callback.data_change_callback(buckets.data[j],
+                                                                           local_bucket_data_change_callback.context);
                     break;
                 }
             }
@@ -178,6 +210,13 @@ static void complete_sync(void)
         &PROTOCOL_VERSION,
         sizeof(PROTOCOL_VERSION)
     );
+
+    bucket_sync_is_currently_syncing = false;
+    void (*local_syncing_callback)() = syncing_status_callback;
+    if (local_syncing_callback != NULL)
+    {
+        local_syncing_callback();
+    }
 }
 
 static void delete_inactive_buckets(const uint8_t* data, const uint8_t new_active_buckets)
@@ -206,4 +245,9 @@ static void delete_inactive_buckets(const uint8_t* data, const uint8_t new_activ
 static uint32_t get_bucket_persist_key(const uint8_t bucket_id)
 {
     return bucket_id + 2000;
+}
+
+void bucket_sync_register_syncing_status_changed_callback(void (*callback)())
+{
+    syncing_status_callback = callback;
 }

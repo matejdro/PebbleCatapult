@@ -2,6 +2,7 @@
 #include "pebble.h"
 #include "../connection/bucket_sync.h"
 #include "../utils/bytes.h"
+#include "layers/status_bar.h"
 
 typedef struct
 {
@@ -17,15 +18,19 @@ typedef struct
     ActionItem data[13];
 } ActionListBucket;
 
-static MenuLayer* menu;
+typedef struct
+{
+    MenuLayer* menu;
+    ActionListBucket current_menu_data;
+    CustomStatusBarLayer* status_bar;
+} WindowActionList;
 
-static ActionListBucket current_menu_data;
 
-static void load_menu(uint8_t directory_id);
+static void load_menu(WindowActionList* window, uint8_t directory_id);
 
 static uint16_t menu_get_num_rows_callback(MenuLayer* me, uint16_t section_index, void* data)
 {
-    return current_menu_data.count;
+    return ((WindowActionList*)data)->current_menu_data.count;
 }
 
 // ReSharper disable once CppParameterMayBeConstPtrOrRef
@@ -33,27 +38,38 @@ static void menu_draw_row_callback(GContext* ctx, const Layer* cell_layer, MenuI
 {
     const int16_t row = cell_index->row;
 
-    menu_cell_basic_draw(ctx, cell_layer, current_menu_data.data[row].title, NULL, NULL);
+    menu_cell_basic_draw(ctx, cell_layer, ((WindowActionList*)data)->current_menu_data.data[row].title, NULL, NULL);
 }
 
-static void bucket_update_callback(BucketMetadata bucket_metadata)
+static void bucket_update_callback(BucketMetadata bucket_metadata, void* context)
 {
-    load_menu(1);
+    load_menu(context, 1);
 }
 
 
 // ReSharper disable once CppParameterMayBeConstPtrOrRef
 static void window_load(Window* window)
 {
-    current_menu_data.count = 0;
+    WindowActionList* window_action_list = malloc(sizeof(WindowActionList));
+    window_action_list->current_menu_data.count = 0;
+
 
     Layer* window_layer = window_get_root_layer(window);
     const GRect screen_bounds = layer_get_bounds(window_layer);
+    window_action_list->status_bar = custom_status_bar_layer_create(screen_bounds);
+    GRect status_bar_bounds = layer_get_bounds(window_action_list->status_bar->layer);
 
-    menu = menu_layer_create(screen_bounds);
+    window_action_list->menu = menu_layer_create(
+        GRect(
+            0,
+            status_bar_bounds.size.h,
+            screen_bounds.size.w,
+            screen_bounds.size.h - status_bar_bounds.size.h
+        )
+    );
 
-    menu_layer_set_callbacks(menu,
-                             NULL,
+    menu_layer_set_callbacks(window_action_list->menu,
+                             window_action_list,
                              (MenuLayerCallbacks)
     {
         .
@@ -64,18 +80,33 @@ static void window_load(Window* window)
     )
     ;
 
-    layer_add_child(window_layer, menu_layer_get_layer(menu));
+    layer_add_child(window_layer, menu_layer_get_layer(window_action_list->menu));
+    layer_add_child(window_layer, window_action_list->status_bar->layer);
 
-    bucket_sync_set_bucket_list_change_callback(bucket_update_callback);
+    bucket_sync_set_bucket_data_change_callback(bucket_update_callback, window_action_list);
 
-    load_menu(1);
+    load_menu(window_action_list, 1);
+    window_set_user_data(window, window_action_list);
 }
 
 static void window_unload(Window* window)
 {
+    const WindowActionList* window_action_list = window_get_user_data(window);
     bucket_sync_clear_bucket_data_change_callback(bucket_update_callback);
-    menu_layer_destroy(menu);
+    menu_layer_destroy(window_action_list->menu);
     window_destroy(window);
+}
+
+static void window_show(Window* window)
+{
+    const WindowActionList* window_action_list = window_get_user_data(window);
+    custom_status_bar_set_active(window_action_list->status_bar, true);
+}
+
+static void window_hide(Window* window)
+{
+    const WindowActionList* window_action_list = window_get_user_data(window);
+    custom_status_bar_set_active(window_action_list->status_bar, false);
 }
 
 void window_action_list_show()
@@ -87,6 +118,10 @@ void window_action_list_show()
         load = window_load,
         .
         unload = window_unload,
+        .
+        appear = window_show,
+        .
+        disappear = window_hide
     }
     )
     ;
@@ -94,27 +129,28 @@ void window_action_list_show()
     window_stack_push(window, animated);
 }
 
-void load_menu(uint8_t directory_id)
+static void load_menu(WindowActionList* window, uint8_t directory_id)
 {
+    ActionListBucket* current_menu_data = &window->current_menu_data;
     uint8_t tmp[PERSIST_DATA_MAX_LENGTH];
 
     if (bucket_sync_load_bucket(directory_id, tmp))
     {
         const uint8_t count = tmp[0];
-        current_menu_data.count = count;
+        current_menu_data->count = count;
 
         int position = 1;
         for (uint8_t i = 0; i < count; i++)
         {
-            current_menu_data.data[i].id = read_uint16_from_byte_array(tmp, position);
+            current_menu_data->data[i].id = read_uint16_from_byte_array(tmp, position);
             position += 2;
 
-            current_menu_data.data[i].target_directory = tmp[position++];
-            current_menu_data.data[i].flags = tmp[position++];
+            current_menu_data->data[i].target_directory = tmp[position++];
+            current_menu_data->data[i].flags = tmp[position++];
 
-            const char* title = strcpy(current_menu_data.data[i].title, (char*)&tmp[position]);
+            const char* title = strcpy(current_menu_data->data[i].title, (char*)&tmp[position]);
             position += strlen(title) + 1;
         }
-        menu_layer_reload_data(menu);
+        menu_layer_reload_data(window->menu);
     }
 }

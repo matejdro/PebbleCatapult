@@ -21,7 +21,23 @@
       "watchface": false
     },
     "resources": {
-      "media": []
+      "media": [
+        {
+          "type": "bitmap",
+          "name": "INDICATOR_BUSY",
+          "file": "busy.png"
+        },
+        {
+          "type": "bitmap",
+          "name": "INDICATOR_DISCONNECTED",
+          "file": "disconnected.png"
+        },
+        {
+          "type": "bitmap",
+          "name": "INDICATOR_ERROR",
+          "file": "error.png"
+        }
+      ]
     },
     "companionApp": {
       "android": {
