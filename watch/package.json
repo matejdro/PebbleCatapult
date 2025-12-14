@@ -24,6 +24,12 @@
       "media": [
         {
           "type": "bitmap",
+          "name": "MENU_ICON",
+          "file": "launcher_icon.png",
+          "menuIcon": true
+        },
+        {
+          "type": "bitmap",
           "name": "INDICATOR_BUSY",
           "file": "busy.png"
         },
