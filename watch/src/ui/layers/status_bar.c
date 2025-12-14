@@ -1,11 +1,11 @@
 #include "status_bar.h"
 #include "pebble.h"
-#include "../../../build/basalt/src/resource_ids.auto.h"
 #include "../../connection/bluetooth.h"
 #include "../../connection/bucket_sync.h"
 
 static const int STATUS_BAR_HEIGHT = 16;
-static const int CLOCK_WIDTH = 50;
+#define CLOCK_WIDTH 48
+static const int STATUS_BAR_RIGHT_WIDTH = CLOCK_WIDTH + 1 + 14 + 1;
 
 static CustomStatusBarLayer* active_layer;
 static bool listeners_active = false;
@@ -15,14 +15,15 @@ static GBitmap* indicator_disconnected = NULL;
 static GBitmap* indicator_error = NULL;
 
 static void custom_status_bar_update_clock();
-static void custom_status_bar_paint(Layer * layer, GContext * ctx);
+static void custom_status_bar_paint(Layer* layer, GContext* ctx);
 static void minute_tick(void);
 static void update_data();
 
 CustomStatusBarLayer* custom_status_bar_layer_create(const GRect window_frame)
 {
     Layer* layer = layer_create(GRect(0, 0, window_frame.size.w, STATUS_BAR_HEIGHT));
-    TextLayer* clock_layer = text_layer_create(GRect(window_frame.size.w - CLOCK_WIDTH - 3, 0, CLOCK_WIDTH, STATUS_BAR_HEIGHT));
+    TextLayer* clock_layer = text_layer_create(
+        GRect(window_frame.size.w - CLOCK_WIDTH - 1, 0, CLOCK_WIDTH - 1, STATUS_BAR_HEIGHT));
     text_layer_set_background_color(clock_layer, GColorClear);
     text_layer_set_text_color(clock_layer, GColorWhite);
     text_layer_set_font(clock_layer, fonts_get_system_font(FONT_KEY_GOTHIC_14));
@@ -53,17 +54,20 @@ static void custom_status_bar_paint(Layer* layer, GContext* ctx)
     graphics_context_set_fill_color(ctx, background_color);
     graphics_fill_rect(ctx, layer_get_frame(layer), 0, GCornerNone);
 
+    const GRect whole_status_size = layer_get_bounds(layer);
+
+    const uint16_t icon_x = whole_status_size.size.w - CLOCK_WIDTH - 1 - 14;
     if (!is_phone_connected)
     {
-        graphics_draw_bitmap_in_rect(ctx, indicator_disconnected, GRect(80, 3, 9, 10));
+        graphics_draw_bitmap_in_rect(ctx, indicator_disconnected, GRect(icon_x, 1, 14, 13));
     }
     else if (got_sending_error)
     {
-        graphics_draw_bitmap_in_rect(ctx, indicator_error, GRect(80, 3, 9, 10));
+        graphics_draw_bitmap_in_rect(ctx, indicator_error, GRect(icon_x + 3, 3, 9, 10));
     }
     else if (is_currently_sending_data || bucket_sync_is_currently_syncing)
     {
-        graphics_draw_bitmap_in_rect(ctx, indicator_busy, GRect(80, 3, 9, 10));
+        graphics_draw_bitmap_in_rect(ctx, indicator_busy, GRect(icon_x + 3, 3, 9, 10));
     }
 }
 
@@ -151,4 +155,20 @@ static void update_data()
     }
 
     layer_mark_dirty(local_active_layer->layer);
+}
+
+GRect custom_status_bar_get_left_space(CustomStatusBarLayer* layer)
+{
+    const GRect whole_status_size = layer_get_bounds(layer->layer);
+
+    return (GRect){
+        .origin = {
+            .x = 0,
+            .y = 0
+        },
+        .size = {
+            .w = whole_status_size.size.w - STATUS_BAR_RIGHT_WIDTH,
+            .h = whole_status_size.size.h
+        }
+    };
 }

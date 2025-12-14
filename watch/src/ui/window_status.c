@@ -40,7 +40,9 @@ static void window_load(Window* window)
     text_layer_set_font(main_text, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
     text_layer_set_text(main_text, status_text);
 
-    app_name_text = text_layer_create(layer_get_bounds(status_bar->layer));
+    GRect app_name_bounds = custom_status_bar_get_left_space(status_bar);
+
+    app_name_text = text_layer_create(app_name_bounds);
     text_layer_set_text_alignment(app_name_text, GTextAlignmentLeft);
     text_layer_set_text_color(app_name_text, GColorWhite);
     text_layer_set_background_color(app_name_text, GColorClear);
