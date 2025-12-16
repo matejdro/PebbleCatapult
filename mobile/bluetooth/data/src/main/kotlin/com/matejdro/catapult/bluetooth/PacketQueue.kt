@@ -99,7 +99,6 @@ class PacketQueue(
                true
             }
 
-            TransmissionResult.FailedDifferentAppOpen,
             TransmissionResult.FailedNoPermissions,
             is TransmissionResult.Unknown,
             null,
@@ -108,6 +107,11 @@ class PacketQueue(
                packet.sentNofification.completeExceptionally(
                   UnrecoverableWatchTransferException(watchResult?.toString())
                )
+               false
+            }
+
+            TransmissionResult.FailedDifferentAppOpen -> {
+               // Do not do anything. This coroutine will be cancelled any second now due to watchapp closing.
                false
             }
          }
