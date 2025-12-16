@@ -21,7 +21,9 @@ class TaskerTaskStarterImpl(private val context: Context) : TaskerTaskStarter {
          putExtra("task_name", task)
       }
 
-      context.sendBroadcast(intent)
+      // Regular broadcasts are sometimes delayed on Android 14+. Use ordered ones instead.
+      // https://stackoverflow.com/questions/77842817/slow-intent-broadcast-delivery-on-android-14
+      context.sendOrderedBroadcast(intent, null)
 
       return true
    }
