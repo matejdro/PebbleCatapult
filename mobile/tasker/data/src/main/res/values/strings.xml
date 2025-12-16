@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="channel_errors">Errors</string>
+    <string name="notification_title_error">Error</string>
+    <string name="tasker_not_installed">Tasker not installed</string>
+    <string name="tasker_is_disabled">Tasker is disabled</string>
+    <string name="tasker_access_blocked">Tasker\'s access is blocked. Try closing Tasker with the back button.</string>
+</resources>
