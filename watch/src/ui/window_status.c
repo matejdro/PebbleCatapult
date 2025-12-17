@@ -19,6 +19,7 @@ static void on_bucket_data_update(BucketMetadata bucket_metadata, void* context)
     }
 }
 
+// ReSharper disable once CppParameterMayBeConstPtrOrRef
 static void window_load(Window* window)
 {
     Layer* window_layer = window_get_root_layer(window);
