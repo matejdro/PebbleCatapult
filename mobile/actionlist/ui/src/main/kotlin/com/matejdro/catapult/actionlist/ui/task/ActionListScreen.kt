@@ -96,7 +96,7 @@ class ActionListScreen(
          viewModel.load(key.id)
       }
       var addDialog by rememberSaveable { mutableStateOf<AddDialogAction?>(null) }
-      var editDialog by rememberSaveable { mutableStateOf<CatapultAction?>(null) }
+      var editDialog by remember { mutableStateOf<CatapultAction?>(null) }
       var showDirectoryPicker by remember { mutableStateOf(false) }
 
       val taskerSelectResult = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
