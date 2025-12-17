@@ -6,6 +6,7 @@ import com.matejdro.catapult.actionlist.test.FakeCatapultActionRepository
 import com.matejdro.catapult.tasker.FakeTaskerTaskStarter
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.rebble.pebblekit2.common.model.PebbleDictionaryItem
 import io.rebble.pebblekit2.common.model.ReceiveResult
@@ -292,24 +293,6 @@ class WatchappConnectionImplTest {
    }
 
    @Test
-   fun `Disallow watch initing twice`() = scope.runTest {
-      connection.onPacketReceived(
-         mapOf(
-            0u to PebbleDictionaryItem.UInt32(255u),
-         )
-      )
-
-      val result = connection.onPacketReceived(
-         mapOf(
-            0u to PebbleDictionaryItem.UInt32(255u),
-         )
-      )
-      runCurrent()
-
-      result shouldBe ReceiveResult.Nack
-   }
-
-   @Test
    fun `Trigger tasker task when the watch requests it`() = scope.runTest {
       taskerTaskStarter.reportStartSuccessful = true
       actionRepository.insert(CatapultAction("Action A", 1, 1, "Tasker A"))
@@ -373,6 +356,21 @@ class WatchappConnectionImplTest {
       runCurrent()
 
       result shouldBe ReceiveResult.Nack
+   }
+
+   @Test
+   fun `Do not duplicate subsequent sync packets if watch is inited twice`() = scope.runTest {
+      receiveStandardHelloPacket(bufferSize = 52u)
+      receiveStandardHelloPacket(bufferSize = 52u)
+      runCurrent()
+
+      sender.sentPackets.clear()
+
+      bucketSyncRepository.updateBucket(1u, byteArrayOf(1))
+      bucketSyncRepository.updateBucket(2u, byteArrayOf(2))
+      delay(1.seconds)
+
+      sender.sentData.shouldHaveSize(1)
    }
 
    private suspend fun receiveStandardHelloPacket(version: UInt = 0u, bufferSize: UInt = 1000u): ReceiveResult =

@@ -17,6 +17,7 @@ import io.rebble.pebblekit2.common.model.PebbleDictionaryItem
 import io.rebble.pebblekit2.common.model.ReceiveResult
 import io.rebble.pebblekit2.common.model.WatchIdentifier
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -37,6 +38,7 @@ class WatchappConnectionImpl(
 ) : WatchAppConnection {
    private val packetQueue = PacketQueue(pebbleSender, watch, WATCHAPP_UUID)
    private var watchBufferSize: Int = 0
+   private var bucketSyncJob: Job? = null
 
    init {
       coroutineScope.launch {
@@ -65,11 +67,6 @@ class WatchappConnectionImpl(
    }
 
    private suspend fun processWatchWelcomePacket(data: PebbleDictionary): ReceiveResult {
-      if (watchBufferSize != 0) {
-         logcat { "Watch already sent init. Nacking..." }
-         return ReceiveResult.Nack
-      }
-
       val watchProtocolVersion = data.requireUint(1u)
       if (watchProtocolVersion != PROTOCOL_VERSION.toUInt()) {
          logcat { "Mismatch protocol version $watchProtocolVersion" }
@@ -118,56 +115,59 @@ class WatchappConnectionImpl(
       }
    }
 
-   private fun startBucketsyncLoop(initialWatchVersion: UShort) = coroutineScope.launch {
-      val bucketsyncBuffer = Buffer()
-      val initialUpdate = bucketSyncRepository.checkForNextUpdate(initialWatchVersion)
-      val watchVersion: UShort
-      if (initialUpdate == null) {
-         logcat { "Watch up to date" }
-         bucketsyncBuffer.writeUByte(SYNC_STATUS_UP_TO_DATE)
+   private fun startBucketsyncLoop(initialWatchVersion: UShort) {
+      bucketSyncJob?.cancel()
+      bucketSyncJob = coroutineScope.launch {
+         val bucketsyncBuffer = Buffer()
+         val initialUpdate = bucketSyncRepository.checkForNextUpdate(initialWatchVersion)
+         val watchVersion: UShort
+         if (initialUpdate == null) {
+            logcat { "Watch up to date" }
+            bucketsyncBuffer.writeUByte(SYNC_STATUS_UP_TO_DATE)
 
-         packetQueue.sendPacket(
-            mapOf(
-               0u to PebbleDictionaryItem.UInt8(1u),
-               1u to PebbleDictionaryItem.UInt16(PROTOCOL_VERSION),
-               2u to PebbleDictionaryItem.ByteArray(bucketsyncBuffer.readByteArray()),
-            ),
-            PRIORITY_SYNC
-         )
-         watchVersion = initialWatchVersion
-      } else {
-         logcat { "Sending bucketsync update: ${initialUpdate.toVersion} | ${initialUpdate.bucketsToUpdate.map { it.id }}" }
-         val totalHelloSizeUntilBuckets = SIZE_OF_STATIC_PART_OF_HELLO_PACKET + 2 * initialUpdate.activeBuckets.size
-
-         val extraPackets: List<PebbleDictionary> = createBucketsyncPackets(
-            initialUpdate,
-            bucketsyncBuffer,
-            watchBufferSize - totalHelloSizeUntilBuckets,
-            watchBufferSize
-         )
-
-         logcat { "Extra packets: ${extraPackets.size}" }
-
-         packetQueue.sendPacket(
-            mapOf(
-               0u to PebbleDictionaryItem.UInt8(1u),
-               1u to PebbleDictionaryItem.UInt16(PROTOCOL_VERSION),
-               2u to PebbleDictionaryItem.ByteArray(bucketsyncBuffer.readByteArray()),
-            ),
-            PRIORITY_SYNC
-         )
-
-         for (packet in extraPackets) {
             packetQueue.sendPacket(
-               packet,
+               mapOf(
+                  0u to PebbleDictionaryItem.UInt8(1u),
+                  1u to PebbleDictionaryItem.UInt16(PROTOCOL_VERSION),
+                  2u to PebbleDictionaryItem.ByteArray(bucketsyncBuffer.readByteArray()),
+               ),
                PRIORITY_SYNC
             )
+            watchVersion = initialWatchVersion
+         } else {
+            logcat { "Sending bucketsync update: ${initialUpdate.toVersion} | ${initialUpdate.bucketsToUpdate.map { it.id }}" }
+            val totalHelloSizeUntilBuckets = SIZE_OF_STATIC_PART_OF_HELLO_PACKET + 2 * initialUpdate.activeBuckets.size
+
+            val extraPackets: List<PebbleDictionary> = createBucketsyncPackets(
+               initialUpdate,
+               bucketsyncBuffer,
+               watchBufferSize - totalHelloSizeUntilBuckets,
+               watchBufferSize
+            )
+
+            logcat { "Extra packets: ${extraPackets.size}" }
+
+            packetQueue.sendPacket(
+               mapOf(
+                  0u to PebbleDictionaryItem.UInt8(1u),
+                  1u to PebbleDictionaryItem.UInt16(PROTOCOL_VERSION),
+                  2u to PebbleDictionaryItem.ByteArray(bucketsyncBuffer.readByteArray()),
+               ),
+               PRIORITY_SYNC
+            )
+
+            for (packet in extraPackets) {
+               packetQueue.sendPacket(
+                  packet,
+                  PRIORITY_SYNC
+               )
+            }
+
+            watchVersion = initialUpdate.toVersion
          }
 
-         watchVersion = initialUpdate.toVersion
+         observeForFutureSyncs(watchVersion, bucketsyncBuffer)
       }
-
-      observeForFutureSyncs(watchVersion, bucketsyncBuffer)
    }
 
    private suspend fun observeForFutureSyncs(

@@ -8,6 +8,8 @@ bool got_sending_error = false;
 
 const uint16_t PROTOCOL_VERSION = 1;
 
+static AppTimer* reconnect_init_timer = NULL;
+
 static void (*sending_finish_callback)(bool success) = NULL;
 
 static void (*phone_connected_change_callback)() = NULL;
@@ -149,8 +151,31 @@ static void on_sending_failed(DictionaryIterator* iterator, const AppMessageResu
     }
 }
 
-static void on_connection_changed(bool status)
+static void reconnect_init_callback(void* context)
 {
+    reconnect_init_timer = NULL;
+
+    // When watch reconnects, send hello again to get synced data while we were offline
+    bluetooth_register_sending_finish(NULL);
+    send_watch_welcome();
+}
+
+static void on_connection_changed(const bool status)
+{
+    if (status && !is_phone_connected)
+    {
+        // Sending packets immediately after connection changes seem to not work (packets get stuck in a timeout)
+        // Instead, we wait a bit, before sending.
+        app_timer_register(1000, reconnect_init_callback, NULL);
+    }
+    else if (!status)
+    {
+        if (reconnect_init_timer != NULL)
+        {
+            app_timer_cancel(reconnect_init_timer);
+        }
+    }
+
     is_phone_connected = status;
     void (*local_phone_connected)() = phone_connected_change_callback;
     if (local_phone_connected != NULL)
