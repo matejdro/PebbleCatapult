@@ -70,7 +70,13 @@ jobs:
         if: "${{ env.BUILD_MOBILE == 'true' }}"
       - run: | 
           cp version.txt watch/version.txt
-          cat watch/package.json | jq ".version = \"$VERSION\"" > tmp.json
+          
+          # Pebble has limitations on versioning. It cannot have patch versions and its major and minor versions are limited to
+          # 255. Instead, just generate a unique version from the build number
+          let WATCH_MAJOR=$BUILD_NUMBER/256
+          let WATCH_MINOR=$BUILD_NUMBER%256
+          
+          cat watch/package.json | jq ".version = \"$WATCH_MAJOR.$WATCH_MINOR\"" > tmp.json
           cp tmp.json watch/package.json
         if: "${{ env.BUILD_WATCH == 'true' }}"
       - run: "echo \"# Release version ${{ env.VERSION }}\" > $GITHUB_STEP_SUMMARY"
