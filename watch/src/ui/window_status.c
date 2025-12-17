@@ -84,18 +84,13 @@ static void window_status_show(const char* text, bool switch_on_load)
 
     Window* window = window_create();
     window_set_window_handlers(window, (WindowHandlers)
-    {
-        .
-        load = window_load,
-        .
-        unload = window_unload,
-        .
-        appear = window_show,
-        .
-        disappear = window_hide
-    }
-    )
-    ;
+                               {
+                                   .load = window_load,
+                                   .unload = window_unload,
+                                   .appear = window_show,
+                                   .disappear = window_hide
+                               }
+    );
     window_stack_pop_all(false);
     window_stack_push(window, false);
 }
