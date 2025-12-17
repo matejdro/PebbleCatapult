@@ -20,4 +20,18 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
+# Disable obfuscation. App is open source anyway.
+-dontobfuscate
+-dontoptimize
+-keepattributes SourceFile,LineNumberTable
+
 -dontwarn javax.inject.*
+
+# Tinylog
+-keepnames interface org.tinylog.**
+-keepnames class * implements org.tinylog.**
+-keepclassmembers class * implements org.tinylog.** { <init>(...); }
+-dontwarn dalvik.system.VMStack
+-dontwarn java.lang.**
+-dontwarn javax.naming.**
+-dontwarn sun.reflect.Reflection
