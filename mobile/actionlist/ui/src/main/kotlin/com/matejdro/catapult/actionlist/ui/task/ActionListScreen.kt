@@ -63,6 +63,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.airbnb.android.showkase.annotation.ShowkaseComposable
 import com.matejdro.catapult.actionlist.api.CatapultAction
 import com.matejdro.catapult.actionlist.api.CatapultDirectory
 import com.matejdro.catapult.actionlist.ui.R
@@ -465,6 +466,7 @@ private const val ROTATION_QUARTER_CIRCLE_DEG = 45f
 
 @FullScreenPreviews
 @Composable
+@ShowkaseComposable(group = "test")
 internal fun TaskListScreenContentPreview() {
    PreviewTheme {
       TaskListScreenContent(
@@ -486,6 +488,7 @@ internal fun TaskListScreenContentPreview() {
 
 @Preview
 @Composable
+@ShowkaseComposable(group = "test")
 internal fun TaskListScreenAddPreview() {
    PreviewTheme {
       TaskListScreenContent(
