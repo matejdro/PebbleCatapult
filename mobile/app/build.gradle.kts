@@ -104,6 +104,13 @@ android {
          signingConfig = signingConfigs.getByName("release")
       }
    }
+
+   applicationVariants.all {
+      outputs.all {
+         val output = this as com.android.build.gradle.internal.api.ApkVariantOutputImpl
+         output.outputFileName = "catapult-mobile.apk"
+      }
+   }
 }
 
 androidComponents {
