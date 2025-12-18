@@ -2,7 +2,8 @@ name: develop-build
 run-name: Develop build of the app
 on:
   schedule:
-    - cron: "42 18 * * *"
+    - cron: "33 20 * * *"
+  workflow_dispatch:
 env:
   BUILD_NUMBER: ${{ github.run_number }}
 jobs:
@@ -24,21 +25,69 @@ jobs:
         shell: bash
         run: |
           echo "CURRENT_BRANCH=$(git branch --show)" >> $GITHUB_ENV
-      - name: Derive appropriate SHAs for base and head for `nx affected` commands
-        uses: nrwl/nx-set-shas@177b48373c6dc583ce0d9257ffb484bdd232fedf
-        with:
-          main-branch-name: "${{ env.CURRENT_BRANCH }}"
-      - name: Collect version prerequisites
+      - name: Collect old version
         shell: bash
         run: |
-          echo "OLD_VERSION=$(cat version.txt)" >> $GITHUB_ENV
-          echo "OLD_MOBILE_VERSION=$(cat mobile/version.txt)" >> $GITHUB_ENV
+          OLD_VERSION=$(cat version.txt)
+          echo "OLD_VERSION=$OLD_VERSION" >> $GITHUB_ENV
+          echo "OLD_VERSION_REF=$(git rev-list -n 1 $OLD_VERSION)" >> $GITHUB_ENV
+      - name: Check if there were any new fix or feature commits
+        id: version-check
+        uses: inovait/actions-common/bump-version@v11
+        with:
+          version: '0.0.0'
+          from: '${{ env.OLD_VERSION_REF }}'
+          to: HEAD
+          increment: "auto"
+      - run: "echo \"No feature or fix commits. Skipping build...\""
+        if: "${{ steps.version-check.outputs.version == '0.0.0' }}"
+      - uses: andymckay/cancel-action@0.3
+        if: "${{ steps.version-check.outputs.version == '0.0.0' }}"
+      - name: "Wait for cancel to stick"
+        run: "sleep 99999"
+        if: "${{ steps.version-check.outputs.version == '0.0.0' }}"
+      - name: Determine new version prerequisites
+        shell: bash
+        run: |
+          set -x
+          # Due to limitations of the PebbleOS versioning, Pebble apps cannot use semantic versioning, they can only have
+          # two version numbers
+          # Because of this, we use a modified versioning system: MAJOR.MINORPATCH, where MINOR is of MINOR * 10 + PATCH.
+          # Since PebbleOS also limits every number to 255, we also increment MAJOR whenever MINORPATCH goes over 100 
+          # (and subtract it by 100) 
+          
+          VERSION_MAJOR=${OLD_VERSION%%.*}
+          VERSION_MINORPATCH=${OLD_VERSION##*.}
+          
+          VERSION_CHANGE_AFTER_FIRST_DOT="${VERSION_BUMP#*.}"
+          if [[ "${VERSION_BUMP%%.*}" == "1" ]] then
+            # Major version change
+            VERSION_MAJOR=$(($VERSION_MAJOR+1))
+          elif [[ "${VERSION_CHANGE_AFTER_FIRST_DOT%%.*}" == "1" ]] then
+            # Minor version change
+            VERSION_MINORPATCH=$(($VERSION_MINORPATCH+10))
+          else
+            # Minor version change
+            VERSION_MINORPATCH=$(($VERSION_MINORPATCH+1))          
+            # Patch version change
+          fi
+          
+          if [[ $VERSION_MINORPATCH -ge 100 ]] then
+            VERSION_MAJOR=$(($VERSION_MAJOR+1))
+            VERSION_MINORPATCH=$((VERSION_MINORPATCH-100))
+          fi
+          
+          VERSION="$VERSION_MAJOR.$VERSION_MINORPATCH"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "Releasing $VERSION"
+          
           OLD_MOBILE_VERSION=$(cat mobile/version.txt)
           echo "OLD_MOBILE_VERSION=$OLD_MOBILE_VERSION" >> $GITHUB_ENV
           OLD_WATCH_VERSION=$(cat watch/version.txt)
           echo "OLD_WATCH_VERSION=$OLD_WATCH_VERSION" >> $GITHUB_ENV
           PREV_MOBILE_VERSION_REF=$(git rev-list -n 1 $OLD_MOBILE_VERSION)
           PREV_WATCH_VERSION_REF=$(git rev-list -n 1 $OLD_WATCH_VERSION)
+          
           if [[ $(git log --oneline "$PREV_MOBILE_VERSION_REF..HEAD" -p mobile | wc -l) == "0" ]] then
             echo "BUILD_MOBILE=false" >> $GITHUB_ENV
           else
@@ -49,35 +98,19 @@ jobs:
           else
             echo "BUILD_WATCH=true" >> $GITHUB_ENV
           fi
-      - name: Check if there were any new fix or feature commits
-        id: version-check
-        uses: inovait/actions-common/bump-version@v11
-        with:
-          version: '${{ env.OLD_VERSION }}'
-          from: '${{ env.NX_BASE }}'
-          to: '${{ env.NX_HEAD }}'
-          increment: "auto"
-      - run: "echo \"No feature or fix commits. Skipping build...\""
-        if: "${{ steps.version-check.outputs.version == env.OLD_VERSION }}"
-      - uses: andymckay/cancel-action@0.3
-        if: "${{ steps.version-check.outputs.version == env.OLD_VERSION }}"
-      - name: "Wait for cancel to stick"
-        run: "sleep 99999"
-        if: "${{ steps.version-check.outputs.version == env.OLD_VERSION }}"
-      - run: "./config/bump_version.sh ${{ steps.version-check.outputs.version }}"
-      - run: "v=$(cat version.txt);echo \"VERSION=$v\" > $GITHUB_ENV"
+          
+          echo "$VERSION" > version.txt
+        env:
+          VERSION_BUMP: "${{ steps.version-check.outputs.version }}"
       - run: "cp version.txt mobile/version.txt"
         if: "${{ env.BUILD_MOBILE == 'true' }}"
-      - run: | 
-          cp version.txt watch/version.txt
-          
-          # Pebble has limitations on versioning. It cannot have patch versions and its major and minor versions are limited to
-          # 255. Instead, just generate a unique version from the build number
-          let WATCH_MAJOR=$BUILD_NUMBER/256
-          let WATCH_MINOR=$BUILD_NUMBER%256
-          
-          cat watch/package.json | jq ".version = \"$WATCH_MAJOR.$WATCH_MINOR\"" > tmp.json
+      - name: "Set watchapp version"
+        shell: bash
+        run: |
+          echo "$VERSION" > watch/version.txt
+          cat watch/package.json | jq ".version = \"$VERSION\"" > tmp.json
           cp tmp.json watch/package.json
+          cat tmp.json
         if: "${{ env.BUILD_WATCH == 'true' }}"
       - run: "echo \"# Release version ${{ env.VERSION }}\" > $GITHUB_STEP_SUMMARY"
 
@@ -116,7 +149,7 @@ jobs:
           daemon: false
           debug: false
           concurrent: true
-          # TODO: read-only: ${{ github.ref != 'refs/heads/master' }}
+          read-only: ${{ github.ref != 'refs/heads/master' }}
         env:
           RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
           RELEASE_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
@@ -186,8 +219,8 @@ jobs:
         with:
           git_commit_url_prefix: 'https://github.com/matejdro/PebbleCatapult/commit/'
           jira_url: 'https://github.com/matejdro/PebbleCatapult'
-          from: '${{ env.NX_BASE }}'
-          to: '${{ env.NX_HEAD }}'
+          from: '${{ env.OLD_VERSION_REF }}'
+          to: HEAD
       - name: Add counterpart link to the changelog
         run: |
           CHANGELOG_EXTRA=""
@@ -197,7 +230,7 @@ jobs:
           if [[ "$BUILD_MOBILE" == "false" ]] then
             CHANGELOG_EXTRA="$CHANGELOG_EXTRA\n\nFor the phone app, download the [$OLD_MOBILE_VERSION](https://github.com/matejdro/PebbleCatapult/releases/tag/$OLD_MOBILE_VERSION) version."
           fi
-          
+
           echo "CHANGELOG_EXTRA<<DELIMITERXXXX" >> $GITHUB_ENV
           echo -e $CHANGELOG_EXTRA >> $GITHUB_ENV
           echo "DELIMITERXXXX" >> $GITHUB_ENV
