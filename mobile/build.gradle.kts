@@ -99,11 +99,7 @@ dependencyAnalysis {
       }
 
       bundle("PebbleKit2") {
-         includeGroup("io.rebble.pebblekit2")
-         includeDependency("PebbleKitAndroid2:common-api")
-         includeDependency("PebbleKitAndroid2:common")
-         includeDependency("PebbleKitAndroid2:client-api")
-         includeDependency("PebbleKitAndroid2:client")
+         includeGroup("com.github.pebble-dev.PebbleKitAndroid2")
       }
    }
 }
