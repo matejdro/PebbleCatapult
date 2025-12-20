@@ -6,18 +6,34 @@ import com.matejdro.catapult.actionlist.sqldelight.generated.DbDirectory
 import com.matejdro.catapult.actionlist.sqldelight.generated.SelectAll
 import com.matejdro.catapult.actionlist.sqldelight.generated.SelectSingle
 
-fun DbDirectory.toDirectory(): CatapultDirectory {
+internal fun DbDirectory.toDirectory(): CatapultDirectory {
    return CatapultDirectory(id.toInt(), title)
 }
 
-fun CatapultDirectory.toDb(): DbDirectory {
+internal fun CatapultDirectory.toDb(): DbDirectory {
    return DbDirectory(id.toLong(), title)
 }
 
-fun SelectAll.toCatapultAction(): CatapultAction {
-   return CatapultAction(title, directoryId.toInt(), id.toInt(), taskerTaskName, targetDirectoryId?.toInt(), targetDirectoryName)
+internal fun SelectAll.toCatapultAction(): CatapultAction {
+   return CatapultAction(
+      title,
+      directoryId.toInt(),
+      id.toInt(),
+      taskerTaskName,
+      targetDirectoryId?.toInt(),
+      targetDirectoryName,
+      enabled == 1L
+   )
 }
 
-fun SelectSingle.toCatapultAction(): CatapultAction {
-   return CatapultAction(title, directoryId.toInt(), id.toInt(), taskerTaskName, targetDirectoryId?.toInt(), targetDirectoryName)
+internal fun SelectSingle.toCatapultAction(): CatapultAction {
+   return CatapultAction(
+      title,
+      directoryId.toInt(),
+      id.toInt(),
+      taskerTaskName,
+      targetDirectoryId?.toInt(),
+      targetDirectoryName,
+      enabled == 1L
+   )
 }

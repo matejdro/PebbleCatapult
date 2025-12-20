@@ -5,11 +5,13 @@ import com.matejdro.catapult.actionlist.api.CatapultDirectory
 import com.matejdro.catapult.actionlist.test.FakeCatapultActionRepository
 import com.matejdro.catapult.actionlist.test.FakeDirectoryListRepository
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
+import si.inova.kotlinova.core.outcome.Outcome
 import si.inova.kotlinova.core.test.outcomes.shouldBeSuccessWithData
 import si.inova.kotlinova.core.test.outcomes.testCoroutineResourceManager
 
@@ -34,7 +36,8 @@ class ActionListViewModelTest {
          listOf(
             CatapultAction("Action A", 1, taskerTaskName = "Task A", id = 1),
             CatapultAction("Action B", 1, taskerTaskName = "Task B", id = 2),
-         )
+         ),
+         false
       )
    }
 
@@ -58,7 +61,8 @@ class ActionListViewModelTest {
          listOf(
             CatapultAction("Action 2A", 2, taskerTaskName = "Task A", id = 3),
             CatapultAction("Action 2B", 2, taskerTaskName = "Task B", id = 4),
-         )
+         ),
+         false
       )
    }
 
@@ -107,12 +111,30 @@ class ActionListViewModelTest {
       actionsRepo.insert(CatapultAction("Action B", 1, taskerTaskName = "Task B", id = 2))
 
       vm.load(1)
+      runCurrent()
       vm.editActionTitle(2, "Action C")
       runCurrent()
 
       actionsRepo.getAll(1).first() shouldBeSuccessWithData listOf(
          CatapultAction("Action A", 1, taskerTaskName = "Task A", id = 1),
          CatapultAction("Action C", 1, taskerTaskName = "Task B", id = 2)
+      )
+   }
+
+   @Test
+   fun `Allow editing the enabled status of the existing action`() = scope.runTest {
+      initDirectories()
+      actionsRepo.insert(CatapultAction("Action A", 1, taskerTaskName = "Task A", id = 1))
+      actionsRepo.insert(CatapultAction("Action B", 1, taskerTaskName = "Task B", id = 2))
+
+      vm.load(1)
+      runCurrent()
+      vm.editActionEnabled(2, false)
+      runCurrent()
+
+      actionsRepo.getAll(1).first() shouldBeSuccessWithData listOf(
+         CatapultAction("Action A", 1, taskerTaskName = "Task A", id = 1),
+         CatapultAction("Action B", 1, taskerTaskName = "Task B", id = 2, enabled = false)
       )
    }
 
@@ -145,6 +167,21 @@ class ActionListViewModelTest {
          CatapultAction("Action B", 1, taskerTaskName = "Task B", id = 2),
          CatapultAction("Action A", 1, taskerTaskName = "Task A", id = 1),
       )
+   }
+
+   @Test
+   fun `Warn when there are more than 13 actions`() = scope.runTest {
+      initDirectories()
+      repeat(14) {
+         actionsRepo.insert(CatapultAction("Action $it", 1, taskerTaskName = "Task A", id = it))
+      }
+
+      vm.load(1)
+      runCurrent()
+
+      vm.uiState.value.shouldBeInstanceOf<Outcome.Success<ActionListState>>()
+         .data
+         .showActionsWarning shouldBe true
    }
 
    private suspend fun initDirectories() {

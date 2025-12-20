@@ -14,9 +14,15 @@ class FakeCatapultActionRepository : CatapultActionRepository {
 
    private val actions = MutableStateFlow<List<CatapultAction>>(emptyList())
 
-   override fun getAll(directory: Int, limit: Int): Flow<Outcome<List<CatapultAction>>> {
+   override fun getAll(directory: Int, limit: Int, onlyEnabled: Boolean): Flow<Outcome<List<CatapultAction>>> {
       return actions
-         .map { list -> Outcome.Success(list.filter { it.directoryId == directory }.take(limit)) }
+         .map { list ->
+            Outcome.Success(
+               list.filter {
+                  it.directoryId == directory && (!onlyEnabled || it.enabled)
+               }.take(limit)
+            )
+         }
          .onStart { numCollections++ }
    }
 
@@ -30,8 +36,8 @@ class FakeCatapultActionRepository : CatapultActionRepository {
       actions.update { it + action }
    }
 
-   override suspend fun updateTitle(id: Int, title: String) {
-      actions.update { list -> list.map { if (it.id == id) it.copy(title = title) else it } }
+   override suspend fun update(id: Int, title: String, enabled: Boolean) {
+      actions.update { list -> list.map { if (it.id == id) it.copy(title = title, enabled = enabled) else it } }
    }
 
    override suspend fun reorder(id: Int, toIndex: Int) {

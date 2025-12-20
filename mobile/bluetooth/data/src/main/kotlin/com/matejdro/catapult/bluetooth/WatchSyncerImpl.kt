@@ -32,7 +32,7 @@ class WatchSyncerImpl(
    }
 
    override suspend fun syncDirectory(id: Int) = withDefault {
-      val items = actionRepository.value.getAll(id, limit = MAX_ACTIONS_TO_SYNC).firstData()
+      val items = actionRepository.value.getAll(id, limit = MAX_ACTIONS_TO_SYNC, onlyEnabled = true).firstData()
       logcat { "Syncing directory $id, ${items.size} items" }
 
       val buffer = Buffer()

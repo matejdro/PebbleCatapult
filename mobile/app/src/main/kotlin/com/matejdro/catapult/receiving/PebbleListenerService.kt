@@ -1,6 +1,8 @@
 package com.matejdro.catapult.receiving
 
 import android.app.Service
+import android.content.Intent
+import android.os.IBinder
 import com.matejdro.catapult.CatapultApplication
 import com.matejdro.catapult.bluetooth.WatchappConnectionsManager
 import com.matejdro.catapult.di.ServiceKey
@@ -26,9 +28,19 @@ class PebbleListenerService : BasePebbleListenerService() {
    @Suppress("VarCouldBeVal") // False positive
    private lateinit var watchappConnectionsManager: WatchappConnectionsManager
 
-   override fun onCreate() {
-      (application!! as CatapultApplication).applicationGraph.inject(this)
-      super.onCreate()
+   private var initialized = false
+
+   override fun onBind(intent: Intent?): IBinder? {
+      if (!initialized) {
+         synchronized(this) {
+            if (!initialized) {
+               (application!! as CatapultApplication).applicationGraph.inject(this)
+               initialized = true
+            }
+         }
+      }
+
+      return super.onBind(intent)
    }
 
    override suspend fun onMessageReceived(

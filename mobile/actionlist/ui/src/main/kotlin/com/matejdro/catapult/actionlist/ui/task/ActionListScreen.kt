@@ -11,10 +11,12 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
@@ -39,6 +41,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -53,8 +56,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -136,6 +141,9 @@ class ActionListScreen(
             },
             reorderAction = { id, toIndex ->
                viewModel.reorder(id, toIndex)
+            },
+            toggleActionEnabled = { action, enabled ->
+               viewModel.editActionEnabled(action.id, enabled)
             }
          )
       }
@@ -186,6 +194,7 @@ private fun TaskListScreenContent(
    addTaskerTask: () -> Unit,
    addDirectoryLink: () -> Unit,
    editAction: (CatapultAction) -> Unit,
+   toggleActionEnabled: (CatapultAction, enabled: Boolean) -> Unit,
    reorderAction: (id: Int, toIndex: Int) -> Unit,
    addButtonsShown: Boolean = false,
 ) {
@@ -205,6 +214,16 @@ private fun TaskListScreenContent(
          TopAppBar(title = { Text(state.directory.title) })
          HorizontalDivider(color = MaterialTheme.colorScheme.onSurface)
 
+         if (state.showActionsWarning) {
+            Text(
+               stringResource(R.string.warning_max_actions),
+               Modifier
+                  .fillMaxWidth()
+                  .background(COLOR_WARNING)
+                  .padding(16.dp),
+            )
+         }
+
          val listState = rememberLazyListState()
          ReorderableListContainer(state.actions, listState) { list ->
             LazyColumn(
@@ -216,15 +235,35 @@ private fun TaskListScreenContent(
                      action,
                      setOrder = { reorderAction(action.id, it) },
                   ) { modifier ->
-                     Text(
-                        action.title,
+                     Row(
                         modifier
                            .clickable(onClick = { editAction(action) })
                            .padding(16.dp)
                            .fillMaxWidth()
-                           .animateItem()
-                     )
+                           .animateItem(),
+                        verticalAlignment = Alignment.CenterVertically
+                     ) {
+                        Text(
+                           action.title,
+                           Modifier
+                              .weight(1f)
+                              .alpha(if (action.enabled) 1f else ALPHA_DISABLED)
+                        )
+
+                        Switch(
+                           action.enabled,
+                           onCheckedChange = {
+                              toggleActionEnabled(action, it)
+                           },
+                           modifier = Modifier.padding(8.dp)
+                        )
+                     }
                   }
+               }
+
+               // Add extra spacer at the end to allow user to scroll around the FAB
+               item {
+                  Spacer(Modifier.size(100.dp))
                }
             }
          }
@@ -463,6 +502,8 @@ private sealed class AddDialogAction : Parcelable {
 }
 
 private const val ROTATION_QUARTER_CIRCLE_DEG = 45f
+private const val ALPHA_DISABLED = 0.75f
+private val COLOR_WARNING = Color(0xAAFFA500)
 
 @FullScreenPreviews
 @Composable
@@ -474,13 +515,15 @@ internal fun TaskListScreenContentPreview() {
             CatapultDirectory(1, "Test Directory"),
             listOf(
                CatapultAction("Action A", 1, taskerTaskName = "Task A", id = 1),
-               CatapultAction("Action B", 1, taskerTaskName = "Task B", id = 2),
-            )
+               CatapultAction("Action B", 1, taskerTaskName = "Task B", id = 2, enabled = false),
+            ),
+            false,
          ),
          SnackbarHostState(),
          {},
          {},
          {},
+         { _, _ -> },
          { _, _ -> },
       )
    }
@@ -497,14 +540,40 @@ internal fun TaskListScreenAddPreview() {
             listOf(
                CatapultAction("Action A", 1, taskerTaskName = "Task A", id = 1),
                CatapultAction("Action B", 1, taskerTaskName = "Task B", id = 2),
-            )
+            ),
+            false
          ),
          SnackbarHostState(),
          {},
          {},
          {},
          { _, _ -> },
+         { _, _ -> },
          addButtonsShown = true
+      )
+   }
+}
+
+@Preview
+@Composable
+@ShowkaseComposable(group = "test")
+internal fun TaskListScreenWithFullWarningPreview() {
+   PreviewTheme {
+      TaskListScreenContent(
+         ActionListState(
+            CatapultDirectory(1, "Test Directory"),
+            listOf(
+               CatapultAction("Action A", 1, taskerTaskName = "Task A", id = 1),
+               CatapultAction("Action B", 1, taskerTaskName = "Task B", id = 2, enabled = false),
+            ),
+            true,
+         ),
+         SnackbarHostState(),
+         {},
+         {},
+         {},
+         { _, _ -> },
+         { _, _ -> },
       )
    }
 }

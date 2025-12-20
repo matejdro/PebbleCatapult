@@ -163,14 +163,6 @@ jobs:
 
       # Tests
 
-      - name: Lint
-        uses: burrunan/gradle-cache-action@v3.0.1
-        with:
-          arguments: "lintRelease detektMain detektTest -x detektDebug -x detektDebugUnitTest assertModuleGraph buildHealth detectTooManyFiles debugComposeCompilerCheck reportMerge --continue --daemon"
-          build-root-directory: mobile
-          debug: false
-          concurrent: true
-        if: "${{ env.BUILD_MOBILE == 'true' }}"
       - name: Compile Unit Tests
         uses: burrunan/gradle-cache-action@v3.0.1
         with:
@@ -178,6 +170,24 @@ jobs:
           build-root-directory: mobile
           debug: false
           concurrent: true
+          read-only: ${{ github.ref != 'refs/heads/master' }}
+        if: "${{ env.BUILD_MOBILE == 'true' }}" 
+      - name: Lint
+        uses: burrunan/gradle-cache-action@v3.0.1
+        with:
+          arguments: "lintRelease detektMain detektTest -x detektDebug -x detektDebugUnitTest assertModuleGraph buildHealth detectTooManyFiles debugComposeCompilerCheck verifyDebugDatabaseMigration reportMerge --continue --daemon"
+          build-root-directory: mobile
+          debug: false
+          concurrent: true
+          read-only: ${{ github.ref != 'refs/heads/master' }}
+      - name: Double check DB with the generated schema
+        uses: burrunan/gradle-cache-action@v3.0.1
+        with:
+          arguments: "generateDebugDatabaseSchema verifyDebugDatabaseMigration --continue --daemon"
+          build-root-directory: mobile
+          debug: false
+          concurrent: true
+          read-only: ${{ github.ref != 'refs/heads/master' }}
         if: "${{ env.BUILD_MOBILE == 'true' }}"
       - name: Run Unit Tests
         uses: burrunan/gradle-cache-action@v3.0.1
@@ -186,6 +196,7 @@ jobs:
           build-root-directory: mobile
           debug: false
           concurrent: true
+          read-only: ${{ github.ref != 'refs/heads/master' }}
         if: "${{ env.BUILD_MOBILE == 'true' }}"
       - name: "Generate new Screenshot Tests"
         run: "config/generate-screenshots.sh ${{ github.event.pull_request.head.ref }}"
@@ -198,6 +209,7 @@ jobs:
           build-root-directory: mobile
           debug: false
           concurrent: true
+          read-only: ${{ github.ref != 'refs/heads/master' }}
         if: "${{ env.BUILD_MOBILE == 'true' }}"
       - name: "Upload Screenshot test failures"
         uses: actions/upload-artifact@v4
