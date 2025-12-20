@@ -37,6 +37,7 @@ class WatchSyncerImplTest {
 
       actionRepository.insert(CatapultAction("Action A", directoryId = 1, id = 10))
       actionRepository.insert(CatapultAction("Action B", directoryId = 1, id = 11, targetDirectoryId = 2))
+      actionRepository.insert(CatapultAction("Action C", directoryId = 1, id = 11, targetDirectoryId = 2, enabled = false))
 
       watchSyncer.syncDirectory(1)
       delay(1.seconds)
