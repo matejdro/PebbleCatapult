@@ -41,7 +41,7 @@ class ActionListViewModel(
          val flow = directoryRepo.getSingle(id).flatMapLatestOutcome { directory ->
             actionsRepo.getAll(directory.id).map { outcome ->
                outcome.mapData { list ->
-                  ActionListState(directory, list)
+                  ActionListState(directory, list, list.size > MAX_ACTIONS_TO_SYNC)
                }
             }
          }
@@ -70,8 +70,16 @@ class ActionListViewModel(
 
    fun editActionTitle(id: Int, title: String) = resources.launchWithExceptionReporting {
       actionLogger.logAction { "ActionListViewModel.editActionTitle(id = $id, title = $title)" }
+      val action = _uiState.value.data?.actions?.find { it.id == id } ?: return@launchWithExceptionReporting
 
-      actionsRepo.updateTitle(id, title)
+      actionsRepo.update(id, title, action.enabled)
+   }
+
+   fun editActionEnabled(id: Int, enabled: Boolean) = resources.launchWithExceptionReporting {
+      actionLogger.logAction { "ActionListViewModel.editActionEnabled(id = $id, enabled = $enabled)" }
+      val action = _uiState.value.data?.actions?.find { it.id == id } ?: return@launchWithExceptionReporting
+
+      actionsRepo.update(id, action.title, enabled)
    }
 
    fun deleteAction(id: Int) = resources.launchWithExceptionReporting {
@@ -91,4 +99,7 @@ class ActionListViewModel(
 data class ActionListState(
    val directory: CatapultDirectory,
    val actions: List<CatapultAction>,
+   val showActionsWarning: Boolean,
 )
+
+private const val MAX_ACTIONS_TO_SYNC = 13
