@@ -101,6 +101,10 @@ dependencyAnalysis {
       bundle("PebbleKit2") {
          includeGroup("com.github.pebble-dev.PebbleKitAndroid2")
       }
+
+      bundle("Navigation3") {
+         includeGroup("androidx.navigation3")
+      }
    }
 }
 
