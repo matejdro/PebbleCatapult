@@ -102,8 +102,14 @@ jobs:
           concurrent: true
           read-only: true
       - name: "Create jacoco aggregate"
-        run: "./gradlew aggregatedJacocoReport"
-        
+        uses: burrunan/gradle-cache-action@v3.0.1
+        with:
+          arguments: "aggregatedJacocoReport --daemon"
+          build-root-directory: mobile
+          debug: false
+          concurrent: true
+          read-only: true
+
       # Build watchapp
 
       - name: Build watchapp
