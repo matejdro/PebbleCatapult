@@ -23,14 +23,14 @@ dependencyResolutionManagement {
    }
 }
 
-includeBuild("libs/PebbleKitAndroid2") {
-   dependencySubstitution {
-      substitute(module("io.rebble.pebblekit2:client"))
-         .using(project(":client"))
-      substitute(module("io.rebble.pebblekit2:client-api"))
-         .using(project(":client-api"))
-   }
-}
+// includeBuild("libs/PebbleKitAndroid2") {
+//    dependencySubstitution {
+//       substitute(module("io.rebble.pebblekit2:client"))
+//          .using(project(":client"))
+//       substitute(module("io.rebble.pebblekit2:client-api"))
+//          .using(project(":client-api"))
+//    }
+// }
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
