@@ -9,8 +9,8 @@ import androidx.core.content.getSystemService
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
+import logcat.logcat
 import net.dinglisch.android.tasker.TaskerIntent
-import si.inova.kotlinova.core.logging.logcat
 
 @Inject
 @ContributesBinding(AppScope::class)

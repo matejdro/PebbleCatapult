@@ -8,7 +8,7 @@ import io.rebble.pebblekit2.common.model.WatchIdentifier
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
-import si.inova.kotlinova.core.logging.logcat
+import logcat.logcat
 import java.util.PriorityQueue
 import java.util.UUID
 import kotlin.coroutines.cancellation.CancellationException

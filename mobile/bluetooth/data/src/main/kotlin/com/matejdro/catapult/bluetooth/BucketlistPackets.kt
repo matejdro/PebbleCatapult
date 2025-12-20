@@ -6,8 +6,8 @@ import com.matejdro.catapult.bluetooth.util.writeUByte
 import com.matejdro.catapult.bluetooth.util.writeUShort
 import io.rebble.pebblekit2.common.model.PebbleDictionary
 import io.rebble.pebblekit2.common.model.PebbleDictionaryItem
+import logcat.logcat
 import okio.Buffer
-import si.inova.kotlinova.core.logging.logcat
 
 /**
  * Write bucketsync data to the [firstPacketBuffer] and, optionally, return additional packets if the first packet

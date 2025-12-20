@@ -10,8 +10,9 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dispatch.core.withDefault
+import logcat.LogPriority
+import logcat.logcat
 import okio.Buffer
-import si.inova.kotlinova.core.logging.logcat
 
 @Inject
 @ContributesBinding(AppScope::class)
@@ -46,7 +47,7 @@ class WatchSyncerImpl(
          buffer.writeUByte(0u) // Null terminator
       }
       val data = buffer.readByteArray()
-      logcat { "Size: ${data.size} bytes" }
+      logcat(LogPriority.DEBUG, null) { "Size: ${data.size} bytes" }
 
       bucketSyncRepository.updateBucket(id.toUByte(), data)
    }

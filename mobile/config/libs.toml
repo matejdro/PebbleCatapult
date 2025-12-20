@@ -48,6 +48,7 @@ kotlin-immutableCollections = "0.4.0"
 kotlinova = "4.0.0-alpha10"
 # @pin until https://github.com/google/ksp/issues/2595 is solved
 ksp = "2.2.20-2.0.2"
+logcat = "0.4"
 metro = "0.7.3"
 moduleGraphAssert = "2.9.0"
 moshi = "1.15.2"
@@ -156,6 +157,7 @@ kotlinova-navigation-test = { module = "si.inova.kotlinova:navigation-test", ver
 kotlinova-retrofit = { module = "si.inova.kotlinova:retrofit", version.ref = "kotlinova" }
 kotlinova-retrofit-test = { module = "si.inova.kotlinova:retrofit-test", version.ref = "kotlinova" }
 ksp = { module = "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin", version.ref = "ksp" }
+logcat = { module = "com.squareup.logcat:logcat", version.ref = "logcat" }
 metro-plugin = { module = "dev.zacsweers.metro:gradle-plugin", version.ref = "metro" }
 moduleGraphAssert = { module = "com.jraska.module.graph.assertion:plugin", version.ref = "moduleGraphAssert" }
 moshi = { module = "com.squareup.moshi:moshi", version.ref = "moshi" }

@@ -13,8 +13,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.job
+import logcat.logcat
 import si.inova.kotlinova.core.exceptions.UnknownCauseException
-import si.inova.kotlinova.core.logging.logcat
 import si.inova.kotlinova.core.reporting.ErrorReporter
 import java.util.UUID
 

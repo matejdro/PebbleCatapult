@@ -195,6 +195,7 @@ dependencies {
    implementation(libs.kotlinova.core)
    implementation(libs.kotlinova.navigation)
    implementation(libs.kotlinova.navigation.navigation3)
+   implementation(libs.logcat)
    implementation(libs.pebblekit)
    implementation(libs.simpleStack)
    implementation(libs.sqldelight.android)

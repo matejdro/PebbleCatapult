@@ -13,17 +13,16 @@ import coil3.SingletonImageLoader
 import com.matejdro.catapult.di.ApplicationGraph
 import com.matejdro.catapult.di.MainApplicationGraph
 import com.matejdro.catapult.logging.ErrorReportingKermitWriter
-import com.matejdro.catapult.logging.MultiLogcatLogger
 import com.matejdro.catapult.logging.TinyLogKermitWriter
 import com.matejdro.catapult.logging.TinyLogLogcatLogger
 import dev.zacsweers.metro.createGraphFactory
 import dispatch.core.DefaultDispatcherProvider
 import dispatch.core.defaultDispatcher
 import kotlinx.coroutines.launch
+import logcat.AndroidLogcatLogger
+import logcat.LogPriority
+import logcat.LogcatLogger
 import si.inova.kotlinova.core.dispatchers.AccessCallbackDispatcherProvider
-import si.inova.kotlinova.core.logging.AndroidLogcatLogger
-import si.inova.kotlinova.core.logging.LogPriority
-import si.inova.kotlinova.core.logging.LogcatLogger
 import java.io.File
 import co.touchlab.kermit.Logger as KermitLogger
 
@@ -150,15 +149,11 @@ open class CatapultApplication : Application() {
 
       val loggingThread = applicationGraph.getTinyLogLoggingThread()
 
-      val logcatLoggers = listOfNotNull(
-         TinyLogLogcatLogger(loggingThread),
-         if (BuildConfig.DEBUG) {
-            AndroidLogcatLogger(minPriority = LogPriority.VERBOSE)
-         } else {
-            null
-         }
-      )
-      LogcatLogger.install(MultiLogcatLogger(logcatLoggers))
+      if (BuildConfig.DEBUG) {
+         LogcatLogger.loggers += AndroidLogcatLogger(minPriority = LogPriority.VERBOSE)
+      }
+      LogcatLogger.loggers += TinyLogLogcatLogger(loggingThread)
+      LogcatLogger.install()
 
       KermitLogger.addLogWriter(TinyLogKermitWriter(loggingThread))
       KermitLogger.addLogWriter(ErrorReportingKermitWriter(applicationGraph.getErrorReporter()))

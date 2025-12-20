@@ -15,7 +15,7 @@ import dispatch.core.withIO
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import si.inova.kotlinova.core.logging.logcat
+import logcat.logcat
 import kotlin.time.Duration.Companion.milliseconds
 
 @Inject

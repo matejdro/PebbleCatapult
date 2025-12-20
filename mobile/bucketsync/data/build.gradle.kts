@@ -16,10 +16,9 @@ dependencies {
    api(projects.bucketsync.api)
    api(libs.androidx.datastore.preferences.core)
 
-   implementation(libs.kotlinova.core)
-   implementation(libs.kotlin.coroutines)
    implementation(libs.dispatch)
-   // implementation(libs.pebblekit.api)
+   implementation(libs.kotlin.coroutines)
+   implementation(libs.logcat)
 
    testImplementation(projects.common.test)
    testImplementation(libs.kotlinova.core.test)

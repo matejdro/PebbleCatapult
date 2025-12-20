@@ -14,5 +14,5 @@ dependencies {
 
    implementation(projects.sharedResources)
    implementation(libs.androidx.core)
-   implementation(libs.kotlinova.core)
+   implementation(libs.logcat)
 }

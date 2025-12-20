@@ -14,6 +14,7 @@ dependencies {
    implementation(projects.common)
    implementation(libs.kotlinova.core)
    implementation(libs.kotlin.coroutines)
+   implementation(libs.logcat)
    implementation(libs.okio)
 
    testImplementation(projects.bluetooth.test)

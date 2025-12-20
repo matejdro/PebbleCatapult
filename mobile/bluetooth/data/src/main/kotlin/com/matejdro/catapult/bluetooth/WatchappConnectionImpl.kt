@@ -21,8 +21,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import logcat.logcat
 import okio.Buffer
-import si.inova.kotlinova.core.logging.logcat
 
 @AssistedInject
 @Suppress("MagicNumber") // Packet processing involves a lot of numbers, it would be less readable to make consts
