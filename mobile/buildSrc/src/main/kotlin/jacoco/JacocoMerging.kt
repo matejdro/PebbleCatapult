@@ -69,6 +69,8 @@ fun Project.setupJacocoMergingRoot() {
          sourceDirectories.from(
             configurations.getByName(CONFIGURATION_JACOCO_SOURCES).incoming.artifactView { isLenient = true }.files
          )
+
+         reports.xml.required.set(true)
       }
    }
 
