@@ -163,6 +163,15 @@ jobs:
 
       # Tests
 
+      - name: Compile Unit Tests
+        uses: burrunan/gradle-cache-action@v3.0.1
+        with:
+          arguments: "compileDebugUnitTestSources compileReleaseUnitTestSources --daemon"
+          build-root-directory: mobile
+          debug: false
+          concurrent: true
+          read-only: ${{ github.ref != 'refs/heads/master' }}
+        if: "${{ env.BUILD_MOBILE == 'true' }}" 
       - name: Lint
         uses: burrunan/gradle-cache-action@v3.0.1
         with:
@@ -175,15 +184,6 @@ jobs:
         uses: burrunan/gradle-cache-action@v3.0.1
         with:
           arguments: "generateDebugDatabaseSchema verifyDebugDatabaseMigration --continue --daemon"
-          build-root-directory: mobile
-          debug: false
-          concurrent: true
-          read-only: ${{ github.ref != 'refs/heads/master' }}
-        if: "${{ env.BUILD_MOBILE == 'true' }}"
-      - name: Compile Unit Tests
-        uses: burrunan/gradle-cache-action@v3.0.1
-        with:
-          arguments: "compileDebugUnitTestSources compileReleaseUnitTestSources --daemon"
           build-root-directory: mobile
           debug: false
           concurrent: true
