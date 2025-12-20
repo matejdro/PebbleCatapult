@@ -84,11 +84,30 @@ class CatapultActionRepositoryImplTest {
          )
          runCurrent()
 
-         repo.updateTitle(1, "Action B")
+         repo.update(1, "Action B", true)
          runCurrent()
 
          expectMostRecentItem() shouldBeSuccessWithData listOf(
             CatapultAction("Action B", 1, 1, taskerTaskName = "Task A"),
+         )
+      }
+   }
+
+   @Test
+   fun `Allow updating action enabled status`() = scope.runTest {
+      repo.getAll(1).test {
+         runCurrent()
+
+         repo.insert(
+            CatapultAction("Action A", 1, taskerTaskName = "Task A"),
+         )
+         runCurrent()
+
+         repo.update(1, "Action A", false)
+         runCurrent()
+
+         expectMostRecentItem() shouldBeSuccessWithData listOf(
+            CatapultAction("Action A", 1, 1, taskerTaskName = "Task A", enabled = false),
          )
       }
    }
@@ -107,6 +126,30 @@ class CatapultActionRepositoryImplTest {
          runCurrent()
 
          expectMostRecentItem() shouldBeSuccessWithData emptyList()
+      }
+   }
+
+   @Test
+   fun `Return only enabled actions`() = scope.runTest {
+      setupDirectories()
+
+      repo.getAll(1, onlyEnabled = true).test {
+         runCurrent()
+
+         repo.insert(
+            CatapultAction("Action A", 1, taskerTaskName = "Task A"),
+         )
+         repo.insert(
+            CatapultAction("Action B", 1, targetDirectoryId = 2)
+         )
+         runCurrent()
+
+         repo.update(1, "Action A", false)
+         runCurrent()
+
+         expectMostRecentItem() shouldBeSuccessWithData listOf(
+            CatapultAction("Action B", 1, 2, targetDirectoryId = 2, targetDirectoryName = "Directory B")
+         )
       }
    }
 
@@ -268,7 +311,7 @@ class CatapultActionRepositoryImplTest {
       runCurrent()
 
       syncer.syncedDirectories.clear()
-      repo.updateTitle(1, "Action B")
+      repo.update(1, "Action B", true)
       runCurrent()
 
       syncer.syncedDirectories.shouldContainExactly(1)

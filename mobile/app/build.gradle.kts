@@ -113,6 +113,13 @@ android {
    }
 }
 
+afterEvaluate {
+   tasks.named("verifyDebugDatabaseMigration") {
+      // Workaround for the https://github.com/cashapp/sqldelight/issues/5115
+      mustRunAfter("generateDebugDatabaseSchema")
+   }
+}
+
 androidComponents {
    beforeVariants { builder ->
       if (builder.name.contains("proguardedDebug")) {

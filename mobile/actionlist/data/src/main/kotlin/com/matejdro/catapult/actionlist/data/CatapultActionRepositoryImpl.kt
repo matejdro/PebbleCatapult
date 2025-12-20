@@ -27,8 +27,9 @@ class CatapultActionRepositoryImpl(
    private val dbActionQueries: DbActionQueries,
    private val watchSyncer: WatchSyncer,
 ) : CatapultActionRepository {
-   override fun getAll(directory: Int, limit: Int): Flow<Outcome<List<CatapultAction>>> {
-      return dbActionQueries.selectAll(directory.toLong(), limit.toLong()).asFlow()
+   override fun getAll(directory: Int, limit: Int, onlyEnabled: Boolean): Flow<Outcome<List<CatapultAction>>> {
+      val enabledNot = if (onlyEnabled) 0L else 2L
+      return dbActionQueries.selectAll(directory.toLong(), enabledNot, limit.toLong()).asFlow()
          .map<Query<SelectAll>, Outcome<List<CatapultAction>>> {
             withDefault {
                val list = it.awaitAsList()
@@ -62,10 +63,10 @@ class CatapultActionRepositoryImpl(
       watchSyncer.syncDirectory(action.directoryId)
    }
 
-   override suspend fun updateTitle(id: Int, title: String) {
+   override suspend fun update(id: Int, title: String, enabled: Boolean) {
       withIO {
          val directoryId = dbActionQueries.getDirectoryId(id.toLong()).executeAsOne().toInt()
-         dbActionQueries.updateTitle(title, id.toLong())
+         dbActionQueries.update(title, if (enabled) 1L else 0L, id.toLong())
 
          watchSyncer.syncDirectory(directoryId)
       }

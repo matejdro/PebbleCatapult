@@ -4,7 +4,8 @@ CREATE TABLE dbCatapultAction (
     title TEXT NOT NULL,
     taskerTaskName TEXT,
     targetDirectoryId INTEGER,
-    sortOrder INTEGER NOT NULL
+    sortOrder INTEGER NOT NULL,
+    enabled INTEGER NOT NULL DEFAULT 1
 );
 
 selectAll:
@@ -14,11 +15,12 @@ SELECT dbCatapultAction.id,
     dbCatapultAction.taskerTaskName,
     dbCatapultAction.targetDirectoryId,
     dbCatapultAction.sortOrder,
+    dbCatapultAction.enabled,
     dbDirectory.title AS targetDirectoryName
     FROM
         dbCatapultAction LEFT JOIN
             dbDirectory ON dbDirectory.id = dbCatapultAction.targetDirectoryId
-    WHERE dbCatapultAction.directoryId = :directoryId
+    WHERE dbCatapultAction.directoryId = :directoryId AND enabled != :enabledNot
     ORDER BY sortOrder ASC
     LIMIT :limit;
 
@@ -29,6 +31,7 @@ SELECT dbCatapultAction.id,
     dbCatapultAction.taskerTaskName,
     dbCatapultAction.targetDirectoryId,
     dbCatapultAction.sortOrder,
+    dbCatapultAction.enabled,
     dbDirectory.title AS targetDirectoryName
     FROM
         dbCatapultAction LEFT JOIN
@@ -56,8 +59,8 @@ delete {
     DELETE FROM dbCatapultAction WHERE id = :id;
 }
 
-updateTitle:
-    UPDATE dbCatapultAction SET title = ? WHERE id = ?;
+update:
+    UPDATE dbCatapultAction SET title = :title, enabled = :enabled WHERE id = ?;
 
 reorderUpwards {
     UPDATE dbCatapultAction
