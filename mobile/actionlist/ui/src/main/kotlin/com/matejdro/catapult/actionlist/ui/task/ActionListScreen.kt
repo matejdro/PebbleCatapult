@@ -255,7 +255,6 @@ private fun TaskListScreenContent(
                            onCheckedChange = {
                               toggleActionEnabled(action, it)
                            },
-                           modifier = Modifier.padding(8.dp)
                         )
                      }
                   }
