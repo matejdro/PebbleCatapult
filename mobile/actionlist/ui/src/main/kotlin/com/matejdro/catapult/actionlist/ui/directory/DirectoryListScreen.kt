@@ -43,6 +43,8 @@ import androidx.compose.ui.unit.dp
 import com.airbnb.android.showkase.annotation.ShowkaseComposable
 import com.matejdro.catapult.actionlist.api.CatapultDirectory
 import com.matejdro.catapult.actionlist.ui.R
+import com.matejdro.catapult.navigation.instructions.navigateToOrReplaceType
+import com.matejdro.catapult.navigation.keys.ActionListKey
 import com.matejdro.catapult.navigation.keys.DirectoryListKey
 import com.matejdro.catapult.ui.components.AlertDialogWithContent
 import com.matejdro.catapult.ui.components.ProgressErrorSuccessScaffold
@@ -52,6 +54,7 @@ import kotlinx.coroutines.launch
 import si.inova.kotlinova.compose.components.itemsWithDivider
 import si.inova.kotlinova.compose.flow.collectAsStateWithLifecycleAndBlinkingPrevention
 import si.inova.kotlinova.navigation.di.ContributesScreenBinding
+import si.inova.kotlinova.navigation.navigator.Navigator
 import si.inova.kotlinova.navigation.screens.InjectNavigationScreen
 import si.inova.kotlinova.navigation.screens.Screen
 
@@ -59,10 +62,13 @@ import si.inova.kotlinova.navigation.screens.Screen
 @ContributesScreenBinding
 class DirectoryListScreen(
    private val viewModel: DirectoryListViewModel,
+   private val navigator: Navigator,
 ) : Screen<DirectoryListKey>() {
    @Composable
    override fun Content(key: DirectoryListKey) {
-      Content({})
+      Content {
+         navigator.navigateToOrReplaceType(ActionListKey(it))
+      }
    }
 
    @Composable

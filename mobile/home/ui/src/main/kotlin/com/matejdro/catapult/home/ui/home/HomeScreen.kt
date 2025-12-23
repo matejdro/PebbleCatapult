@@ -17,16 +17,11 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.movableContentOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -36,13 +31,16 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import com.airbnb.android.showkase.annotation.ShowkaseComposable
 import com.matejdro.catapult.home.ui.R
-import com.matejdro.catapult.navigation.keys.DirectoryTaskListCombinedKey
+import com.matejdro.catapult.navigation.instructions.ReplaceTabContentWith
+import com.matejdro.catapult.navigation.keys.DirectoryListKey
 import com.matejdro.catapult.navigation.keys.HomeScreenKey
 import com.matejdro.catapult.navigation.keys.ToolsScreenKey
+import com.matejdro.catapult.navigation.keys.base.LocalSelectedTabContent
+import com.matejdro.catapult.navigation.keys.base.SelectedTabContent
 import com.matejdro.catapult.ui.debugging.FullScreenPreviews
 import com.matejdro.catapult.ui.debugging.PreviewTheme
 import si.inova.kotlinova.core.activity.requireActivity
-import si.inova.kotlinova.navigation.instructions.navigateTo
+import si.inova.kotlinova.navigation.instructions.NavigationInstruction
 import si.inova.kotlinova.navigation.navigator.Navigator
 import si.inova.kotlinova.navigation.screenkeys.ScreenKey
 import si.inova.kotlinova.navigation.screens.InjectNavigationScreen
@@ -53,64 +51,37 @@ import com.matejdro.catapult.sharedresources.R as sharedR
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 class HomeScreen(
    private val navigator: Navigator,
-   private val directoriesScreen: Screen<DirectoryTaskListCombinedKey>,
-   private val toolsScreen: Screen<ToolsScreenKey>,
 ) : Screen<HomeScreenKey>() {
    @Composable
    override fun Content(key: HomeScreenKey) {
-      val keyState = rememberUpdatedState(key)
-
-      val mainContent = remember {
-         movableContentOf {
-            MainContent(keyState.value.selectedScreen)
-         }
-      }
-
       val sizeClass = calculateWindowSizeClass(activity = LocalContext.current.requireActivity())
 
-      Surface {
-         HomeScreenContent(
-            selectedScreen = key.selectedScreen,
-            tabletMode = sizeClass.widthSizeClass == WindowWidthSizeClass.Expanded,
-            mainContent = mainContent,
-            switchScreen = { navigator.navigateTo(HomeScreenKey(it)) },
-         )
-      }
-   }
-
-   @Composable
-   private fun MainContent(tab: ScreenKey) {
-      val stateHolder = rememberSaveableStateHolder()
-      // We must provide name here, not the enum, because name stays the same after process kill, while enum object is different
-      stateHolder.SaveableStateProvider(tab.javaClass.name) {
-         when (tab) {
-            is DirectoryTaskListCombinedKey -> directoriesScreen.Content(tab)
-            is ToolsScreenKey -> toolsScreen.Content(tab)
-            else -> error("Unhandled screen type $tab")
-         }
-      }
+      HomeScreenContent(
+         LocalSelectedTabContent.current,
+         sizeClass.widthSizeClass == WindowWidthSizeClass.Expanded,
+         navigator::navigate
+      )
    }
 }
 
 @Composable
 private fun HomeScreenContent(
-   selectedScreen: ScreenKey,
+   selectedScreen: SelectedTabContent,
    tabletMode: Boolean,
-   mainContent: @Composable () -> Unit,
-   switchScreen: (ScreenKey) -> Unit,
+   navigate: (NavigationInstruction) -> Unit,
 ) {
    if (tabletMode) {
-      NavigationRailContent(mainContent, selectedScreen, switchScreen)
+      NavigationRailContent(selectedScreen.content, selectedScreen.key, navigate)
    } else {
-      NavigationBarContent(mainContent, selectedScreen, switchScreen)
+      NavigationBarContent(selectedScreen.content, selectedScreen.key, navigate)
    }
 }
 
 @Composable
 private fun NavigationBarContent(
    mainContent: @Composable () -> Unit,
-   selectedScreen: ScreenKey,
-   switchScreen: (ScreenKey) -> Unit,
+   selectedScreenKey: ScreenKey,
+   navigate: (NavigationInstruction) -> Unit,
 ) {
    Column {
       Box(
@@ -124,15 +95,15 @@ private fun NavigationBarContent(
 
       NavigationBar {
          NavigationBarItem(
-            selected = selectedScreen is DirectoryTaskListCombinedKey,
-            onClick = { switchScreen(DirectoryTaskListCombinedKey) },
+            selected = selectedScreenKey is DirectoryListKey,
+            onClick = { navigate(ReplaceTabContentWith(DirectoryListKey)) },
             icon = { Icon(painter = painterResource(id = sharedR.drawable.directories), contentDescription = null) },
             label = { Text(stringResource(R.string.directories)) }
          )
 
          NavigationBarItem(
-            selected = selectedScreen is ToolsScreenKey,
-            onClick = { switchScreen(ToolsScreenKey) },
+            selected = selectedScreenKey is ToolsScreenKey,
+            onClick = { navigate(ReplaceTabContentWith(ToolsScreenKey)) },
             icon = { Icon(painter = painterResource(id = R.drawable.tools), contentDescription = null) },
             label = { Text(stringResource(R.string.tools)) }
          )
@@ -143,21 +114,22 @@ private fun NavigationBarContent(
 @Composable
 private fun NavigationRailContent(
    mainContent: @Composable () -> Unit,
-   selectedScreen: ScreenKey,
-   switchScreen: (ScreenKey) -> Unit,
+   selectedScreenKey: ScreenKey,
+   navigate: (NavigationInstruction) -> Unit,
 ) {
    Row {
       NavigationRail {
          NavigationRailItem(
-            selected = selectedScreen is DirectoryTaskListCombinedKey,
-            onClick = { switchScreen(DirectoryTaskListCombinedKey) },
+            selected = selectedScreenKey is DirectoryListKey,
+            onClick = { navigate(ReplaceTabContentWith(DirectoryListKey)) },
             icon = { Icon(painter = painterResource(id = sharedR.drawable.directories), contentDescription = null) },
             label = { Text(stringResource(R.string.directories)) }
          )
 
          NavigationRailItem(
-            selected = selectedScreen is ToolsScreenKey,
-            onClick = { switchScreen(ToolsScreenKey) },
+            selected = selectedScreenKey is ToolsScreenKey,
+
+            onClick = { navigate(ReplaceTabContentWith(ToolsScreenKey)) },
             icon = { Icon(painter = painterResource(id = R.drawable.tools), contentDescription = null) },
             label = { Text(stringResource(R.string.tools)) }
          )
@@ -180,15 +152,17 @@ internal fun HomePhonePreview() {
    PreviewTheme {
       HomeScreenContent(
          tabletMode = false,
-         selectedScreen = DirectoryTaskListCombinedKey,
-         mainContent = {
-            Box(
-               Modifier
-                  .fillMaxSize()
-                  .background(Color.Red)
-            )
-         },
-         switchScreen = {},
+         selectedScreen = SelectedTabContent(
+            {
+               Box(
+                  Modifier
+                     .fillMaxSize()
+                     .background(Color.Red)
+               )
+            },
+            DirectoryListKey,
+         ),
+         navigate = {},
       )
    }
 }
@@ -200,15 +174,17 @@ internal fun HomeTabletPreview() {
    PreviewTheme {
       HomeScreenContent(
          tabletMode = true,
-         selectedScreen = DirectoryTaskListCombinedKey,
-         mainContent = {
-            Box(
-               Modifier
-                  .fillMaxSize()
-                  .background(Color.Red)
-            )
-         },
-         switchScreen = {},
+         selectedScreen = SelectedTabContent(
+            {
+               Box(
+                  Modifier
+                     .fillMaxSize()
+                     .background(Color.Red)
+               )
+            },
+            DirectoryListKey,
+         ),
+         navigate = {},
       )
    }
 }

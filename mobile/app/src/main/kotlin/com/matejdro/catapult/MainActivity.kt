@@ -19,10 +19,10 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation3.runtime.NavEntryDecorator
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import com.matejdro.catapult.navigation.scenes.TabListDetailScene
+import com.matejdro.catapult.navigation.scenes.rememberTabListDetailSceneStrategy
 import com.matejdro.catapult.ui.theme.CatapultTheme
 import com.zhuinden.simplestack.Backstack
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
@@ -46,6 +46,8 @@ class MainActivity : ComponentActivity() {
    private lateinit var dateFormatter: AndroidDateTimeFormatter
    private lateinit var mainViewModelFactory: MainViewModel.Factory
 
+   private lateinit var tabListDetailSceneFactory: TabListDetailScene.Factory
+
    private val viewModel by viewModels<MainViewModel> { ViewModelFactory() }
    private var initComplete = false
 
@@ -57,6 +59,7 @@ class MainActivity : ComponentActivity() {
       navigationContext = appGraph.getNavigationContext()
       dateFormatter = appGraph.getDateFormatter()
       mainViewModelFactory = appGraph.getMainViewModelFactory()
+      tabListDetailSceneFactory = appGraph.getTabListDetailSceneFactory()
 
       super.onCreate(savedInstanceState)
       enableEdgeToEdge()
@@ -69,7 +72,7 @@ class MainActivity : ComponentActivity() {
 
    private fun beginInitialisation(startup: Boolean) {
       lifecycleScope.launch {
-         val initialHistory: ImmutableList<ScreenKey> = persistentListOf(viewModel.startingScreen.filterNotNull().first())
+         val initialHistory = viewModel.startingScreens.filterNotNull().first()
 
          val deepLinkTarget = if (startup) {
             intent?.data?.let { mainDeepLinkHandler.handleDeepLink(it, startup = true) }
@@ -92,7 +95,7 @@ class MainActivity : ComponentActivity() {
    }
 
    @Composable
-   private fun NavigationRoot(initialHistory: ImmutableList<ScreenKey>) {
+   private fun NavigationRoot(initialHistory: List<ScreenKey>) {
       CatapultTheme {
          // A surface container using the 'background' color from the theme
          Surface(
@@ -115,8 +118,8 @@ class MainActivity : ComponentActivity() {
                            }
                         }
                      )
-
-                  )
+                  ),
+                  sceneStrategy = rememberTabListDetailSceneStrategy(tabListDetailSceneFactory)
                )
 
                LogCurrentScreen(backstack)
