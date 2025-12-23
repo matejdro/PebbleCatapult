@@ -41,6 +41,7 @@ import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
 import com.matejdro.catapult.home.ui.R
+import com.matejdro.catapult.navigation.keys.DirectoryListKey
 import com.matejdro.catapult.navigation.keys.HomeScreenKey
 import com.matejdro.catapult.navigation.keys.OnboardingKey
 import com.matejdro.catapult.ui.debugging.FullScreenPreviews
@@ -60,7 +61,8 @@ class OnboardingScreen(
          {
             navigator.navigate(
                ReplaceBackstack(
-                  HomeScreenKey(),
+                  HomeScreenKey,
+                  DirectoryListKey,
                )
             )
          }

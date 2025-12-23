@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.matejdro.catapult.navigation.keys.DirectoryListKey
 import com.matejdro.catapult.navigation.keys.HomeScreenKey
 import com.matejdro.catapult.navigation.keys.OnboardingKey
 import dev.zacsweers.metro.AssistedFactory
@@ -20,15 +21,15 @@ import si.inova.kotlinova.navigation.screenkeys.ScreenKey
 class MainViewModel(
    private val preferences: DataStore<Preferences>,
 ) : ViewModel() {
-   private val _startingScreen = MutableStateFlow<ScreenKey?>(null)
-   val startingScreen: StateFlow<ScreenKey?> = _startingScreen
+   private val _startingScreens = MutableStateFlow<List<ScreenKey>?>(null)
+   val startingScreens: StateFlow<List<ScreenKey>?> = _startingScreens
 
    init {
       viewModelScope.launch {
-         _startingScreen.value = if (preferences.data.first()[onboardingShown] == true) {
-            HomeScreenKey()
+         _startingScreens.value = if (preferences.data.first()[onboardingShown] == true) {
+            listOf(HomeScreenKey, DirectoryListKey)
          } else {
-            OnboardingKey
+            listOf(OnboardingKey)
          }
 
          preferences.edit {

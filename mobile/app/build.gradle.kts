@@ -171,6 +171,7 @@ dependencies {
    implementation(projects.actionlist.ui)
    implementation(projects.bluetooth.api)
    implementation(projects.bluetooth.data)
+   implementation(projects.navigationImpl)
    implementation(projects.bucketsync.api)
    implementation(projects.bucketsync.data)
    implementation(projects.tasker.api)
