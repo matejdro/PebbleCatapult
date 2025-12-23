@@ -160,6 +160,7 @@ dependencyAnalysis {
 
 dependencies {
    implementation(projects.common)
+   implementation(projects.commonAndroid)
    implementation(projects.commonNavigation)
    implementation(projects.commonCompose)
    implementation(projects.home.ui)
@@ -176,6 +177,7 @@ dependencies {
    implementation(projects.bucketsync.data)
    implementation(projects.tasker.api)
    implementation(projects.tasker.data)
+   implementation(projects.tasker.ui)
    implementation(projects.tools.ui)
 
    implementation(libs.androidx.activity.compose)
@@ -201,7 +203,6 @@ dependencies {
    implementation(libs.simpleStack)
    implementation(libs.sqldelight.android)
    implementation(libs.tinylog.api)
-
 
    keeperR8(libs.androidx.r8)
 }

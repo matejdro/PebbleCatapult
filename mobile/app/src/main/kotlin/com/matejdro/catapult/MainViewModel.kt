@@ -27,7 +27,7 @@ class MainViewModel(
    init {
       viewModelScope.launch {
          _startingScreens.value = if (preferences.data.first()[onboardingShown] == true) {
-            listOf(HomeScreenKey, DirectoryListKey)
+            listOf(HomeScreenKey, DirectoryListKey())
          } else {
             listOf(OnboardingKey)
          }

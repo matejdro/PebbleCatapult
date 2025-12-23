@@ -2,6 +2,9 @@ plugins {
    androidLibraryModule
    compose
    di
+   navigation
+   parcelize
+   showkase
 }
 
 android {
@@ -15,5 +18,20 @@ android {
 dependencies {
    api(projects.tasker.api)
 
-   testImplementation(projects.common.test)
+   implementation(projects.actionlist.api)
+   implementation(projects.commonAndroid)
+   implementation(projects.common)
+   implementation(projects.commonCompose)
+   implementation(projects.commonNavigation)
+   implementation(projects.sharedResources)
+   implementation(libs.androidx.activity.compose)
+   implementation(libs.androidx.core)
+   implementation(libs.kotlin.coroutines)
+   implementation(libs.kotlinova.core)
+   implementation(libs.kotlinova.navigation)
+   implementation(libs.kotlinova.navigation.navigation3)
+
+   testImplementation(projects.actionlist.test)
+   testImplementation(libs.kotlinova.core.test)
+   testImplementation(libs.turbine)
 }

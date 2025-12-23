@@ -3,6 +3,7 @@ package com.matejdro.catapult.di
 import android.app.Application
 import com.matejdro.catapult.MainViewModel
 import com.matejdro.catapult.bluetooth.WatchSyncer
+import com.matejdro.catapult.common.di.NavigationInjectingGraph
 import com.matejdro.catapult.logging.FileLoggingController
 import com.matejdro.catapult.logging.TinyLogLoggingThread
 import com.matejdro.catapult.navigation.scenes.TabListDetailScene
@@ -18,6 +19,7 @@ import si.inova.kotlinova.navigation.conditions.ConditionalNavigationHandler
 import si.inova.kotlinova.navigation.deeplink.MainDeepLinkHandler
 import si.inova.kotlinova.navigation.di.NavigationContext
 import si.inova.kotlinova.navigation.di.NavigationInjection
+import si.inova.kotlinova.navigation.di.NavigationStackSubGraph
 import si.inova.kotlinova.navigation.di.OuterNavigationScope
 import kotlin.reflect.KClass
 
@@ -36,12 +38,12 @@ interface MainApplicationGraph : ApplicationGraph {
 }
 
 @Suppress("ComplexInterface") // DI
-interface ApplicationGraph {
+interface ApplicationGraph: NavigationInjectingGraph {
    fun getErrorReporter(): ErrorReporter
    fun getDefaultCoroutineScope(): DefaultCoroutineScope
-   fun getNavigationInjectionFactory(): NavigationInjection.Factory
+   override fun getNavigationInjectionFactory(): NavigationInjection.Factory
    fun getMainDeepLinkHandler(): MainDeepLinkHandler
-   fun getNavigationContext(): NavigationContext
+   override fun getNavigationContext(): NavigationContext
    fun getDateFormatter(): AndroidDateTimeFormatter
    fun getMainViewModelFactory(): MainViewModel.Factory
    fun getFileLoggingController(): FileLoggingController
