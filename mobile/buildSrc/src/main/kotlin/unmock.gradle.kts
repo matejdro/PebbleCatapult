@@ -23,6 +23,7 @@ configure<UnMockExtension> {
    keep("android.net.UriCodec")
    keep("android.os.BaseBundle")
    keep("android.os.Bundle")
+   keep("android.os.Parcel")
    keep("android.os.BadTypeParcelableException")
    keepStartingWith("android.text.")
    keepStartingWith("android.util.")

@@ -5,4 +5,7 @@
     <string name="tasker_not_installed">Tasker not installed</string>
     <string name="tasker_is_disabled">Tasker is disabled</string>
     <string name="tasker_access_blocked">Tasker\'s access is blocked. Try closing Tasker with the back button.</string>
+    <string name="explanation_for_special_use_action">Tasker plugin service that executes the app\'s actions from Tasker</string>
+    <string name="channel_background_work">Background work</string>
+    <string name="running_tasker_action">Running Tasker Action</string>
 </resources>
