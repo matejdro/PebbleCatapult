@@ -12,4 +12,5 @@ dependencyAnalysis {
 }
 
 dependencies {
+   api(libs.kotlinova.navigation)
 }

@@ -216,7 +216,7 @@ private fun TaskListScreenContent(
 
          if (state.showActionsWarning) {
             Text(
-               stringResource(R.string.warning_max_actions),
+               stringResource(sharedR.string.warning_max_actions),
                Modifier
                   .fillMaxWidth()
                   .background(COLOR_WARNING)

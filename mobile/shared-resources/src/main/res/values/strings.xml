@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Catapult</string>
+    <string name="this_directory_does_not_exist_anymore">This directory does not exist anymore.</string>
+    <string name="warning_max_actions">Note: Only the first 13 enabled actions will be shown on the watch</string>
+</resources>

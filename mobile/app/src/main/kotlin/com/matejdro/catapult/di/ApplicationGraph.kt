@@ -3,10 +3,12 @@ package com.matejdro.catapult.di
 import android.app.Application
 import com.matejdro.catapult.MainViewModel
 import com.matejdro.catapult.bluetooth.WatchSyncer
+import com.matejdro.catapult.common.di.NavigationInjectingGraph
 import com.matejdro.catapult.logging.FileLoggingController
 import com.matejdro.catapult.logging.TinyLogLoggingThread
 import com.matejdro.catapult.navigation.scenes.TabListDetailScene
 import com.matejdro.catapult.receiving.PebbleListenerService
+import com.matejdro.catapult.tasker.TaskerServiceInjector
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metro.Multibinds
@@ -36,12 +38,12 @@ interface MainApplicationGraph : ApplicationGraph {
 }
 
 @Suppress("ComplexInterface") // DI
-interface ApplicationGraph {
+interface ApplicationGraph : NavigationInjectingGraph, TaskerServiceInjector {
    fun getErrorReporter(): ErrorReporter
    fun getDefaultCoroutineScope(): DefaultCoroutineScope
-   fun getNavigationInjectionFactory(): NavigationInjection.Factory
+   override fun getNavigationInjectionFactory(): NavigationInjection.Factory
    fun getMainDeepLinkHandler(): MainDeepLinkHandler
-   fun getNavigationContext(): NavigationContext
+   override fun getNavigationContext(): NavigationContext
    fun getDateFormatter(): AndroidDateTimeFormatter
    fun getMainViewModelFactory(): MainViewModel.Factory
    fun getFileLoggingController(): FileLoggingController

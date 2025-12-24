@@ -62,7 +62,7 @@ class OnboardingScreen(
             navigator.navigate(
                ReplaceBackstack(
                   HomeScreenKey,
-                  DirectoryListKey,
+                  DirectoryListKey(),
                )
             )
          }

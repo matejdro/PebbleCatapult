@@ -1,4 +1,4 @@
-package com.matejdro.catapult.actionlist.ui.errors
+package com.matejdro.catapult.tasker.ui.errors
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource

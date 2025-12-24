@@ -6,12 +6,10 @@
     <string name="edit">Edit</string>
     <string name="delete">Delete</string>
     <string name="starting_directory_cannot_be_edited">Starting Directory cannot be edited</string>
-    <string name="this_directory_does_not_exist_anymore">This directory does not exist anymore.</string>
     <string name="open_directory">Open Directory</string>
     <string name="tasker_task">Tasker Task</string>
     <string name="error_no_tasker">Cannot open Task selector. Is the Tasker installed?</string>
     <string name="will_open_a_directory">"Will open a directory "</string>
     <string name="will_start_a_tasker_task">"Will start a Tasker task "</string>
     <string name="you_can_only_have_up_to_15_directories">You can only have up to 15 directories</string>
-    <string name="warning_max_actions">Note: Only the first 13 enabled actions will be shown on the watch</string>
 </resources>

@@ -10,6 +10,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
 import coil3.ImageLoader
 import coil3.SingletonImageLoader
+import com.matejdro.catapult.common.di.NavigationInjectingApplication
 import com.matejdro.catapult.di.ApplicationGraph
 import com.matejdro.catapult.di.MainApplicationGraph
 import com.matejdro.catapult.logging.ErrorReportingKermitWriter
@@ -26,8 +27,8 @@ import si.inova.kotlinova.core.dispatchers.AccessCallbackDispatcherProvider
 import java.io.File
 import co.touchlab.kermit.Logger as KermitLogger
 
-open class CatapultApplication : Application() {
-   open val applicationGraph: ApplicationGraph by lazy {
+open class CatapultApplication : Application(), NavigationInjectingApplication {
+   override val applicationGraph: ApplicationGraph by lazy {
       createGraphFactory<MainApplicationGraph.Factory>().create(this)
    }
 

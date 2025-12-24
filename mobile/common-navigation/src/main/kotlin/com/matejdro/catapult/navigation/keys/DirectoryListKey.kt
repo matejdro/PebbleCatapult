@@ -5,4 +5,6 @@ import com.matejdro.catapult.navigation.keys.base.ListKey
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data object DirectoryListKey : BaseScreenKey(), ListKey
+data class DirectoryListKey(
+   val targetScreen: String = ActionListKey::class.java.name,
+) : BaseScreenKey(), ListKey

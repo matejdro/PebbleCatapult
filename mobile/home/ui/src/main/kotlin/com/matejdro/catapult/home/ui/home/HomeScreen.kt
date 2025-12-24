@@ -96,7 +96,7 @@ private fun NavigationBarContent(
       NavigationBar {
          NavigationBarItem(
             selected = selectedScreenKey is DirectoryListKey,
-            onClick = { navigate(ReplaceTabContentWith(DirectoryListKey)) },
+            onClick = { navigate(ReplaceTabContentWith(DirectoryListKey())) },
             icon = { Icon(painter = painterResource(id = sharedR.drawable.directories), contentDescription = null) },
             label = { Text(stringResource(R.string.directories)) }
          )
@@ -121,7 +121,7 @@ private fun NavigationRailContent(
       NavigationRail {
          NavigationRailItem(
             selected = selectedScreenKey is DirectoryListKey,
-            onClick = { navigate(ReplaceTabContentWith(DirectoryListKey)) },
+            onClick = { navigate(ReplaceTabContentWith(DirectoryListKey())) },
             icon = { Icon(painter = painterResource(id = sharedR.drawable.directories), contentDescription = null) },
             label = { Text(stringResource(R.string.directories)) }
          )
@@ -160,7 +160,7 @@ internal fun HomePhonePreview() {
                      .background(Color.Red)
                )
             },
-            DirectoryListKey,
+            DirectoryListKey(),
          ),
          navigate = {},
       )
@@ -182,7 +182,7 @@ internal fun HomeTabletPreview() {
                      .background(Color.Red)
                )
             },
-            DirectoryListKey,
+            DirectoryListKey(),
          ),
          navigate = {},
       )

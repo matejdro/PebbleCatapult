@@ -45,6 +45,7 @@ import com.matejdro.catapult.actionlist.api.CatapultDirectory
 import com.matejdro.catapult.actionlist.ui.R
 import com.matejdro.catapult.navigation.instructions.navigateToOrReplaceType
 import com.matejdro.catapult.navigation.keys.ActionListKey
+import com.matejdro.catapult.navigation.keys.ActionListToggleKey
 import com.matejdro.catapult.navigation.keys.DirectoryListKey
 import com.matejdro.catapult.ui.components.AlertDialogWithContent
 import com.matejdro.catapult.ui.components.ProgressErrorSuccessScaffold
@@ -54,6 +55,7 @@ import kotlinx.coroutines.launch
 import si.inova.kotlinova.compose.components.itemsWithDivider
 import si.inova.kotlinova.compose.flow.collectAsStateWithLifecycleAndBlinkingPrevention
 import si.inova.kotlinova.navigation.di.ContributesScreenBinding
+import si.inova.kotlinova.navigation.instructions.ReplaceBackstack
 import si.inova.kotlinova.navigation.navigator.Navigator
 import si.inova.kotlinova.navigation.screens.InjectNavigationScreen
 import si.inova.kotlinova.navigation.screens.Screen
@@ -67,7 +69,11 @@ class DirectoryListScreen(
    @Composable
    override fun Content(key: DirectoryListKey) {
       Content {
-         navigator.navigateToOrReplaceType(ActionListKey(it))
+         if (key.targetScreen == ActionListToggleKey::class.java.name) {
+            navigator.navigate(ReplaceBackstack(ActionListToggleKey(it)))
+         } else {
+            navigator.navigateToOrReplaceType(ActionListKey(it))
+         }
       }
    }
 

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="toggle_action">Toggle Action</string>
+    <string name="select_different_directory">Select different directory</string>
+    <string name="enable">Enable %1$s</string>
+    <string name="disable">Disable %1$s</string>
+</resources>
