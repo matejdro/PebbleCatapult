@@ -22,12 +22,15 @@ import java.util.UUID
 @Inject
 class PebbleListenerService : BasePebbleListenerService() {
    @Inject
+   @Volatile
    override lateinit var coroutineScope: DefaultCoroutineScope
 
    @Inject
+   @Volatile
    @Suppress("VarCouldBeVal") // False positive
    private lateinit var watchappConnectionsManager: WatchappConnectionsManager
 
+   @Volatile
    private var initialized = false
 
    override fun onBind(intent: Intent?): IBinder? {
