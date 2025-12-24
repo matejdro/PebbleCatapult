@@ -80,4 +80,4 @@ class TaskerTaskStarterImpl(private val context: Context) : TaskerTaskStarter {
    }
 }
 
-private const val CHANNEL_ID_ERRORS = "ERRORS"
+internal const val CHANNEL_ID_ERRORS = "ERRORS"
