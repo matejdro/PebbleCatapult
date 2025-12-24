@@ -10,4 +10,5 @@ interface CatapultActionRepository {
    suspend fun update(id: Int, title: String, enabled: Boolean)
    suspend fun delete(id: Int)
    suspend fun reorder(id: Int, toIndex: Int)
+   suspend fun massToggle(directory: Int, enable: List<Int>, disable: List<Int>)
 }

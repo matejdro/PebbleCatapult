@@ -57,7 +57,8 @@ class CatapultActionRepositoryImpl(
          title = action.title,
          directoryId = action.directoryId.toLong(),
          taskerTaskName = action.taskerTaskName,
-         targetDirectoryId = action.targetDirectoryId?.toLong()
+         targetDirectoryId = action.targetDirectoryId?.toLong(),
+         enabled = if (action.enabled) 1L else 0L,
       )
 
       watchSyncer.syncDirectory(action.directoryId)
@@ -104,6 +105,13 @@ class CatapultActionRepositoryImpl(
          }
 
          watchSyncer.syncDirectory(directoryId.toInt())
+      }
+   }
+
+   override suspend fun massToggle(directory: Int, enable: List<Int>, disable: List<Int>) {
+      withIO {
+         dbActionQueries.toggle(enable.map { it.toLong() }, disable.map { it.toLong() })
+         watchSyncer.syncDirectory(directory)
       }
    }
 }

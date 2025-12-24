@@ -350,6 +350,42 @@ class CatapultActionRepositoryImplTest {
       syncer.syncedDirectories.shouldContainExactly(1)
    }
 
+   @Test
+   fun `Perform mass toggle`() = scope.runTest {
+      setupDirectories()
+
+      repo.getAll(1).test {
+         runCurrent()
+
+         repo.insert(CatapultAction("Action A", 1, enabled = false))
+         repo.insert(CatapultAction("Action B", 1, enabled = false))
+         repo.insert(CatapultAction("Action C", 1, enabled = false))
+         repo.insert(CatapultAction("Action D", 1, enabled = true))
+         repo.insert(CatapultAction("Action E", 1, enabled = true))
+         repo.insert(CatapultAction("Action F", 1, enabled = true))
+         runCurrent()
+         syncer.syncedDirectories.clear()
+
+         repo.massToggle(
+            directory = 1,
+            enable = listOf(2, 3, 4),
+            disable = listOf(1, 5, 6),
+         )
+         runCurrent()
+
+         expectMostRecentItem() shouldBeSuccessWithData listOf(
+            CatapultAction("Action A", 1, 1, enabled = false),
+            CatapultAction("Action B", 1, 2, enabled = true),
+            CatapultAction("Action C", 1, 3, enabled = true),
+            CatapultAction("Action D", 1, 4, enabled = true),
+            CatapultAction("Action E", 1, 5, enabled = false),
+            CatapultAction("Action F", 1, 6, enabled = false),
+         )
+      }
+
+      syncer.syncedDirectories.shouldContainExactly(1)
+   }
+
    private suspend fun setupDirectories() {
       val directoryRepo = DirectoryListRepositoryImpl(createTestDirectoryQueries(driver), syncer)
 

@@ -36,6 +36,10 @@ class FakeCatapultActionRepository : CatapultActionRepository {
       actions.update { it + action }
    }
 
+   fun insert(vararg action: CatapultAction) {
+      actions.update { it + action }
+   }
+
    override suspend fun update(id: Int, title: String, enabled: Boolean) {
       actions.update { list -> list.map { if (it.id == id) it.copy(title = title, enabled = enabled) else it } }
    }
@@ -52,5 +56,25 @@ class FakeCatapultActionRepository : CatapultActionRepository {
 
    override suspend fun delete(id: Int) {
       actions.update { list -> list.filter { it.id != id } }
+   }
+
+   override suspend fun massToggle(
+      directory: Int,
+      enable: List<Int>,
+      disable: List<Int>,
+   ) {
+      actions.update { list ->
+         list.map {
+            val enabled = if (enable.contains(it.id)) {
+               true
+            } else if (disable.contains(it.id)) {
+               false
+            } else {
+               it.enabled
+            }
+
+            it.copy(enabled = enabled)
+         }
+      }
    }
 }

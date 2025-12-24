@@ -42,12 +42,13 @@ selectSingleRaw:
     SELECT * FROM dbCatapultAction WHERE id = ?;
 
 insert:
-   INSERT INTO dbCatapultAction (title, directoryId, taskerTaskName, targetDirectoryId, sortOrder)
+   INSERT INTO dbCatapultAction (title, directoryId, taskerTaskName, targetDirectoryId, enabled, sortOrder)
    VALUES (
        :title,
        :directoryId,
        :taskerTaskName,
        :targetDirectoryId,
+       :enabled,
        (SELECT COALESCE(MAX(sortOrder) + 1, 0) FROM dbCatapultAction WHERE directoryId = :directoryId)
    );
 
@@ -84,3 +85,8 @@ reorderDownwards {
 
 getDirectoryId:
 SELECT directoryId FROM dbCatapultAction WHERE id = :id;
+
+toggle {
+    UPDATE dbCatapultAction SET enabled = 1 WHERE id IN :enable;
+    UPDATE dbCatapultAction SET enabled = 0 WHERE id IN :disable;
+}
