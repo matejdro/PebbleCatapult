@@ -7,6 +7,7 @@ import com.matejdro.catapult.actionlist.api.CatapultActionRepository
 import com.matejdro.catapult.actionlist.api.CatapultDirectory
 import com.matejdro.catapult.actionlist.api.DirectoryListRepository
 import com.matejdro.catapult.common.logging.ActionLogger
+import com.matejdro.catapult.navigation.keys.ActionListKey
 import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,7 +17,7 @@ import si.inova.kotlinova.core.outcome.Outcome
 import si.inova.kotlinova.core.outcome.flatMapLatestOutcome
 import si.inova.kotlinova.core.outcome.mapData
 import si.inova.kotlinova.navigation.services.ContributesScopedService
-import si.inova.kotlinova.navigation.services.CoroutineScopedService
+import si.inova.kotlinova.navigation.services.SingleScreenViewModel
 
 @Stable
 @Inject
@@ -26,15 +27,15 @@ class ActionListViewModel(
    private val directoryRepo: DirectoryListRepository,
    private val actionsRepo: CatapultActionRepository,
    private val actionLogger: ActionLogger,
-) : CoroutineScopedService(resources.scope) {
+) : SingleScreenViewModel<ActionListKey>(resources.scope) {
    private val _uiState = MutableStateFlow<Outcome<ActionListState>>(Outcome.Progress())
    val uiState: StateFlow<Outcome<ActionListState>> = _uiState
 
    private var selectedDirectory: Int? = null
 
-   fun load(id: Int) {
+   override fun onServiceRegistered() {
+      val id = key.id
       actionLogger.logAction { "TaskListViewModel.load(id = $id)" }
-      if (selectedDirectory == id) return
       selectedDirectory = id
 
       resources.launchResourceControlTask(_uiState) {

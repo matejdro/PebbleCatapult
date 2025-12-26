@@ -4,6 +4,7 @@ import com.matejdro.catapult.actionlist.api.CatapultAction
 import com.matejdro.catapult.actionlist.api.CatapultDirectory
 import com.matejdro.catapult.actionlist.test.FakeCatapultActionRepository
 import com.matejdro.catapult.actionlist.test.FakeDirectoryListRepository
+import com.matejdro.catapult.navigation.keys.ActionListKey
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import kotlinx.coroutines.flow.first
@@ -28,7 +29,8 @@ class ActionListViewModelTest {
       actionsRepo.insert(CatapultAction("Action A", 1, taskerTaskName = "Task A", id = 1))
       actionsRepo.insert(CatapultAction("Action B", 1, taskerTaskName = "Task B", id = 2))
 
-      vm.load(1)
+      vm.key = ActionListKey(1)
+      vm.onServiceRegistered()
       runCurrent()
 
       vm.uiState.value shouldBeSuccessWithData ActionListState(
@@ -42,47 +44,11 @@ class ActionListViewModelTest {
    }
 
    @Test
-   fun `Allow switching to a different directory`() = scope.runTest {
-      initDirectories()
-
-      actionsRepo.insert(CatapultAction("Action 1A", 1, taskerTaskName = "Task A", id = 1))
-      actionsRepo.insert(CatapultAction("Action 1B", 1, taskerTaskName = "Task B", id = 2))
-
-      actionsRepo.insert(CatapultAction("Action 2A", 2, taskerTaskName = "Task A", id = 3))
-      actionsRepo.insert(CatapultAction("Action 2B", 2, taskerTaskName = "Task B", id = 4))
-
-      vm.load(1)
-      runCurrent()
-      vm.load(2)
-      runCurrent()
-
-      vm.uiState.value shouldBeSuccessWithData ActionListState(
-         CatapultDirectory(2, "Another Directory"),
-         listOf(
-            CatapultAction("Action 2A", 2, taskerTaskName = "Task A", id = 3),
-            CatapultAction("Action 2B", 2, taskerTaskName = "Task B", id = 4),
-         ),
-         false
-      )
-   }
-
-   @Test
-   fun `Do not reset flows when collecting multiple ones`() = scope.runTest {
-      initDirectories()
-
-      repeat(2) {
-         vm.load(1)
-         runCurrent()
-      }
-
-      directoryRepo.numCollections shouldBe 1
-   }
-
-   @Test
    fun `Allow adding new Tasker task`() = scope.runTest {
       initDirectories()
 
-      vm.load(1)
+      vm.key = ActionListKey(1)
+      vm.onServiceRegistered()
       vm.add("A Task", "My Task", null)
       runCurrent()
 
@@ -95,7 +61,8 @@ class ActionListViewModelTest {
    fun `Allow adding new Directory link`() = scope.runTest {
       initDirectories()
 
-      vm.load(1)
+      vm.key = ActionListKey(1)
+      vm.onServiceRegistered()
       vm.add("A Task", null, 2)
       runCurrent()
 
@@ -110,7 +77,8 @@ class ActionListViewModelTest {
       actionsRepo.insert(CatapultAction("Action A", 1, taskerTaskName = "Task A", id = 1))
       actionsRepo.insert(CatapultAction("Action B", 1, taskerTaskName = "Task B", id = 2))
 
-      vm.load(1)
+      vm.key = ActionListKey(1)
+      vm.onServiceRegistered()
       runCurrent()
       vm.editActionTitle(2, "Action C")
       runCurrent()
@@ -127,7 +95,8 @@ class ActionListViewModelTest {
       actionsRepo.insert(CatapultAction("Action A", 1, taskerTaskName = "Task A", id = 1))
       actionsRepo.insert(CatapultAction("Action B", 1, taskerTaskName = "Task B", id = 2))
 
-      vm.load(1)
+      vm.key = ActionListKey(1)
+      vm.onServiceRegistered()
       runCurrent()
       vm.editActionEnabled(2, false)
       runCurrent()
@@ -144,7 +113,8 @@ class ActionListViewModelTest {
       actionsRepo.insert(CatapultAction("Action A", 1, taskerTaskName = "Task A", id = 1))
       actionsRepo.insert(CatapultAction("Action B", 1, taskerTaskName = "Task B", id = 2))
 
-      vm.load(1)
+      vm.key = ActionListKey(1)
+      vm.onServiceRegistered()
       vm.deleteAction(1)
       runCurrent()
 
@@ -159,7 +129,8 @@ class ActionListViewModelTest {
       actionsRepo.insert(CatapultAction("Action A", 1, taskerTaskName = "Task A", id = 1))
       actionsRepo.insert(CatapultAction("Action B", 1, taskerTaskName = "Task B", id = 2))
 
-      vm.load(1)
+      vm.key = ActionListKey(1)
+      vm.onServiceRegistered()
       vm.reorder(1, 1)
       runCurrent()
 
@@ -176,7 +147,8 @@ class ActionListViewModelTest {
          actionsRepo.insert(CatapultAction("Action $it", 1, taskerTaskName = "Task A", id = it))
       }
 
-      vm.load(1)
+      vm.key = ActionListKey(1)
+      vm.onServiceRegistered()
       runCurrent()
 
       vm.uiState.value.shouldBeInstanceOf<Outcome.Success<ActionListState>>()

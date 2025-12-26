@@ -98,9 +98,6 @@ class ActionListScreen(
    override fun Content(key: ActionListKey) {
       val stateOutcome = viewModel.uiState.collectAsStateWithLifecycleAndBlinkingPrevention().value
 
-      LaunchedEffect(key.id) {
-         viewModel.load(key.id)
-      }
       var addDialog by rememberSaveable { mutableStateOf<AddDialogAction?>(null) }
       var editDialog by remember { mutableStateOf<CatapultAction?>(null) }
       var showDirectoryPicker by remember { mutableStateOf(false) }
