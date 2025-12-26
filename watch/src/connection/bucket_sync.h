@@ -49,6 +49,8 @@ void bucket_sync_set_bucket_list_change_callback(void (*callback)());
  */
 void bucket_sync_set_bucket_data_change_callback(void(*callback)(BucketMetadata, void*), void*context);
 
+void bucket_sync_set_auto_close_after_sync();
+
 /**
  * Clear the callback if currently registered callback is the passed one.
  */

@@ -23,7 +23,8 @@ static DataChangeCallback data_change_callback = {
 static void (*syncing_status_callback)() = NULL;
 
 static uint16_t bucket_sync_pending_next_version = 0;
-bool bucket_sync_is_currently_syncing = false;
+bool bucket_sync_is_currently_syncing = true;
+bool close_after_sync = false;
 
 static uint32_t get_bucket_persist_key(uint8_t bucket_id);
 static void delete_inactive_buckets(const uint8_t* data, const uint8_t new_active_buckets);
@@ -95,7 +96,7 @@ void bucket_sync_set_bucket_list_change_callback(void (*callback)())
     list_change_callback = callback;
 }
 
-void bucket_sync_set_bucket_data_change_callback(void (*callback)(BucketMetadata, void*), void* context)
+void bucket_sync_set_bucket_data_change_callback(void(*callback)(BucketMetadata, void*), void*context)
 {
     data_change_callback = (DataChangeCallback){
         .data_change_callback = callback,
@@ -103,7 +104,7 @@ void bucket_sync_set_bucket_data_change_callback(void (*callback)(BucketMetadata
     };
 }
 
-void bucket_sync_clear_bucket_data_change_callback(void (*callback)(BucketMetadata, void*), void* context)
+void bucket_sync_clear_bucket_data_change_callback(void(*callback)(BucketMetadata, void*), void*context)
 {
     if (data_change_callback.data_change_callback == callback && data_change_callback.context == context)
     {
@@ -124,6 +125,11 @@ void bucket_sync_on_start_received(const uint8_t* data, size_t data_size)
         if (local_syncing_callback != NULL)
         {
             local_syncing_callback();
+        }
+
+        if (close_after_sync)
+        {
+            window_stack_pop_all(true);
         }
 
         return;
@@ -227,6 +233,11 @@ static void complete_sync(void)
     {
         local_syncing_callback();
     }
+
+    if (close_after_sync)
+    {
+        window_stack_pop_all(true);
+    }
 }
 
 static void delete_inactive_buckets(const uint8_t* data, const uint8_t new_active_buckets)
@@ -260,4 +271,16 @@ static uint32_t get_bucket_persist_key(const uint8_t bucket_id)
 void bucket_sync_register_syncing_status_changed_callback(void (*callback)())
 {
     syncing_status_callback = callback;
+}
+
+void bucket_sync_set_auto_close_after_sync()
+{
+    if (!bucket_sync_is_currently_syncing)
+    {
+        window_stack_pop_all(true);
+    }
+    else
+    {
+        close_after_sync = true;
+    }
 }
