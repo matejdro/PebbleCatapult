@@ -16,6 +16,7 @@ import com.matejdro.catapult.di.MainApplicationGraph
 import com.matejdro.catapult.logging.ErrorReportingKermitWriter
 import com.matejdro.catapult.logging.TinyLogKermitWriter
 import com.matejdro.catapult.logging.TinyLogLogcatLogger
+import com.matejdro.catapult.notifications.NotificationChannelManager
 import dev.zacsweers.metro.createGraphFactory
 import dispatch.core.DefaultDispatcherProvider
 import dispatch.core.defaultDispatcher
@@ -71,6 +72,8 @@ open class CatapultApplication : Application(), NavigationInjectingApplication {
       applicationGraph.getDefaultCoroutineScope().launch {
          applicationGraph.getWatchSyncer().init()
       }
+
+      NotificationChannelManager(this).createChannels()
    }
 
    private fun enableStrictMode() {

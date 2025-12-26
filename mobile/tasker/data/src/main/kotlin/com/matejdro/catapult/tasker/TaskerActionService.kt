@@ -1,18 +1,15 @@
 package com.matejdro.catapult.tasker
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Binder
-import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
-import androidx.core.content.getSystemService
 import androidx.core.os.bundleOf
+import com.matejdro.catapult.common.NotificationsKeys
 import com.matejdro.catapult.common.di.NavigationInjectingApplication
 import dev.zacsweers.metro.Inject
 import dispatch.core.MainImmediateCoroutineScope
@@ -105,19 +102,7 @@ class TaskerActionService : Service() {
    }
 
    private fun startForeground() {
-      val notificationManager = getSystemService<NotificationManager>()!!
-
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-         notificationManager.createNotificationChannel(
-            NotificationChannel(
-               CHANNEL_ID_TASKER_SERVICE,
-               getString(R.string.channel_background_work),
-               NotificationManager.IMPORTANCE_LOW
-            )
-         )
-      }
-
-      val notification = NotificationCompat.Builder(this, CHANNEL_ID_TASKER_SERVICE)
+      val notification = NotificationCompat.Builder(this, NotificationsKeys.CHANNEL_ID_TASKER_SERVICE)
          .setContentTitle(
             getString(com.matejdro.catapult.sharedresources.R.string.app_name)
          )
@@ -125,12 +110,14 @@ class TaskerActionService : Service() {
          .setSmallIcon(com.matejdro.catapult.sharedresources.R.drawable.ic_launcher)
          .build()
 
-      ServiceCompat.startForeground(this, NOTIFICATION_ID, notification, FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
+      ServiceCompat.startForeground(
+         this,
+         NotificationsKeys.NOTIFICATION_ID_TASKER_SERVICE,
+         notification,
+         FOREGROUND_SERVICE_TYPE_SPECIAL_USE
+      )
    }
 }
-
-private const val CHANNEL_ID_TASKER_SERVICE = "TASKER_SERVICE"
-private const val NOTIFICATION_ID = 15476
 
 /**
  * copy of the [ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE] for compat reasons

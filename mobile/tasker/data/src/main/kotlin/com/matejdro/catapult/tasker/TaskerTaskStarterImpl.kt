@@ -1,11 +1,10 @@
 package com.matejdro.catapult.tasker
 
-import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
-import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.content.getSystemService
+import com.matejdro.catapult.common.NotificationsKeys
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
@@ -54,19 +53,7 @@ class TaskerTaskStarterImpl(private val context: Context) : TaskerTaskStarter {
    }
 
    private fun showErrorNotification(message: String) {
-      val notificationManager = context.getSystemService<NotificationManager>()!!
-
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-         notificationManager.createNotificationChannel(
-            NotificationChannel(
-               CHANNEL_ID_ERRORS,
-               context.getString(R.string.channel_errors),
-               NotificationManager.IMPORTANCE_HIGH
-            )
-         )
-      }
-
-      val notification = NotificationCompat.Builder(context, CHANNEL_ID_ERRORS)
+      val notification = NotificationCompat.Builder(context, NotificationsKeys.CHANNEL_ID_ERRORS)
          .setContentTitle(
             context.getString(
                R.string.notification_title_error,
@@ -76,8 +63,6 @@ class TaskerTaskStarterImpl(private val context: Context) : TaskerTaskStarter {
          .setSmallIcon(com.matejdro.catapult.sharedresources.R.drawable.ic_launcher)
          .build()
 
-      notificationManager.notify(1, notification)
+      context.getSystemService<NotificationManager>()!!.notify(NotificationsKeys.NOTIFICATION_ID_ERROR, notification)
    }
 }
-
-internal const val CHANNEL_ID_ERRORS = "ERRORS"
