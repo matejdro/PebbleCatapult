@@ -11,6 +11,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -19,6 +20,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation3.runtime.NavEntryDecorator
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.scene.DialogSceneStrategy
 import com.matejdro.catapult.navigation.scenes.TabListDetailScene
 import com.matejdro.catapult.navigation.scenes.rememberTabListDetailSceneStrategy
 import com.matejdro.catapult.ui.theme.CatapultTheme
@@ -119,7 +121,8 @@ class MainActivity : ComponentActivity() {
                         }
                      )
                   ),
-                  sceneStrategy = rememberTabListDetailSceneStrategy(tabListDetailSceneFactory)
+                  sceneStrategy = rememberTabListDetailSceneStrategy(tabListDetailSceneFactory) then
+                     remember { DialogSceneStrategy() }
                )
 
                LogCurrentScreen(backstack)

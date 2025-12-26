@@ -72,7 +72,7 @@ import com.airbnb.android.showkase.annotation.ShowkaseComposable
 import com.matejdro.catapult.actionlist.api.CatapultAction
 import com.matejdro.catapult.actionlist.api.CatapultDirectory
 import com.matejdro.catapult.actionlist.ui.R
-import com.matejdro.catapult.actionlist.ui.directorypicker.DirectoryPickerScreen
+import com.matejdro.catapult.actionlist.ui.directorypicker.DirectoryPickerKey
 import com.matejdro.catapult.actionlist.ui.errors.taskListUserFriendlyMessage
 import com.matejdro.catapult.actionlist.ui.util.MaxStringSizeBytesInputTransformation
 import com.matejdro.catapult.navigation.keys.ActionListKey
@@ -85,6 +85,9 @@ import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import si.inova.kotlinova.compose.components.itemsWithDivider
 import si.inova.kotlinova.compose.flow.collectAsStateWithLifecycleAndBlinkingPrevention
+import si.inova.kotlinova.compose.result.registerResultReceiver
+import si.inova.kotlinova.navigation.instructions.navigateTo
+import si.inova.kotlinova.navigation.navigator.Navigator
 import si.inova.kotlinova.navigation.screens.InjectNavigationScreen
 import si.inova.kotlinova.navigation.screens.Screen
 import com.matejdro.catapult.sharedresources.R as sharedR
@@ -92,7 +95,7 @@ import com.matejdro.catapult.sharedresources.R as sharedR
 @InjectNavigationScreen
 class ActionListScreen(
    private val viewModel: ActionListViewModel,
-   private val directoryPicker: DirectoryPickerScreen,
+   private val navigator: Navigator,
 ) : Screen<ActionListKey>() {
    @Composable
    override fun Content(key: ActionListKey) {
@@ -100,7 +103,6 @@ class ActionListScreen(
 
       var addDialog by rememberSaveable { mutableStateOf<AddDialogAction?>(null) }
       var editDialog by remember { mutableStateOf<CatapultAction?>(null) }
-      var showDirectoryPicker by remember { mutableStateOf(false) }
 
       val taskerSelectResult = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
          val taskName = it.data?.dataString ?: return@rememberLauncherForActivityResult
@@ -110,6 +112,9 @@ class ActionListScreen(
       val context = LocalContext.current
       val scope = rememberCoroutineScope()
       val snackbarHostState = remember { SnackbarHostState() }
+      val directorySelectResult = registerResultReceiver<DirectoryPickerKey.Result> {
+         addDialog = AddDialogAction.Directory(it.title, it.id)
+      }
 
       ProgressErrorSuccessScaffold(
          stateOutcome,
@@ -134,7 +139,7 @@ class ActionListScreen(
                editDialog = it
             },
             addDirectoryLink = {
-               showDirectoryPicker = true
+               navigator.navigateTo(DirectoryPickerKey(directorySelectResult))
             },
             reorderAction = { id, toIndex ->
                viewModel.reorder(id, toIndex)
@@ -165,19 +170,6 @@ class ActionListScreen(
             { viewModel.editActionTitle(action.id, it) },
             { editDialog = null },
             { viewModel.deleteAction(action.id) }
-         )
-      }
-
-      if (showDirectoryPicker) {
-         directoryPicker.Content(
-            context.getString(R.string.open_directory),
-            onDirectorySelect = {
-               addDialog = AddDialogAction.Directory(it.title, it.id)
-               showDirectoryPicker = false
-            },
-            onDismiss = {
-               showDirectoryPicker = false
-            }
          )
       }
    }
