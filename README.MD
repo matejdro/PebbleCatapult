@@ -10,8 +10,7 @@ immediately upon opening, there is no need to wait for the data to come from the
 
 # Install
 
-**Note: Until Core merges [PebbleKit2 PR](https://github.com/coredevices/mobileapp/pull/26),
-this app is only compatible with the [microPebble](https://github.com/matejdro/microPebble).**
+**Note: Core/Pebble app is only supported from its version 1.0.7.7 onwards**
 
 ## Android app
 
