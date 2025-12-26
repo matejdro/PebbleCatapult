@@ -31,6 +31,7 @@ dependencies {
    implementation(libs.kotlinova.core)
    implementation(libs.kotlinova.navigation.navigation3)
    implementation(libs.androidx.navigation3)
+   implementation(libs.composePreference)
 
    testImplementation(projects.actionlist.test)
    testImplementation(libs.kotlinova.core.test)

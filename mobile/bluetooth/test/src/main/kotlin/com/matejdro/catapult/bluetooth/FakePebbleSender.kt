@@ -18,6 +18,8 @@ class FakePebbleSender(
    var sendingResult: TransmissionResult = TransmissionResult.Success
    var reportNoPebbleAppInstalled: Boolean = false
 
+   val startedApps = mutableListOf<AppLifecycleEvent>()
+
    var pauseSending: Boolean
       get() = _pauseSending.value
       set(value) {
@@ -45,7 +47,9 @@ class FakePebbleSender(
       watchappUUID: UUID,
       watches: List<WatchIdentifier>?,
    ): Map<WatchIdentifier, TransmissionResult>? {
-      throw UnsupportedOperationException("Not supported in tests")
+      startedApps += AppLifecycleEvent(watchappUUID, watches)
+
+      return watches?.associateWith { sendingResult }.orEmpty()
    }
 
    override suspend fun stopAppOnTheWatch(
@@ -64,6 +68,11 @@ class FakePebbleSender(
       val data: PebbleDictionary,
       val watches: List<WatchIdentifier>?,
       val sentTime: Long,
+   )
+
+   data class AppLifecycleEvent(
+      val watchappUUID: UUID,
+      val watches: List<WatchIdentifier>?,
    )
 }
 

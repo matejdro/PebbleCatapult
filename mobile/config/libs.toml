@@ -27,6 +27,7 @@ certificateTransparency = "2.8.9"
 coil = "3.3.0"
 composeDnd = "0.4.0"
 composeGuard = "2.4.0"
+composePreference = "2.1.0"
 dependencyAnalysis = "3.0.4"
 desugarJdkLibs = "2.1.5"
 detekt = "1.23.8"
@@ -120,6 +121,7 @@ coil = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
 coil-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coil" }
 composeDnd = { module = "com.mohamedrejeb.dnd:compose-dnd", version.ref = "composeDnd" }
 composeGuard = { module = "com.joetr.compose.guard:com.joetr.compose.guard.gradle.plugin", version.ref = "composeGuard" }
+composePreference = { module = "me.zhanghai.compose.preference:preference", version.ref = "composePreference" }
 dependencyAnalysis = { module = "com.autonomousapps:dependency-analysis-gradle-plugin", version.ref = "dependencyAnalysis" }
 desugarJdkLibs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugarJdkLibs" }
 detekt-api = { module = "io.gitlab.arturbosch.detekt:detekt-api", version.ref = "detekt" }

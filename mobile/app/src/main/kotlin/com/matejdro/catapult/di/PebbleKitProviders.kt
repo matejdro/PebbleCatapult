@@ -5,7 +5,9 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesTo
 import dev.zacsweers.metro.Provides
 import dev.zacsweers.metro.SingleIn
+import io.rebble.pebblekit2.client.DefaultPebbleInfoRetriever
 import io.rebble.pebblekit2.client.DefaultPebbleSender
+import io.rebble.pebblekit2.client.PebbleInfoRetriever
 import io.rebble.pebblekit2.client.PebbleSender
 
 @ContributesTo(AppScope::class)
@@ -13,4 +15,8 @@ interface PebbleKitProviders {
    @Provides
    @SingleIn(AppScope::class)
    fun providePebbleSender(context: Context): PebbleSender = DefaultPebbleSender(context)
+
+   @Provides
+   @SingleIn(AppScope::class)
+   fun providePebbleInfoRetriever(context: Context): PebbleInfoRetriever = DefaultPebbleInfoRetriever(context)
 }

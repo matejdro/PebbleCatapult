@@ -4,4 +4,11 @@
     <string name="select_different_directory">Select different directory</string>
     <string name="enable">Enable %1$s</string>
     <string name="disable">Disable %1$s</string>
+    <string name="only_on_watchface_title">Only on watchface</string>
+    <string name="only_on_watchface_description">When enabled, this Tasker action will not be executed if the watch is not on the
+        watchface
+    </string>
+    <string name="save">Save</string>
+    <string name="sync_now">Sync Now</string>
+    <string name="sync_now_only_on_watchface">Sync Now, only on watchface</string>
 </resources>
