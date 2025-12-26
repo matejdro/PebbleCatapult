@@ -1,5 +1,6 @@
 package com.matejdro.catapult.bluetooth
 
+import com.matejdro.catapult.bluetooth.api.WATCHAPP_UUID
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject

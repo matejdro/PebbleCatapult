@@ -1,5 +1,6 @@
 package com.matejdro.catapult.bluetooth
 
+import com.matejdro.catapult.bluetooth.api.WATCHAPP_UUID
 import dispatch.core.DefaultCoroutineScope
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly

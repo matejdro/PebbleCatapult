@@ -2,6 +2,7 @@ package com.matejdro.catapult.bluetooth
 
 import com.matejdro.bucketsync.BucketSyncRepository
 import com.matejdro.catapult.actionlist.api.CatapultActionRepository
+import com.matejdro.catapult.bluetooth.api.WATCHAPP_UUID
 import com.matejdro.catapult.bluetooth.util.requireUint
 import com.matejdro.catapult.bluetooth.util.writeUByte
 import com.matejdro.catapult.common.flow.firstData
