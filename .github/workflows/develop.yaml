@@ -124,7 +124,7 @@ jobs:
         if: "${{ env.BUILD_WATCH == 'true' }}"
        # Newest version of Python is not supported by the Pebble SDK yet
       - name: Downgrade python to 3.13
-      - uses: actions/setup-python@v6
+        uses: actions/setup-python@v6
         with:
           python-version: '3.13'
         if: "${{ env.BUILD_WATCH == 'true' }}"
