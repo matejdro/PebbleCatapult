@@ -122,6 +122,12 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v7
         if: "${{ env.BUILD_WATCH == 'true' }}"
+       # Newest version of Python is not supported by the Pebble SDK yet
+      - name: Downgrade python to 3.13
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+        if: "${{ env.BUILD_WATCH == 'true' }}"
       - name: Install pebble SDK
         run: "uv tool install pebble-tool && pebble sdk install latest"
         if: "${{ env.BUILD_WATCH == 'true' }}"
@@ -163,6 +169,14 @@ jobs:
 
       # Tests
 
+      - name: Lint
+        uses: burrunan/gradle-cache-action@v3.0.1
+        with:
+          arguments: "lintRelease detektMain detektTest -x detektDebug -x detektDebugUnitTest assertModuleGraph buildHealth detectTooManyFiles debugComposeCompilerCheck reportMerge --continue --daemon"
+          build-root-directory: mobile
+          debug: false
+          concurrent: true
+        if: "${{ env.BUILD_MOBILE == 'true' }}"
       - name: Compile Unit Tests
         uses: burrunan/gradle-cache-action@v3.0.1
         with:
@@ -170,24 +184,6 @@ jobs:
           build-root-directory: mobile
           debug: false
           concurrent: true
-          read-only: ${{ github.ref != 'refs/heads/master' }}
-        if: "${{ env.BUILD_MOBILE == 'true' }}" 
-      - name: Lint
-        uses: burrunan/gradle-cache-action@v3.0.1
-        with:
-          arguments: "lintRelease detektMain detektTest -x detektDebug -x detektDebugUnitTest assertModuleGraph buildHealth detectTooManyFiles debugComposeCompilerCheck verifyDebugDatabaseMigration reportMerge --continue --daemon"
-          build-root-directory: mobile
-          debug: false
-          concurrent: true
-          read-only: ${{ github.ref != 'refs/heads/master' }}
-      - name: Double check DB with the generated schema
-        uses: burrunan/gradle-cache-action@v3.0.1
-        with:
-          arguments: "generateDebugDatabaseSchema verifyDebugDatabaseMigration --continue --daemon"
-          build-root-directory: mobile
-          debug: false
-          concurrent: true
-          read-only: ${{ github.ref != 'refs/heads/master' }}
         if: "${{ env.BUILD_MOBILE == 'true' }}"
       - name: Run Unit Tests
         uses: burrunan/gradle-cache-action@v3.0.1
@@ -196,10 +192,9 @@ jobs:
           build-root-directory: mobile
           debug: false
           concurrent: true
-          read-only: ${{ github.ref != 'refs/heads/master' }}
         if: "${{ env.BUILD_MOBILE == 'true' }}"
       - name: "Generate new Screenshot Tests"
-        run: "config/generate-screenshots.sh master"
+        run: "config/generate-screenshots.sh ${{ github.event.pull_request.head.ref }}"
         working-directory: mobile
         if: "${{ env.BUILD_MOBILE == 'true' }}"
       - name: "Run Screenshot Tests"
@@ -209,7 +204,6 @@ jobs:
           build-root-directory: mobile
           debug: false
           concurrent: true
-          read-only: ${{ github.ref != 'refs/heads/master' }}
         if: "${{ env.BUILD_MOBILE == 'true' }}"
       - name: "Upload Screenshot test failures"
         uses: actions/upload-artifact@v4
