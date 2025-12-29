@@ -28,7 +28,7 @@ bool close_after_sync = false;
 
 static uint32_t get_bucket_persist_key(uint8_t bucket_id);
 static void delete_inactive_buckets(const uint8_t* data, const uint8_t new_active_buckets);
-static void save_bucket_data(const uint8_t* data, size_t data_size, uint8_t position);
+static void save_bucket_data(const uint8_t* data, size_t data_size, size_t position);
 static void complete_sync(void);
 
 void bucket_sync_init()
@@ -181,7 +181,7 @@ void bucket_sync_on_next_packet_received(const uint8_t* data, size_t data_size)
     }
 }
 
-static void save_bucket_data(const uint8_t* data, size_t data_size, uint8_t position)
+static void save_bucket_data(const uint8_t* data, size_t data_size, size_t position)
 {
     while (position < data_size)
     {
