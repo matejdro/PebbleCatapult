@@ -196,7 +196,7 @@ jobs:
           concurrent: true
         if: "${{ env.BUILD_MOBILE == 'true' }}"
       - name: "Generate new Screenshot Tests"
-        run: "config/generate-screenshots.sh ${{ github.event.pull_request.head.ref }}"
+        run: "config/generate-screenshots.sh master"
         working-directory: mobile
         if: "${{ env.BUILD_MOBILE == 'true' }}"
       - name: "Run Screenshot Tests"
