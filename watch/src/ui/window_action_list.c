@@ -38,6 +38,12 @@ static uint16_t menu_get_num_rows_callback(MenuLayer* me, uint16_t section_index
 }
 
 // ReSharper disable once CppParameterMayBeConstPtrOrRef
+static int16_t menu_get_cell_height_callback(MenuLayer* me, MenuIndex* cell_index, void* data)
+{
+    return 40;
+}
+
+// ReSharper disable once CppParameterMayBeConstPtrOrRef
 static void menu_draw_row_callback(GContext* ctx, const Layer* cell_layer, MenuIndex* cell_index, void* data)
 {
     const int16_t row = cell_index->row;
@@ -80,11 +86,16 @@ static void window_load(Window* window)
     menu_layer_set_callbacks(window_action_list->menu,
                              window_action_list,
                              (MenuLayerCallbacks)
-                             {
-                                 .get_num_rows = menu_get_num_rows_callback,
-                                 .draw_row = menu_draw_row_callback,
-                             }
-    );
+    {
+        .
+        get_num_rows = menu_get_num_rows_callback,
+        .
+        draw_row = menu_draw_row_callback,
+        .
+        get_cell_height = menu_get_cell_height_callback
+    }
+    )
+    ;
 
     layer_add_child(window_layer, menu_layer_get_layer(window_action_list->menu));
     layer_add_child(window_layer, window_action_list->status_bar->layer);
@@ -126,26 +137,34 @@ static void on_button_up_pressed(ClickRecognizerRef recognizer, void* context)
         menu_layer_set_selected_index(
             menu_layer,
             (MenuIndex)
-            {
-                .row = last_index,
-                .section = 0
-            },
-            MenuRowAlignCenter,
+        {
+            .
+            row = last_index,
+            .
+            section = 0
+        }
+        ,
+        MenuRowAlignCenter,
             true
-        );
+        )
+        ;
     }
     else
     {
         menu_layer_set_selected_index(
             menu_layer,
             (MenuIndex)
-            {
-                .row = index.row - 1,
-                .section = 0
-            },
-            MenuRowAlignCenter,
+        {
+            .
+            row = index.row - 1,
+            .
+            section = 0
+        }
+        ,
+        MenuRowAlignCenter,
             true
-        );
+        )
+        ;
     }
 }
 
@@ -161,26 +180,34 @@ static void on_button_down_pressed(ClickRecognizerRef recognizer, void* context)
         menu_layer_set_selected_index(
             menu_layer,
             (MenuIndex)
-            {
-                .row = 0,
-                .section = 0
-            },
-            MenuRowAlignCenter,
+        {
+            .
+            row = 0,
+            .
+            section = 0
+        }
+        ,
+        MenuRowAlignCenter,
             true
-        );
+        )
+        ;
     }
     else
     {
         menu_layer_set_selected_index(
             menu_layer,
             (MenuIndex)
-            {
-                .row = index.row + 1,
-                .section = 0
-            },
-            MenuRowAlignCenter,
+        {
+            .
+            row = index.row + 1,
+            .
+            section = 0
+        }
+        ,
+        MenuRowAlignCenter,
             true
-        );
+        )
+        ;
     }
 }
 
@@ -231,13 +258,18 @@ void window_action_list_show(uint8_t directory_id)
     window_set_user_data(window, window_action_list);
 
     window_set_window_handlers(window, (WindowHandlers)
-                               {
-                                   .load = window_load,
-                                   .unload = window_unload,
-                                   .appear = window_show,
-                                   .disappear = window_hide
-                               }
-    );
+    {
+        .
+        load = window_load,
+        .
+        unload = window_unload,
+        .
+        appear = window_show,
+        .
+        disappear = window_hide
+    }
+    )
+    ;
     const bool animated = true;
     window_stack_push(window, animated);
 }
