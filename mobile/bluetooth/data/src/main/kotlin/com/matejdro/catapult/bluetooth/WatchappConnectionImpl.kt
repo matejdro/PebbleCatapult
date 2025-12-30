@@ -37,6 +37,7 @@ class WatchappConnectionImpl(
    private val actionRepository: CatapultActionRepository,
    private val taskerTaskStarter: TaskerTaskStarter,
    private val backgroundSyncNotifier: BackgroundSyncNotifier,
+   private val watchappOpenController: WatchappOpenController,
    pebbleSender: PebbleSender,
 ) : WatchAppConnection {
    private val packetQueue = PacketQueue(pebbleSender, watch, WATCHAPP_UUID)
@@ -125,19 +126,20 @@ class WatchappConnectionImpl(
          val initialUpdate = bucketSyncRepository.checkForNextUpdate(initialWatchVersion)
          val watchVersion: UShort
          if (initialUpdate == null) {
-            logcat { "Watch up to date" }
             bucketsyncBuffer.writeUByte(SYNC_STATUS_UP_TO_DATE)
 
             packetQueue.sendPacket(
-               mapOf(
+               mapOfNotNull(
                   0u to PebbleDictionaryItem.UInt8(1u),
                   1u to PebbleDictionaryItem.UInt16(PROTOCOL_VERSION),
                   2u to PebbleDictionaryItem.ByteArray(bucketsyncBuffer.readByteArray()),
+                  (3u to PebbleDictionaryItem.UInt8(1u)).takeIf { watchappOpenController.isNextWatchappOpenForAutoSync() },
                ),
                PRIORITY_SYNC
             )
             watchVersion = initialWatchVersion
             backgroundSyncNotifier.notifyWatchFullySynced(watch.value)
+            watchappOpenController.resetNextWatchappOpen()
          } else {
             logcat { "Sending bucketsync update: ${initialUpdate.toVersion} | ${initialUpdate.bucketsToUpdate.map { it.id }}" }
             val totalHelloSizeUntilBuckets = SIZE_OF_STATIC_PART_OF_HELLO_PACKET + 2 * initialUpdate.activeBuckets.size
@@ -152,13 +154,15 @@ class WatchappConnectionImpl(
             logcat { "Extra packets: ${extraPackets.size}" }
 
             packetQueue.sendPacket(
-               mapOf(
+               mapOfNotNull(
                   0u to PebbleDictionaryItem.UInt8(1u),
                   1u to PebbleDictionaryItem.UInt16(PROTOCOL_VERSION),
                   2u to PebbleDictionaryItem.ByteArray(bucketsyncBuffer.readByteArray()),
+                  (3u to PebbleDictionaryItem.UInt8(1u)).takeIf { watchappOpenController.isNextWatchappOpenForAutoSync() },
                ),
                PRIORITY_SYNC
             )
+            watchappOpenController.resetNextWatchappOpen()
 
             for (packet in extraPackets) {
                packetQueue.sendPacket(
@@ -226,12 +230,16 @@ class WatchappConnectionImpl(
    }
 }
 
+private fun <K, V> mapOfNotNull(vararg pairs: Pair<K, V>?): Map<K, V> =
+   pairs.filterNotNull().toMap()
+
 internal const val SYNC_STATUS_UP_TO_DATE: UByte = 2u
 internal const val SYNC_STATUS_LAST_PACKET: UByte = 1u
 internal const val SYNC_STATUS_MORE_PACKETS: UByte = 0u
 
 private const val SIZE_OF_STATIC_PART_OF_HELLO_PACKET =
    1 +
+      7 + 1 +
       7 + 1 +
       7 + 2 +
       7 +

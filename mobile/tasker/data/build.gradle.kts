@@ -12,10 +12,10 @@ android {
 
 dependencies {
    api(projects.actionlist.api)
+   api(projects.bluetooth.api)
    api(projects.tasker.api)
    api(libs.dispatch)
 
-   implementation(projects.bluetooth.api)
    implementation(projects.commonAndroid)
    implementation(projects.sharedResources)
    implementation(libs.androidx.core)

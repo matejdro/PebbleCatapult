@@ -13,24 +13,16 @@ int main(void)
 
     send_watch_welcome();
 
-    if (launch_reason() == APP_LAUNCH_PHONE)
+    uint8_t tmp[PERSIST_DATA_MAX_LENGTH];
+    const bool loaded = bucket_sync_load_bucket(1, tmp);
+
+    if (!loaded || tmp[0] == 0)
     {
-        window_status_show_error("Syncing...");
-        bucket_sync_set_auto_close_after_sync();
+        window_status_show_empty();
     }
     else
     {
-        uint8_t tmp[PERSIST_DATA_MAX_LENGTH];
-        const bool loaded = bucket_sync_load_bucket(1, tmp);
-
-        if (!loaded || tmp[0] == 0)
-        {
-            window_status_show_empty();
-        }
-        else
-        {
-            window_action_list_show(1);
-        }
+        window_action_list_show(1);
     }
 
     app_event_loop();

@@ -51,6 +51,11 @@ void receive_watch_packet(const DictionaryIterator* received)
 
 void receive_phone_welcome(const DictionaryIterator* iterator)
 {
+    if (launch_reason() == APP_LAUNCH_PHONE && dict_find(iterator, 3) != NULL)
+    {
+        bucket_sync_set_auto_close_after_sync();
+    }
+
     const uint16_t phone_protocol_version = dict_find(iterator, 1)->value->uint16;
     if (phone_protocol_version != PROTOCOL_VERSION)
     {

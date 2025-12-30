@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.ListenableWorker
 import androidx.work.WorkerParameters
+import com.matejdro.bucketsync.BucketSyncAutoSyncNotifier
 import com.matejdro.bucketsync.di.BucketSyncWorkerKey
 import com.matejdro.bucketsync.di.WatchappId
 import dev.zacsweers.metro.AppScope
@@ -27,6 +28,7 @@ class OpenWatchappWorker(
    private val workerController: WorkControllerImpl,
    private val pebbleSender: PebbleSender,
    private val errorReporter: ErrorReporter,
+   private val autoSyncNotifier: BucketSyncAutoSyncNotifier,
    @WatchappId
    private val watchappId: UUID,
    @Assisted
@@ -40,6 +42,7 @@ class OpenWatchappWorker(
       }
 
       logcat { "Opening the watchapp on the $watchId" }
+      autoSyncNotifier.notifyAboutToStartAutoSync()
       pebbleSender.startAppOnTheWatch(watchappId)
       workerController.cancelForegroundAppWorker(watchId)
       return Result.success()

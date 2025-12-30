@@ -5,8 +5,10 @@ import com.matejdro.catapult.actionlist.api.CatapultAction
 import com.matejdro.catapult.actionlist.test.FakeCatapultActionRepository
 import com.matejdro.catapult.bluetooth.FakePebbleInfoRetriever
 import com.matejdro.catapult.bluetooth.FakePebbleSender
+import com.matejdro.catapult.bluetooth.FakeWatchappOpenController
 import com.matejdro.catapult.bluetooth.api.WATCHAPP_UUID
 import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.shouldBe
 import io.rebble.pebblekit2.common.model.WatchIdentifier
 import io.rebble.pebblekit2.model.Watchapp
 import kotlinx.coroutines.flow.first
@@ -23,7 +25,8 @@ class TaskerActionRunnerTest {
    private val repo = FakeCatapultActionRepository()
    private val pebbleSender = FakePebbleSender(scope.virtualTimeProvider())
    private val pebbleInfoRetriever = FakePebbleInfoRetriever()
-   private val runner = TaskerActionRunner(repo, pebbleSender, pebbleInfoRetriever)
+   private val openController = FakeWatchappOpenController()
+   private val runner = TaskerActionRunner(repo, pebbleSender, pebbleInfoRetriever, openController)
 
    @Test
    fun `Run toggle action`() = scope.runTest {
@@ -60,6 +63,8 @@ class TaskerActionRunnerTest {
          )
       )
       runCurrent()
+
+      openController.isNextWatchappOpenForAutoSync() shouldBe true
 
       pebbleSender.startedApps.shouldContainExactly(
          FakePebbleSender.AppLifecycleEvent(WATCHAPP_UUID, null)
@@ -99,6 +104,8 @@ class TaskerActionRunnerTest {
          )
       )
       runCurrent()
+
+      openController.isNextWatchappOpenForAutoSync() shouldBe true
 
       pebbleSender.startedApps.shouldContainExactly(
          FakePebbleSender.AppLifecycleEvent(

@@ -8,6 +8,7 @@ import com.matejdro.catapult.tasker.FakeTaskerTaskStarter
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.maps.shouldContainKey
 import io.kotest.matchers.shouldBe
 import io.rebble.pebblekit2.common.model.PebbleDictionaryItem
 import io.rebble.pebblekit2.common.model.ReceiveResult
@@ -30,6 +31,8 @@ class WatchappConnectionImplTest {
    private val taskerTaskStarter = FakeTaskerTaskStarter()
    private val backgroundSyncNotifier = FakeBackgroundSyncNotifier()
 
+   private val watchappOpenController = FakeWatchappOpenController()
+
    private val connection = WatchappConnectionImpl(
       WatchIdentifier("watch"),
       scope.backgroundScope,
@@ -37,6 +40,7 @@ class WatchappConnectionImplTest {
       actionRepository,
       taskerTaskStarter,
       backgroundSyncNotifier,
+      watchappOpenController,
       sender,
    )
 
@@ -99,7 +103,7 @@ class WatchappConnectionImplTest {
       bucketSyncRepository.updateBucket(1u, byteArrayOf(1))
       bucketSyncRepository.updateBucket(2u, byteArrayOf(2))
 
-      val result = receiveStandardHelloPacket(bufferSize = 53u)
+      val result = receiveStandardHelloPacket(bufferSize = 61u)
       runCurrent()
 
       result shouldBe ReceiveResult.Ack
@@ -128,7 +132,7 @@ class WatchappConnectionImplTest {
       bucketSyncRepository.updateBucket(1u, byteArrayOf(1))
       bucketSyncRepository.updateBucket(2u, byteArrayOf(2))
 
-      val result = receiveStandardHelloPacket(bufferSize = 52u)
+      val result = receiveStandardHelloPacket(bufferSize = 60u)
       runCurrent()
 
       result shouldBe ReceiveResult.Ack
@@ -164,9 +168,9 @@ class WatchappConnectionImplTest {
    fun `Send list of updated buckets in three packets`() = scope.runTest {
       bucketSyncRepository.updateBucket(1u, byteArrayOf(1))
       bucketSyncRepository.updateBucket(2u, byteArrayOf(2))
-      bucketSyncRepository.updateBucket(3u, ByteArray(33) { 3 })
+      bucketSyncRepository.updateBucket(3u, ByteArray(40) { 3 })
 
-      val result = receiveStandardHelloPacket(bufferSize = 52u)
+      val result = receiveStandardHelloPacket(bufferSize = 60u)
       runCurrent()
 
       result shouldBe ReceiveResult.Ack
@@ -201,8 +205,8 @@ class WatchappConnectionImplTest {
             1u to PebbleDictionaryItem.ByteArray(
                byteArrayOf(
                   1, // Status
-                  3, 33 // Sync data for bucket 3
-               ) + ByteArray(33) { 3 }
+                  3, 40 // Sync data for bucket 3
+               ) + ByteArray(40) { 3 }
             ),
          )
       )
@@ -400,6 +404,39 @@ class WatchappConnectionImplTest {
       delay(1.seconds)
 
       backgroundSyncNotifier.watchesFullySynced.shouldContainExactly("watch")
+   }
+
+   @Test
+   fun `Send auto-close flag when watchapp was started by auto sync`() = scope.runTest {
+      watchappOpenController.setNextWatchappOpenForAutoSync()
+
+      bucketSyncRepository.updateBucket(1u, byteArrayOf(1))
+      bucketSyncRepository.updateBucket(2u, byteArrayOf(2))
+
+      receiveStandardHelloPacket(bufferSize = 61u)
+      runCurrent()
+
+      sender.sentData.first().shouldContainKey(3u)
+   }
+
+   @Test
+   fun `Send auto-close flag when watchapp was started by auto sync and there are no updates`() = scope.runTest {
+      watchappOpenController.setNextWatchappOpenForAutoSync()
+
+      receiveStandardHelloPacket(bufferSize = 61u)
+      runCurrent()
+
+      sender.sentData.first().shouldContainKey(3u)
+   }
+
+   @Test
+   fun `Reset auto sync flag after open`() = scope.runTest {
+      watchappOpenController.setNextWatchappOpenForAutoSync()
+
+      receiveStandardHelloPacket(bufferSize = 61u)
+      runCurrent()
+
+      watchappOpenController.isNextWatchappOpenForAutoSync() shouldBe false
    }
 
    private suspend fun receiveStandardHelloPacket(version: UInt = 0u, bufferSize: UInt = 1000u): ReceiveResult =
