@@ -66,13 +66,13 @@ static void custom_status_bar_paint(Layer* layer, GContext* ctx)
     const GRect whole_status_size = layer_get_bounds(layer);
 
     const uint16_t icon_x = whole_status_size.size.w - CLOCK_WIDTH - 1 - 14 - RIGHTMOST_PADDING;
-    if (!is_phone_connected)
-    {
-        graphics_draw_bitmap_in_rect(ctx, indicator_disconnected, GRect(icon_x, 1, 14, 13));
-    }
-    else if (got_sending_error)
+    if (got_sending_error)
     {
         graphics_draw_bitmap_in_rect(ctx, indicator_error, GRect(icon_x + 3, 3, 9, 10));
+    }
+    else if (!is_phone_connected)
+    {
+        graphics_draw_bitmap_in_rect(ctx, indicator_disconnected, GRect(icon_x, 1, 14, 13));
     }
     else if (is_currently_sending_data || bucket_sync_is_currently_syncing)
     {
