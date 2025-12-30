@@ -1,6 +1,7 @@
 package com.matejdro.catapult.bluetooth
 
 import com.matejdro.bucketsync.BucketSyncRepository
+import com.matejdro.bucketsync.background.BackgroundSyncNotifier
 import com.matejdro.catapult.actionlist.api.CatapultActionRepository
 import com.matejdro.catapult.bluetooth.api.WATCHAPP_UUID
 import com.matejdro.catapult.bluetooth.util.requireUint
@@ -35,6 +36,7 @@ class WatchappConnectionImpl(
    private val bucketSyncRepository: BucketSyncRepository,
    private val actionRepository: CatapultActionRepository,
    private val taskerTaskStarter: TaskerTaskStarter,
+   private val backgroundSyncNotifier: BackgroundSyncNotifier,
    pebbleSender: PebbleSender,
 ) : WatchAppConnection {
    private val packetQueue = PacketQueue(pebbleSender, watch, WATCHAPP_UUID)
@@ -135,6 +137,7 @@ class WatchappConnectionImpl(
                PRIORITY_SYNC
             )
             watchVersion = initialWatchVersion
+            backgroundSyncNotifier.notifyWatchFullySynced(watch.value)
          } else {
             logcat { "Sending bucketsync update: ${initialUpdate.toVersion} | ${initialUpdate.bucketsToUpdate.map { it.id }}" }
             val totalHelloSizeUntilBuckets = SIZE_OF_STATIC_PART_OF_HELLO_PACKET + 2 * initialUpdate.activeBuckets.size
@@ -165,6 +168,7 @@ class WatchappConnectionImpl(
             }
 
             watchVersion = initialUpdate.toVersion
+            backgroundSyncNotifier.notifyWatchFullySynced(watch.value)
          }
 
          observeForFutureSyncs(watchVersion, bucketsyncBuffer)
@@ -211,6 +215,7 @@ class WatchappConnectionImpl(
          }
 
          watchVersion = nextUpdate.toVersion
+         backgroundSyncNotifier.notifyWatchFullySynced(watch.value)
       }
    }
 

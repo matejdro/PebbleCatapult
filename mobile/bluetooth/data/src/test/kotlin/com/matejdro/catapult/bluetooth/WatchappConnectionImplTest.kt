@@ -1,6 +1,7 @@
 package com.matejdro.catapult.bluetooth
 
 import com.matejdro.bucketsync.FakeBucketSyncRepository
+import com.matejdro.bucketsync.background.FakeBackgroundSyncNotifier
 import com.matejdro.catapult.actionlist.api.CatapultAction
 import com.matejdro.catapult.actionlist.test.FakeCatapultActionRepository
 import com.matejdro.catapult.tasker.FakeTaskerTaskStarter
@@ -27,6 +28,7 @@ class WatchappConnectionImplTest {
    private val bucketSyncRepository = FakeBucketSyncRepository()
    private val actionRepository = FakeCatapultActionRepository()
    private val taskerTaskStarter = FakeTaskerTaskStarter()
+   private val backgroundSyncNotifier = FakeBackgroundSyncNotifier()
 
    private val connection = WatchappConnectionImpl(
       WatchIdentifier("watch"),
@@ -34,6 +36,7 @@ class WatchappConnectionImplTest {
       bucketSyncRepository,
       actionRepository,
       taskerTaskStarter,
+      backgroundSyncNotifier,
       sender,
    )
 
@@ -371,6 +374,32 @@ class WatchappConnectionImplTest {
       delay(1.seconds)
 
       sender.sentData.shouldHaveSize(1)
+   }
+
+   @Test
+   fun `Notify that the watch up to date when the startup sync completes`() = scope.runTest {
+      bucketSyncRepository.updateBucket(1u, byteArrayOf(1))
+      bucketSyncRepository.updateBucket(2u, byteArrayOf(2))
+
+      receiveStandardHelloPacket(bufferSize = 53u)
+      runCurrent()
+
+      backgroundSyncNotifier.watchesFullySynced.shouldContainExactly("watch")
+   }
+
+   @Test
+   fun `Notify that the watch up to date when the follow up sync completes`() = scope.runTest {
+      receiveStandardHelloPacket(bufferSize = 52u)
+      runCurrent()
+
+      sender.sentPackets.clear()
+      backgroundSyncNotifier.watchesFullySynced.clear()
+
+      bucketSyncRepository.updateBucket(1u, byteArrayOf(1))
+      bucketSyncRepository.updateBucket(2u, byteArrayOf(2))
+      delay(1.seconds)
+
+      backgroundSyncNotifier.watchesFullySynced.shouldContainExactly("watch")
    }
 
    private suspend fun receiveStandardHelloPacket(version: UInt = 0u, bufferSize: UInt = 1000u): ReceiveResult =

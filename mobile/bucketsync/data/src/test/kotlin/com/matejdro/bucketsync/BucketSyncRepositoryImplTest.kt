@@ -5,6 +5,7 @@ import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import com.matejdro.bucketsync.api.Bucket
 import com.matejdro.bucketsync.api.BucketUpdate
+import com.matejdro.bucketsync.background.FakeBackgroundSyncNotifier
 import com.matejdro.bucketsync.sqldelight.generated.Database
 import com.matejdro.bucketsync.sqldelight.generated.DbBucket
 import com.matejdro.bucketsync.sqldelight.generated.DbBucketQueries
@@ -22,7 +23,8 @@ import kotlin.time.Duration.Companion.seconds
 class BucketSyncRepositoryImplTest {
    private val scope = TestScopeWithDispatcherProvider()
    private val db = createTestBucketQueries()
-   private val repo = BucketsyncRepositoryImpl(db, InMemoryDataStore(preferencesOf()))
+   private val notifier = FakeBackgroundSyncNotifier()
+   private val repo = BucketsyncRepositoryImpl(db, InMemoryDataStore(preferencesOf()), notifier)
 
    @Test
    fun `Report all added buckets when updating from version 0`() = scope.runTest {
@@ -317,6 +319,33 @@ class BucketSyncRepositoryImplTest {
             Bucket(1u, byteArrayOf(1)),
          )
       )
+   }
+
+   @Test
+   fun `Report data changed when buckets are updated`() = scope.runTest {
+      repo.init(1)
+
+      repo.updateBucket(1u, byteArrayOf(1))
+      repo.updateBucket(2u, byteArrayOf(2))
+      delay(1.seconds)
+
+      notifier.dataChangeNotified shouldBe true
+   }
+
+   @Test
+   fun `Report data changed when bucket is deleted`() = scope.runTest {
+      repo.init(1)
+
+      repo.updateBucket(1u, byteArrayOf(1))
+      repo.updateBucket(2u, byteArrayOf(2))
+      delay(1.seconds)
+
+      notifier.dataChangeNotified = false
+
+      repo.deleteBucket(2u)
+      runCurrent()
+
+      notifier.dataChangeNotified shouldBe true
    }
 }
 

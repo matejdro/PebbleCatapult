@@ -1,5 +1,5 @@
 plugins {
-   pureKotlinModule
+   androidLibraryModule
    di
    sqldelight
 }
@@ -17,9 +17,11 @@ dependencies {
    api(libs.androidx.datastore.preferences.core)
 
    implementation(libs.dispatch)
+   implementation(libs.kotlinova.core)
    implementation(libs.kotlin.coroutines)
    implementation(libs.logcat)
 
+   testImplementation(projects.bucketsync.test)
    testImplementation(projects.common.test)
    testImplementation(libs.kotlinova.core.test)
    testImplementation(libs.turbine)
