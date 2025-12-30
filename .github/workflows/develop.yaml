@@ -174,7 +174,15 @@ jobs:
       - name: Lint
         uses: burrunan/gradle-cache-action@v3.0.1
         with:
-          arguments: "lintRelease detektMain detektTest -x detektDebug -x detektDebugUnitTest assertModuleGraph buildHealth detectTooManyFiles debugComposeCompilerCheck reportMerge --continue --daemon"
+          arguments: "lintRelease detektMain detektTest -x detektDebug -x detektDebugUnitTest assertModuleGraph buildHealth detectTooManyFiles debugComposeCompilerCheck :app:verifyDebugDatabaseMigration reportMerge --continue --daemon"
+          build-root-directory: mobile
+          debug: false
+          concurrent: true
+        if: "${{ env.BUILD_MOBILE == 'true' }}"
+      - name: Double check db with generated schema
+        uses: burrunan/gradle-cache-action@v3.0.1
+        with:
+          arguments: ":app:generateDebugDatabaseSchema :app:verifyDebugDatabaseMigration --daemon"
           build-root-directory: mobile
           debug: false
           concurrent: true

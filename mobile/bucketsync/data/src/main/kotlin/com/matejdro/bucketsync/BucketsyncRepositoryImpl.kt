@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import app.cash.sqldelight.coroutines.asFlow
 import com.matejdro.bucketsync.api.Bucket
 import com.matejdro.bucketsync.api.BucketUpdate
+import com.matejdro.bucketsync.background.BackgroundSyncNotifier
 import com.matejdro.bucketsync.sqldelight.generated.DbBucketQueries
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
@@ -23,6 +24,7 @@ import kotlin.time.Duration.Companion.milliseconds
 class BucketsyncRepositoryImpl(
    private val queries: DbBucketQueries,
    private val preferences: DataStore<Preferences>,
+   private val backgroundSyncNotifier: BackgroundSyncNotifier,
 ) : BucketSyncRepository {
    override suspend fun init(protocolVersion: Int): Boolean {
       val version = preferences.data.first()[lastVersionKey]
@@ -49,6 +51,8 @@ class BucketsyncRepositoryImpl(
             queries.resetAllVersions()
          }
       }
+
+      backgroundSyncNotifier.notifyDataChanged()
    }
 
    override suspend fun awaitNextUpdate(currentVersion: UShort): BucketUpdate = withIO {
@@ -102,6 +106,7 @@ class BucketsyncRepositoryImpl(
    override suspend fun deleteBucket(id: UByte) = withIO<Unit> {
       logcat { "Delete bucket $id" }
       queries.insert(id.toLong(), null)
+      backgroundSyncNotifier.notifyDataChanged()
    }
 }
 

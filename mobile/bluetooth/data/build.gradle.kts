@@ -1,5 +1,5 @@
 plugins {
-   pureKotlinModule
+   androidLibraryModule
    di
 }
 
