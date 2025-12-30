@@ -1,6 +1,7 @@
 package com.matejdro.catapult.di
 
 import android.app.Application
+import com.matejdro.bucketsync.background.BackgroundSyncNotifier
 import com.matejdro.catapult.MainViewModel
 import com.matejdro.catapult.bluetooth.WatchSyncer
 import com.matejdro.catapult.common.di.NavigationInjectingGraph
@@ -50,6 +51,8 @@ interface ApplicationGraph : NavigationInjectingGraph, TaskerServiceInjector {
    fun getTinyLogLoggingThread(): TinyLogLoggingThread
    fun getWatchSyncer(): WatchSyncer
    fun getTabListDetailSceneFactory(): TabListDetailScene.Factory
+   fun getWorkerFactory(): CatapultWorkerFactory
+   fun getSyncNotifier(): BackgroundSyncNotifier
 
    fun inject(target: PebbleListenerService)
 }

@@ -6,8 +6,11 @@ import android.os.Build
 import android.os.StrictMode
 import android.os.StrictMode.VmPolicy
 import android.os.strictmode.Violation
+import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
+import androidx.work.Configuration
+import androidx.work.WorkManager
 import coil3.ImageLoader
 import coil3.SingletonImageLoader
 import com.matejdro.catapult.common.di.NavigationInjectingApplication
@@ -69,11 +72,21 @@ open class CatapultApplication : Application(), NavigationInjectingApplication {
       setupLogging()
       enableStrictMode()
 
+      NotificationChannelManager(this).createChannels()
+
+      WorkManager.initialize(
+         this,
+         Configuration.Builder()
+            .setWorkerFactory(applicationGraph.getWorkerFactory())
+            .setMinimumLoggingLevel(Log.INFO)
+            .setWorkerCoroutineContext(applicationGraph.getDefaultCoroutineScope().coroutineContext)
+            .build()
+      )
+
       applicationGraph.getDefaultCoroutineScope().launch {
          applicationGraph.getWatchSyncer().init()
+         applicationGraph.getSyncNotifier().notifyAppStarted()
       }
-
-      NotificationChannelManager(this).createChannels()
    }
 
    private fun enableStrictMode() {

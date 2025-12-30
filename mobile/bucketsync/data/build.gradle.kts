@@ -20,6 +20,8 @@ dependencies {
    implementation(libs.kotlinova.core)
    implementation(libs.kotlin.coroutines)
    implementation(libs.logcat)
+   implementation(libs.androidx.workManager)
+   implementation(libs.pebblekit)
 
    testImplementation(projects.bucketsync.test)
    testImplementation(projects.common.test)

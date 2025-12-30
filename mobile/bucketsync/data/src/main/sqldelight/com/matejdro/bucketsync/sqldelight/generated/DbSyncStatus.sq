@@ -12,3 +12,6 @@ invalidateAllWatches:
 
 isAnyWatchPendingSync:
     SELECT COUNT(*) FROM dbSyncStatus WHERE fullySynced = 0 AND lastFullySynced > :lastSyncDeadline;
+
+getPendingSyncWatches:
+    SELECT watchId FROM dbSyncStatus WHERE fullySynced = 0 AND lastFullySynced > :lastSyncDeadline;
