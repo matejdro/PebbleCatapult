@@ -2,6 +2,7 @@ package com.matejdro.catapult.tasker
 
 import android.os.Bundle
 import com.matejdro.catapult.actionlist.api.CatapultActionRepository
+import com.matejdro.catapult.bluetooth.WatchappOpenController
 import com.matejdro.catapult.bluetooth.api.WATCHAPP_UUID
 import dev.zacsweers.metro.Inject
 import dispatch.core.withDefault
@@ -16,6 +17,7 @@ class TaskerActionRunner(
    private val actionRepository: CatapultActionRepository,
    private val sender: PebbleSender,
    private val pebbleInfoRetriever: PebbleInfoRetriever,
+   private val openController: WatchappOpenController,
 ) {
    suspend fun run(bundle: Bundle) {
       val actionName = bundle.getString(BundleKeys.ACTION) ?: error("Missing action from bundle")
@@ -53,9 +55,11 @@ class TaskerActionRunner(
                runningApp?.isWatchface == Watchapp.Type.WATCHFACE
             }
 
+            openController.setNextWatchappOpenForAutoSync()
             sender.startAppOnTheWatch(WATCHAPP_UUID, watchesOnWatchface.map { it.id })
          }
       } else {
+         openController.setNextWatchappOpenForAutoSync()
          sender.startAppOnTheWatch(WATCHAPP_UUID)
       }
    }
