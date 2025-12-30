@@ -105,6 +105,11 @@ dependencyAnalysis {
       bundle("Navigation3") {
          includeGroup("androidx.navigation3")
       }
+
+      bundle("WorkManager") {
+         includeGroup("androidx.work")
+         includeDependency("com.google.guava:listenablefuture")
+      }
    }
 }
 
