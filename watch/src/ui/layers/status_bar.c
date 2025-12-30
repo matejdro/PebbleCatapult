@@ -4,8 +4,17 @@
 #include "../../connection/bucket_sync.h"
 
 static const int STATUS_BAR_HEIGHT = 16;
+
+// Emery (and presumably future Core devices with larger displays) have a pretty big corner radius. And since there's
+// more display real estate, we can afford to make some padding on the right
+#if PBL_DISPLAY_WIDTH > 190
+#define RIGHTMOST_PADDING 5
+#else
+#define RIGHTMOST_PADDING 0
+#endif
+
 #define CLOCK_WIDTH 48
-static const int STATUS_BAR_RIGHT_WIDTH = CLOCK_WIDTH + 1 + 14 + 1;
+static const int STATUS_BAR_RIGHT_WIDTH = CLOCK_WIDTH + 1 + 14 + 1 + RIGHTMOST_PADDING;
 
 static CustomStatusBarLayer* active_layer;
 static bool listeners_active = false;
@@ -23,7 +32,7 @@ CustomStatusBarLayer* custom_status_bar_layer_create(const GRect window_frame)
 {
     Layer* layer = layer_create(GRect(0, 0, window_frame.size.w, STATUS_BAR_HEIGHT));
     TextLayer* clock_layer = text_layer_create(
-        GRect(window_frame.size.w - CLOCK_WIDTH - 1, 0, CLOCK_WIDTH - 1, STATUS_BAR_HEIGHT));
+        GRect(window_frame.size.w - CLOCK_WIDTH - RIGHTMOST_PADDING - 1, 0, CLOCK_WIDTH - 1, STATUS_BAR_HEIGHT));
     text_layer_set_background_color(clock_layer, GColorClear);
     text_layer_set_text_color(clock_layer, GColorWhite);
     text_layer_set_font(clock_layer, fonts_get_system_font(FONT_KEY_GOTHIC_14));
@@ -56,7 +65,7 @@ static void custom_status_bar_paint(Layer* layer, GContext* ctx)
 
     const GRect whole_status_size = layer_get_bounds(layer);
 
-    const uint16_t icon_x = whole_status_size.size.w - CLOCK_WIDTH - 1 - 14;
+    const uint16_t icon_x = whole_status_size.size.w - CLOCK_WIDTH - 1 - 14 - RIGHTMOST_PADDING;
     if (!is_phone_connected)
     {
         graphics_draw_bitmap_in_rect(ctx, indicator_disconnected, GRect(icon_x, 1, 14, 13));
