@@ -1,5 +1,3 @@
-import com.slack.keeper.optInToKeeper
-
 plugins {
    androidAppModule
    compose
@@ -7,8 +5,6 @@ plugins {
    parcelize
    showkase
    sqldelight
-   id("com.slack.keeper")
-   id("androidx.baselineprofile")
 }
 
 android {
@@ -32,10 +28,6 @@ android {
 
    testOptions {
       execution = "ANDROIDX_TEST_ORCHESTRATOR"
-   }
-
-   if (hasProperty("testAppWithProguard")) {
-      testBuildType = "proguardedDebug"
    }
 
    signingConfigs {
@@ -65,33 +57,6 @@ android {
          signingConfig = signingConfigs.getByName("debug")
       }
 
-      create("proguardedDebug") {
-         isMinifyEnabled = true
-         isShrinkResources = true
-
-         proguardFiles(
-            getDefaultProguardFile("proguard-android-optimize.txt"),
-            "proguard-rules.pro",
-         )
-
-         testProguardFiles(
-            getDefaultProguardFile("proguard-android-optimize.txt"),
-            "proguard-rules.pro",
-            "proguard-rules-test.pro"
-         )
-
-         matchingFallbacks += "debug"
-
-         signingConfig = signingConfigs.getByName("debug")
-      }
-
-      create("benchmark") {
-         isDebuggable = true
-         initWith(buildTypes.getByName("release"))
-         signingConfig = signingConfigs.getByName("debug")
-         matchingFallbacks += listOf("release")
-      }
-
       getByName("release") {
          isMinifyEnabled = true
          isShrinkResources = true
@@ -118,18 +83,6 @@ afterEvaluate {
       // Workaround for the https://github.com/cashapp/sqldelight/issues/5115
       mustRunAfter("generateDebugDatabaseSchema")
    }
-}
-
-androidComponents {
-   beforeVariants { builder ->
-      if (builder.name.contains("proguardedDebug")) {
-         builder.optInToKeeper()
-      }
-   }
-}
-
-keeper {
-   automaticR8RepoManagement = false
 }
 
 custom {
@@ -203,6 +156,4 @@ dependencies {
    implementation(libs.simpleStack)
    implementation(libs.sqldelight.android)
    implementation(libs.tinylog.api)
-
-   keeperR8(libs.androidx.r8)
 }
