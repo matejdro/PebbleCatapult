@@ -143,7 +143,7 @@ class WorkControllerImpl(
    suspend fun scheduleOpenWatchappWorker(connectedWatch: WatchIdentifier) {
       val name = TAG_WATCH_OPEN_PREFIX + connectedWatch.value
 
-      val duration = 1.minutes + Random.nextInt(2.minutes.inWholeSeconds.toInt()).seconds
+      val duration = 10.minutes + Random.nextInt(20.minutes.inWholeSeconds.toInt()).seconds
       logcat { "Opening Watchapp on the watch $connectedWatch after $duration" }
 
       workManager.enqueueUniqueWork(
