@@ -1,6 +1,6 @@
-package com.matejdro.catapult.bluetooth
+package com.matejdro.pebble.bluetooth.common
 
-import com.matejdro.catapult.bluetooth.exceptions.UnrecoverableWatchTransferException
+import com.matejdro.pebble.bluetooth.common.exceptions.UnrecoverableWatchTransferException
 import io.rebble.pebblekit2.client.PebbleSender
 import io.rebble.pebblekit2.common.model.PebbleDictionary
 import io.rebble.pebblekit2.common.model.TransmissionResult

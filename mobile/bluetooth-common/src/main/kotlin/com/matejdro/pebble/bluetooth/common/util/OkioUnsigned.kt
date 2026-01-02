@@ -1,6 +1,6 @@
 @file:Suppress("NOTHING_TO_INLINE")
 
-package com.matejdro.catapult.bluetooth.util
+package com.matejdro.pebble.bluetooth.common.util
 
 import okio.BufferedSink
 import okio.BufferedSource

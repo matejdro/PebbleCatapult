@@ -1,6 +1,5 @@
-package com.matejdro.catapult.bluetooth
+package com.matejdro.pebble.bluetooth.common
 
-import com.matejdro.catapult.bluetooth.api.WATCHAPP_UUID
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
@@ -25,6 +24,8 @@ class WatchappConnectionsManagerImpl(
    private val defaultScope: DefaultCoroutineScope,
    private val connectionFactory: WatchAppConnection.Factory,
    private val errorReporter: ErrorReporter,
+   @WatchappId
+   private val targetWatchappUUID: UUID,
 ) : WatchappConnectionsManager {
    private val activeConnections: MutableMap<WatchIdentifier, ConnectionWrapper> = mutableMapOf()
    override suspend fun onMessageReceived(
@@ -34,7 +35,7 @@ class WatchappConnectionsManagerImpl(
    ): ReceiveResult {
       logcat { "onMessageReceived: $watchappUUID $watch" }
 
-      if (watchappUUID != WATCHAPP_UUID) {
+      if (watchappUUID != this.targetWatchappUUID) {
          errorReporter.report(UnknownCauseException("Got app opened for the unknown app"))
          return ReceiveResult.Nack
       }
@@ -60,7 +61,7 @@ class WatchappConnectionsManagerImpl(
 
    override fun onAppOpened(watchappUUID: UUID, watch: WatchIdentifier) {
       logcat { "onAppOpened: $watchappUUID $watch" }
-      if (watchappUUID != WATCHAPP_UUID) {
+      if (watchappUUID != this.targetWatchappUUID) {
          errorReporter.report(UnknownCauseException("Got app opened for the unknown app"))
          return
       }

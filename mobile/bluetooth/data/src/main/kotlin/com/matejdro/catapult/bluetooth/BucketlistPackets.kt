@@ -2,8 +2,8 @@ package com.matejdro.catapult.bluetooth
 
 import com.matejdro.bucketsync.api.Bucket
 import com.matejdro.bucketsync.api.BucketUpdate
-import com.matejdro.catapult.bluetooth.util.writeUByte
-import com.matejdro.catapult.bluetooth.util.writeUShort
+import com.matejdro.pebble.bluetooth.common.util.writeUByte
+import com.matejdro.pebble.bluetooth.common.util.writeUShort
 import io.rebble.pebblekit2.common.model.PebbleDictionary
 import io.rebble.pebblekit2.common.model.PebbleDictionaryItem
 import logcat.logcat

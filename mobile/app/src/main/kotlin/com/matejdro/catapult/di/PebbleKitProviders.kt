@@ -1,8 +1,8 @@
 package com.matejdro.catapult.di
 
 import android.content.Context
-import com.matejdro.bucketsync.di.WatchappId
 import com.matejdro.catapult.bluetooth.api.WATCHAPP_UUID
+import com.matejdro.pebble.bluetooth.common.WatchappId
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesTo
 import dev.zacsweers.metro.Provides

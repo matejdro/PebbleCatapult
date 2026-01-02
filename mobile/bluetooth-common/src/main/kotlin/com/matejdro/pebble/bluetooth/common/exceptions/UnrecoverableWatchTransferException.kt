@@ -1,4 +1,4 @@
-package com.matejdro.catapult.bluetooth.exceptions
+package com.matejdro.pebble.bluetooth.common.exceptions
 
 import si.inova.kotlinova.core.outcome.CauseException
 

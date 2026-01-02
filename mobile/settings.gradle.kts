@@ -38,6 +38,7 @@ rootProject.name = "PebbleCatapult"
 
 include(":app")
 include(":app-screenshot-tests")
+include(":bluetooth-common")
 include(":common")
 include(":common:test")
 include(":common-android")

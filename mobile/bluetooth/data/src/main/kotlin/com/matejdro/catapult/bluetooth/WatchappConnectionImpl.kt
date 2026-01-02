@@ -4,10 +4,12 @@ import com.matejdro.bucketsync.BucketSyncRepository
 import com.matejdro.bucketsync.background.BackgroundSyncNotifier
 import com.matejdro.catapult.actionlist.api.CatapultActionRepository
 import com.matejdro.catapult.bluetooth.api.WATCHAPP_UUID
-import com.matejdro.catapult.bluetooth.util.requireUint
-import com.matejdro.catapult.bluetooth.util.writeUByte
 import com.matejdro.catapult.common.flow.firstData
 import com.matejdro.catapult.tasker.TaskerTaskStarter
+import com.matejdro.pebble.bluetooth.common.PacketQueue
+import com.matejdro.pebble.bluetooth.common.WatchAppConnection
+import com.matejdro.pebble.bluetooth.common.util.requireUint
+import com.matejdro.pebble.bluetooth.common.util.writeUByte
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.Assisted
 import dev.zacsweers.metro.AssistedFactory

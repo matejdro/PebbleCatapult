@@ -4,11 +4,6 @@ plugins {
 }
 
 dependencies {
-   api(projects.bluetooth.api)
-   api(projects.bluetoothCommon)
-   api(projects.bucketsync.api)
-   api(projects.actionlist.api)
-   api(projects.tasker.api)
    api(libs.dispatch)
    api(libs.pebblekit.api)
 

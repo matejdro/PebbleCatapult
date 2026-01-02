@@ -3,7 +3,7 @@ package com.matejdro.catapult.receiving
 import android.content.Intent
 import android.os.IBinder
 import com.matejdro.catapult.CatapultApplication
-import com.matejdro.catapult.bluetooth.WatchappConnectionsManager
+import com.matejdro.pebble.bluetooth.common.WatchappConnectionsManager
 import dev.zacsweers.metro.Inject
 import dispatch.core.DefaultCoroutineScope
 import io.rebble.pebblekit2.client.BasePebbleListenerService

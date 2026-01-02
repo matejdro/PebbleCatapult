@@ -1,6 +1,5 @@
-package com.matejdro.catapult.bluetooth
+package com.matejdro.pebble.bluetooth.common
 
-import com.matejdro.catapult.bluetooth.api.WATCHAPP_UUID
 import dispatch.core.DefaultCoroutineScope
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
@@ -31,7 +30,8 @@ class WatchappConnectionsManagerImplTest {
    private val connectionsManager = WatchappConnectionsManagerImpl(
       DefaultCoroutineScope(scope.backgroundScope.coroutineContext),
       ::TestWatchappConnection,
-      errorReporter
+      errorReporter,
+      WATCHAPP_UUID
    )
 
    @Test
@@ -165,3 +165,4 @@ class WatchappConnectionsManagerImplTest {
 }
 
 private val INVALID_APP_UUID = UUID.fromString("a4020bb5-6f9c-4a08-9606-d676d99e842a")
+private val WATCHAPP_UUID: UUID = UUID.fromString("54be2d78-a70c-4573-a73e-5b0f1323d4cd")

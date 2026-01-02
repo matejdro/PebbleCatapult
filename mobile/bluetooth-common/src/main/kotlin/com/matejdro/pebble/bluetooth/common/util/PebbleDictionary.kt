@@ -1,4 +1,4 @@
-package com.matejdro.catapult.bluetooth.util
+package com.matejdro.pebble.bluetooth.common.util
 
 import io.rebble.pebblekit2.common.model.PebbleDictionary
 import io.rebble.pebblekit2.common.model.PebbleDictionaryItem
