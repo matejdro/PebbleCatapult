@@ -1,5 +1,0 @@
-CREATE TABLE dbSyncStatus (
-    watchId TEXT PRIMARY KEY,
-    fullySynced INTEGER NOT NULL,
-    lastFullySynced INTEGER NOT NULL
-);
