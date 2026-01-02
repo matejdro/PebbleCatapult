@@ -1,5 +1,6 @@
 package com.matejdro.catapult.bluetooth
 
+import com.matejdro.bucketsync.BucketSyncWatchLoopImpl
 import com.matejdro.bucketsync.FakeBucketSyncRepository
 import com.matejdro.bucketsync.background.FakeBackgroundSyncNotifier
 import com.matejdro.catapult.actionlist.api.CatapultAction
@@ -11,20 +12,17 @@ import com.matejdro.pebble.bluetooth.common.test.FakePebbleSender
 import com.matejdro.pebble.bluetooth.common.test.sentData
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
-import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.maps.shouldContainKey
 import io.kotest.matchers.shouldBe
 import io.rebble.pebblekit2.common.model.PebbleDictionaryItem
 import io.rebble.pebblekit2.common.model.ReceiveResult
 import io.rebble.pebblekit2.common.model.WatchIdentifier
 import kotlinx.coroutines.async
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
 import si.inova.kotlinova.core.test.TestScopeWithDispatcherProvider
 import si.inova.kotlinova.core.test.time.virtualTimeProvider
-import kotlin.time.Duration.Companion.seconds
 
 class WatchappConnectionImplTest {
    private val scope = TestScopeWithDispatcherProvider()
@@ -33,19 +31,27 @@ class WatchappConnectionImplTest {
    private val bucketSyncRepository = FakeBucketSyncRepository()
    private val actionRepository = FakeCatapultActionRepository()
    private val taskerTaskStarter = FakeTaskerTaskStarter()
-   private val backgroundSyncNotifier = FakeBackgroundSyncNotifier()
 
    private val watchappOpenController = FakeWatchappOpenController()
 
+   private val watch = WatchIdentifier("watch")
+
+   private val packetQueue = PacketQueue(sender, watch, WATCHAPP_UUID)
+
    private val connection = WatchappConnectionImpl(
-      WatchIdentifier("watch"),
       scope.backgroundScope,
-      bucketSyncRepository,
       actionRepository,
       taskerTaskStarter,
-      backgroundSyncNotifier,
       watchappOpenController,
-      PacketQueue(sender, WatchIdentifier("watch"), WATCHAPP_UUID),
+      packetQueue,
+      BucketSyncWatchLoopImpl(
+         scope.backgroundScope,
+         packetQueue,
+         bucketSyncRepository,
+         watchappOpenController,
+         FakeBackgroundSyncNotifier(),
+         watch,
+      )
    )
 
    @Test
@@ -83,56 +89,7 @@ class WatchappConnectionImplTest {
    }
 
    @Test
-   fun `Only send status 3 when watch is up to date`() = scope.runTest {
-      val result = receiveStandardHelloPacket()
-      runCurrent()
-
-      result shouldBe ReceiveResult.Ack
-
-      sender.sentData.shouldContainExactly(
-         mapOf(
-            0u to PebbleDictionaryItem.UInt8(1u),
-            1u to PebbleDictionaryItem.UInt16(PROTOCOL_VERSION),
-            2u to PebbleDictionaryItem.ByteArray(
-               byteArrayOf(
-                  2
-               )
-            ),
-         )
-      )
-   }
-
-   @Test
-   fun `Send list of updated buckets in a single packet`() = scope.runTest {
-      bucketSyncRepository.updateBucket(1u, byteArrayOf(1))
-      bucketSyncRepository.updateBucket(2u, byteArrayOf(2))
-
-      val result = receiveStandardHelloPacket(bufferSize = 61u)
-      runCurrent()
-
-      result shouldBe ReceiveResult.Ack
-
-      sender.sentData.shouldContainExactly(
-         mapOf(
-            0u to PebbleDictionaryItem.UInt8(1u),
-            1u to PebbleDictionaryItem.UInt16(PROTOCOL_VERSION),
-            2u to PebbleDictionaryItem.ByteArray(
-               byteArrayOf(
-                  1, // Status
-                  0, 2, // Latest version
-                  2, // Num of active buckets
-                  1, 0, // Metadata for bucket 1
-                  2, 0, // Metadata for bucket 2
-                  1, 1, 1, // Sync data for bucket 1
-                  2, 1, 2, // Sync data for bucket 2
-               )
-            ),
-         )
-      )
-   }
-
-   @Test
-   fun `Send list of updated buckets in two packets`() = scope.runTest {
+   fun `Send a list of updated buckets`() = scope.runTest {
       bucketSyncRepository.updateBucket(1u, byteArrayOf(1))
       bucketSyncRepository.updateBucket(2u, byteArrayOf(2))
 
@@ -163,54 +120,6 @@ class WatchappConnectionImplTest {
                   1, // Status
                   2, 1, 2, // Sync data for bucket 2
                )
-            ),
-         )
-      )
-   }
-
-   @Test
-   fun `Send list of updated buckets in three packets`() = scope.runTest {
-      bucketSyncRepository.updateBucket(1u, byteArrayOf(1))
-      bucketSyncRepository.updateBucket(2u, byteArrayOf(2))
-      bucketSyncRepository.updateBucket(3u, ByteArray(40) { 3 })
-
-      val result = receiveStandardHelloPacket(bufferSize = 60u)
-      runCurrent()
-
-      result shouldBe ReceiveResult.Ack
-
-      sender.sentData.shouldContainExactly(
-         mapOf(
-            0u to PebbleDictionaryItem.UInt8(1u),
-            1u to PebbleDictionaryItem.UInt16(PROTOCOL_VERSION),
-            2u to PebbleDictionaryItem.ByteArray(
-               byteArrayOf(
-                  0, // Status
-                  0, 3, // Latest version
-                  3, // Num of active buckets
-                  1, 0, // Metadata for bucket 1
-                  2, 0, // Metadata for bucket 2
-                  3, 0, // Metadata for bucket 3
-                  1, 1, 1, // Sync data for bucket 1
-               )
-            ),
-         ),
-         mapOf(
-            0u to PebbleDictionaryItem.UInt8(3u),
-            1u to PebbleDictionaryItem.ByteArray(
-               byteArrayOf(
-                  0, // Status
-                  2, 1, 2, // Sync data for bucket 2
-               )
-            ),
-         ),
-         mapOf(
-            0u to PebbleDictionaryItem.UInt8(3u),
-            1u to PebbleDictionaryItem.ByteArray(
-               byteArrayOf(
-                  1, // Status
-                  3, 40 // Sync data for bucket 3
-               ) + ByteArray(40) { 3 }
             ),
          )
       )
@@ -226,84 +135,6 @@ class WatchappConnectionImplTest {
       result.getCompleted() shouldBe ReceiveResult.Ack
    }
 
-   @Test
-   fun `Send new sync packet if buckets update after initial sync packet `() = scope.runTest {
-      receiveStandardHelloPacket(bufferSize = 52u)
-      runCurrent()
-
-      sender.sentPackets.clear()
-
-      bucketSyncRepository.updateBucket(1u, byteArrayOf(1))
-      bucketSyncRepository.updateBucket(2u, byteArrayOf(2))
-      delay(1.seconds)
-
-      sender.sentData.shouldContainExactly(
-         mapOf(
-            0u to PebbleDictionaryItem.UInt8(2u),
-            1u to PebbleDictionaryItem.ByteArray(
-               byteArrayOf(
-                  1, // Status
-                  0, 2, // Latest version
-                  2, // Num of active buckets
-                  1, 0, // Metadata for bucket 1
-                  2, 0, // Metadata for bucket 2
-                  1, 1, 1, // Sync data for bucket 1
-                  2, 1, 2, // Sync data for bucket 2
-               )
-            ),
-         )
-      )
-   }
-
-   @Test
-   fun `Send new sync packet if large size buckets update after initial sync packet in 3 packets`() = scope.runTest {
-      receiveStandardHelloPacket(bufferSize = 52u)
-      runCurrent()
-
-      sender.sentPackets.clear()
-
-      bucketSyncRepository.updateBucket(1u, byteArrayOf(1))
-      bucketSyncRepository.updateBucket(2u, ByteArray(33) { 2 })
-      bucketSyncRepository.updateBucket(3u, ByteArray(33) { 3 })
-      delay(1.seconds)
-
-      sender.sentData.shouldContainExactly(
-         mapOf(
-            0u to PebbleDictionaryItem.UInt8(2u),
-            1u to PebbleDictionaryItem.ByteArray(
-               byteArrayOf(
-                  0, // Status
-                  0, 3, // Latest version
-                  3, // Num of active buckets
-                  1, 0, // Metadata for bucket 1
-                  2, 0, // Metadata for bucket 2
-                  3, 0, // Metadata for bucket 2
-                  1, 1, 1, // Sync data for bucket 1
-               )
-            ),
-         ),
-         mapOf(
-            0u to PebbleDictionaryItem.UInt8(3u),
-            1u to PebbleDictionaryItem.ByteArray(
-               byteArrayOf(
-                  0, // Status
-                  2, 33, // Sync data for bucket 2
-               ) + ByteArray(33) { 2 }
-            ),
-         ),
-         mapOf(
-            0u to PebbleDictionaryItem.UInt8(3u),
-            1u to PebbleDictionaryItem.ByteArray(
-               byteArrayOf(
-                  1, // Status
-                  3, 33 // Sync data for bucket 3
-               ) + ByteArray(33) { 3 }
-            ),
-         ),
-      )
-   }
-
-   @Test
    fun `Trigger tasker task when the watch requests it`() = scope.runTest {
       taskerTaskStarter.reportStartSuccessful = true
       actionRepository.insert(CatapultAction("Action A", 1, 1, "Tasker A"))
@@ -370,47 +201,6 @@ class WatchappConnectionImplTest {
    }
 
    @Test
-   fun `Do not duplicate subsequent sync packets if watch is inited twice`() = scope.runTest {
-      receiveStandardHelloPacket(bufferSize = 52u)
-      receiveStandardHelloPacket(bufferSize = 52u)
-      runCurrent()
-
-      sender.sentPackets.clear()
-
-      bucketSyncRepository.updateBucket(1u, byteArrayOf(1))
-      bucketSyncRepository.updateBucket(2u, byteArrayOf(2))
-      delay(1.seconds)
-
-      sender.sentData.shouldHaveSize(1)
-   }
-
-   @Test
-   fun `Notify that the watch up to date when the startup sync completes`() = scope.runTest {
-      bucketSyncRepository.updateBucket(1u, byteArrayOf(1))
-      bucketSyncRepository.updateBucket(2u, byteArrayOf(2))
-
-      receiveStandardHelloPacket(bufferSize = 53u)
-      runCurrent()
-
-      backgroundSyncNotifier.watchesFullySynced.shouldContainExactly("watch")
-   }
-
-   @Test
-   fun `Notify that the watch up to date when the follow up sync completes`() = scope.runTest {
-      receiveStandardHelloPacket(bufferSize = 52u)
-      runCurrent()
-
-      sender.sentPackets.clear()
-      backgroundSyncNotifier.watchesFullySynced.clear()
-
-      bucketSyncRepository.updateBucket(1u, byteArrayOf(1))
-      bucketSyncRepository.updateBucket(2u, byteArrayOf(2))
-      delay(1.seconds)
-
-      backgroundSyncNotifier.watchesFullySynced.shouldContainExactly("watch")
-   }
-
-   @Test
    fun `Send auto-close flag when watchapp was started by auto sync`() = scope.runTest {
       watchappOpenController.setNextWatchappOpenForAutoSync()
 
@@ -431,16 +221,6 @@ class WatchappConnectionImplTest {
       runCurrent()
 
       sender.sentData.first().shouldContainKey(3u)
-   }
-
-   @Test
-   fun `Reset auto sync flag after open`() = scope.runTest {
-      watchappOpenController.setNextWatchappOpenForAutoSync()
-
-      receiveStandardHelloPacket(bufferSize = 61u)
-      runCurrent()
-
-      watchappOpenController.isNextWatchappOpenForAutoSync() shouldBe false
    }
 
    private suspend fun receiveStandardHelloPacket(version: UInt = 0u, bufferSize: UInt = 1000u): ReceiveResult =

@@ -1,6 +1,8 @@
 package com.matejdro.catapult.bluetooth
 
-class FakeWatchappOpenController : WatchappOpenController {
+import com.matejdro.bucketsync.BucketSyncWatchappOpenController
+
+class FakeWatchappOpenController : WatchappOpenController, BucketSyncWatchappOpenController {
    private var nextWatchappOpenForAutoSync: Boolean = false
 
    override fun isNextWatchappOpenForAutoSync(): Boolean {

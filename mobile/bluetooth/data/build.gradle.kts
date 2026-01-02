@@ -20,6 +20,7 @@ dependencies {
 
    testImplementation(projects.bluetooth.test)
    testImplementation(projects.bucketsync.test)
+   testImplementation(projects.bucketsync.data)
    testImplementation(projects.actionlist.test)
    testImplementation(projects.tasker.test)
    testImplementation(libs.kotlinova.core.test)
