@@ -1,6 +1,6 @@
 #include "packets.h"
-#include "bluetooth.h"
-#include "bucket_sync.h"
+#include "commons/connection/bluetooth.h"
+#include "commons/connection/bucket_sync.h"
 #include <pebble.h>
 
 #include "../ui/window_status.h"
@@ -8,6 +8,13 @@
 static void receive_phone_welcome(const DictionaryIterator* iterator);
 static void receive_sync_restart(const DictionaryIterator* iterator);
 static void receive_sync_next_packet(const DictionaryIterator* iterator);
+static void receive_watch_packet(const DictionaryIterator* received);
+
+void packets_init()
+{
+    bluetooth_register_reconnect_callback(send_watch_welcome);
+    bluetooth_register_receive_watch_packet(receive_watch_packet);
+}
 
 void send_watch_welcome()
 {
@@ -29,7 +36,7 @@ void send_trigger_action(const uint16_t id)
     bluetooth_app_message_outbox_send();
 }
 
-void receive_watch_packet(const DictionaryIterator* received)
+static void receive_watch_packet(const DictionaryIterator* received)
 {
     const uint8_t packet_id = dict_find(received, 0)->value->uint8;
 

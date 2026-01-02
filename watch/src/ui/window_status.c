@@ -2,7 +2,7 @@
 #include "pebble.h"
 #include "window_action_list.h"
 #include "layers/status_bar.h"
-#include "../connection/bucket_sync.h"
+#include "commons/connection/bucket_sync.h"
 
 static TextLayer* main_text;
 static TextLayer* app_name_text;
@@ -85,13 +85,18 @@ static void window_status_show(const char* text, bool switch_on_load)
 
     Window* window = window_create();
     window_set_window_handlers(window, (WindowHandlers)
-                               {
-                                   .load = window_load,
-                                   .unload = window_unload,
-                                   .appear = window_show,
-                                   .disappear = window_hide
-                               }
-    );
+    {
+        .
+        load = window_load,
+        .
+        unload = window_unload,
+        .
+        appear = window_show,
+        .
+        disappear = window_hide
+    }
+    )
+    ;
     window_stack_pop_all(false);
     window_stack_push(window, false);
 }
@@ -104,4 +109,9 @@ void window_status_show_empty()
 void window_status_show_error(const char* text)
 {
     window_status_show(text, false);
+}
+
+void bluetooth_show_error(const char* text)
+{
+    window_status_show_error(text);
 }

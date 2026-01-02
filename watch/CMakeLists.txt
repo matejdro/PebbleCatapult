@@ -3,7 +3,7 @@ project(watch C)
 
 set(CMAKE_C_STANDARD 11)
 
-include_directories(src/c)
+include_directories(src)
 
 file(GLOB SOURCES "src/*.c")
 

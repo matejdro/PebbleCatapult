@@ -1,9 +1,10 @@
 #include "window_action_list.h"
 #include "pebble.h"
 #include "window_status.h"
-#include "../connection/bucket_sync.h"
+#include "commons/connection/bucket_sync.h"
 #include "../connection/packets.h"
-#include "../utils/bytes.h"
+#include "commons/bytes.h"
+#include "commons/connection/bluetooth.h"
 #include "layers/status_bar.h"
 
 typedef struct

@@ -1,7 +1,7 @@
 #include "status_bar.h"
 #include "pebble.h"
-#include "../../connection/bluetooth.h"
-#include "../../connection/bucket_sync.h"
+#include "commons/connection/bluetooth.h"
+#include "commons/connection/bucket_sync.h"
 
 static const int STATUS_BAR_HEIGHT = 16;
 
@@ -24,7 +24,7 @@ static GBitmap* indicator_disconnected = NULL;
 static GBitmap* indicator_error = NULL;
 
 static void custom_status_bar_update_clock();
-static void custom_status_bar_paint(Layer* layer, GContext* ctx);
+static void custom_status_bar_paint(Layer * layer, GContext * ctx);
 static void minute_tick(void);
 static void update_data();
 
@@ -170,12 +170,15 @@ GRect custom_status_bar_get_left_space(CustomStatusBarLayer* layer)
 {
     const GRect whole_status_size = layer_get_bounds(layer->layer);
 
-    return (GRect){
-        .origin = {
+    return (GRect)
+    {
+        .
+        origin = {
             .x = 0,
             .y = 0
         },
-        .size = {
+        .
+        size = {
             .w = whole_status_size.size.w - STATUS_BAR_RIGHT_WIDTH,
             .h = whole_status_size.size.h
         }

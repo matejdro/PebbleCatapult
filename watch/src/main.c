@@ -1,6 +1,6 @@
 #include <pebble.h>
-#include "connection/bluetooth.h"
-#include "connection/bucket_sync.h"
+#include "commons/connection/bluetooth.h"
+#include "commons/connection/bucket_sync.h"
 #include "ui/window_action_list.h"
 #include "connection/packets.h"
 #include "ui/window_status.h"
@@ -8,6 +8,7 @@
 
 int main(void)
 {
+    packets_init();
     bluetooth_init();
     bucket_sync_init();
 
