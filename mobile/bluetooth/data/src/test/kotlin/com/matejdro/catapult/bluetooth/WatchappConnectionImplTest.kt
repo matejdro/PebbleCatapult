@@ -4,7 +4,9 @@ import com.matejdro.bucketsync.FakeBucketSyncRepository
 import com.matejdro.bucketsync.background.FakeBackgroundSyncNotifier
 import com.matejdro.catapult.actionlist.api.CatapultAction
 import com.matejdro.catapult.actionlist.test.FakeCatapultActionRepository
+import com.matejdro.catapult.bluetooth.api.WATCHAPP_UUID
 import com.matejdro.catapult.tasker.FakeTaskerTaskStarter
+import com.matejdro.pebble.bluetooth.common.PacketQueue
 import com.matejdro.pebble.bluetooth.common.test.FakePebbleSender
 import com.matejdro.pebble.bluetooth.common.test.sentData
 import io.kotest.matchers.collections.shouldBeEmpty
@@ -43,7 +45,7 @@ class WatchappConnectionImplTest {
       taskerTaskStarter,
       backgroundSyncNotifier,
       watchappOpenController,
-      sender,
+      PacketQueue(sender, WatchIdentifier("watch"), WATCHAPP_UUID),
    )
 
    @Test

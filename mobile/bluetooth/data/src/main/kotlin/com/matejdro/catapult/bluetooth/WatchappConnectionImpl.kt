@@ -3,7 +3,6 @@ package com.matejdro.catapult.bluetooth
 import com.matejdro.bucketsync.BucketSyncRepository
 import com.matejdro.bucketsync.background.BackgroundSyncNotifier
 import com.matejdro.catapult.actionlist.api.CatapultActionRepository
-import com.matejdro.catapult.bluetooth.api.WATCHAPP_UUID
 import com.matejdro.catapult.common.flow.firstData
 import com.matejdro.catapult.tasker.TaskerTaskStarter
 import com.matejdro.pebble.bluetooth.common.PacketQueue
@@ -15,7 +14,6 @@ import com.matejdro.pebble.bluetooth.common.util.writeUByte
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
-import io.rebble.pebblekit2.client.PebbleSender
 import io.rebble.pebblekit2.common.model.PebbleDictionary
 import io.rebble.pebblekit2.common.model.PebbleDictionaryItem
 import io.rebble.pebblekit2.common.model.ReceiveResult
@@ -39,9 +37,8 @@ class WatchappConnectionImpl(
    private val taskerTaskStarter: TaskerTaskStarter,
    private val backgroundSyncNotifier: BackgroundSyncNotifier,
    private val watchappOpenController: WatchappOpenController,
-   pebbleSender: PebbleSender,
+   private val packetQueue: PacketQueue,
 ) : WatchAppConnection {
-   private val packetQueue = PacketQueue(pebbleSender, watch, WATCHAPP_UUID)
    private var watchBufferSize: Int = 0
    private var bucketSyncJob: Job? = null
 
