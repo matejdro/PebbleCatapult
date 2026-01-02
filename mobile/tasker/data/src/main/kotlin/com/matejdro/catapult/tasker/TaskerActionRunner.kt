@@ -52,7 +52,7 @@ class TaskerActionRunner(
                val runningApp = pebbleInfoRetriever.getActiveApp(watch.id).first()
                logcat { "Running app on ${watch.id}: ${runningApp ?: "null"}" }
 
-               runningApp?.isWatchface == Watchapp.Type.WATCHFACE
+               runningApp?.type == Watchapp.Type.WATCHFACE
             }
 
             openController.setNextWatchappOpenForAutoSync()
