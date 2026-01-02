@@ -112,6 +112,9 @@ dependencyAnalysis {
 }
 
 dependencies {
+   implementation(projects.bluetoothCommon)
+   implementation(projects.bluetooth.api)
+   implementation(projects.bluetooth.data)
    implementation(projects.common)
    implementation(projects.commonAndroid)
    implementation(projects.commonNavigation)
@@ -123,8 +126,6 @@ dependencies {
    implementation(projects.actionlist.api)
    implementation(projects.actionlist.data)
    implementation(projects.actionlist.ui)
-   implementation(projects.bluetooth.api)
-   implementation(projects.bluetooth.data)
    implementation(projects.navigationImpl)
    implementation(projects.bucketsync.api)
    implementation(projects.bucketsync.data)

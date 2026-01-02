@@ -25,6 +25,7 @@ dependencies {
    implementation(libs.logcat)
 
    testImplementation(projects.actionlist.test)
+   testImplementation(projects.bluetoothCommon)
    testImplementation(projects.bluetooth.test)
    testImplementation(libs.kotlinova.core.test)
 }

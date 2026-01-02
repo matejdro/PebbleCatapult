@@ -9,10 +9,10 @@ dependencies {
    api(projects.bucketsync.api)
    api(projects.actionlist.api)
    api(projects.tasker.api)
-   api(libs.dispatch)
    api(libs.pebblekit.api)
 
    implementation(projects.common)
+   implementation(libs.dispatch)
    implementation(libs.kotlinova.core)
    implementation(libs.kotlin.coroutines)
    implementation(libs.logcat)
