@@ -8,13 +8,13 @@ import com.matejdro.catapult.common.flow.firstData
 import com.matejdro.catapult.tasker.TaskerTaskStarter
 import com.matejdro.pebble.bluetooth.common.PacketQueue
 import com.matejdro.pebble.bluetooth.common.WatchAppConnection
+import com.matejdro.pebble.bluetooth.common.di.WatchappConnectionGraph
+import com.matejdro.pebble.bluetooth.common.di.WatchappConnectionScope
 import com.matejdro.pebble.bluetooth.common.util.requireUint
 import com.matejdro.pebble.bluetooth.common.util.writeUByte
 import dev.zacsweers.metro.AppScope
-import dev.zacsweers.metro.Assisted
-import dev.zacsweers.metro.AssistedFactory
-import dev.zacsweers.metro.AssistedInject
 import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.Inject
 import io.rebble.pebblekit2.client.PebbleSender
 import io.rebble.pebblekit2.common.model.PebbleDictionary
 import io.rebble.pebblekit2.common.model.PebbleDictionaryItem
@@ -28,12 +28,11 @@ import kotlinx.coroutines.launch
 import logcat.logcat
 import okio.Buffer
 
-@AssistedInject
+@Inject
+@ContributesBinding(WatchappConnectionScope::class)
 @Suppress("MagicNumber") // Packet processing involves a lot of numbers, it would be less readable to make consts
 class WatchappConnectionImpl(
-   @Assisted
    private val watch: WatchIdentifier,
-   @Assisted
    private val coroutineScope: CoroutineScope,
    private val bucketSyncRepository: BucketSyncRepository,
    private val actionRepository: CatapultActionRepository,
@@ -225,10 +224,14 @@ class WatchappConnectionImpl(
       }
    }
 
-   @AssistedFactory
+   @Inject
    @ContributesBinding(AppScope::class)
-   interface Factory : WatchAppConnection.Factory {
-      override fun create(watch: WatchIdentifier, scope: CoroutineScope): WatchappConnectionImpl
+   class Factory(
+      private val subgraphFactory: WatchappConnectionGraph.Factory,
+   ) : WatchAppConnection.Factory {
+      override fun create(watch: WatchIdentifier, scope: CoroutineScope): WatchAppConnection {
+         return subgraphFactory.create(scope, watch).createWatchappConnection()
+      }
    }
 }
 
