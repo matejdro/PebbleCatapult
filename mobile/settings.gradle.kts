@@ -38,7 +38,6 @@ rootProject.name = "PebbleCatapult"
 
 include(":app")
 include(":app-screenshot-tests")
-include(":bluetooth-common")
 include(":common")
 include(":common:test")
 include(":common-android")
@@ -58,17 +57,22 @@ include(":actionlist:test")
 include(":bluetooth:api")
 include(":bluetooth:data")
 include(":bluetooth:test")
-include(":bucketsync:api")
-
-project(":bucketsync").projectDir = file("../PebbleCommons/mobile/bucketsync")
-project(":bucketsync:api").projectDir = file("../PebbleCommons/mobile/bucketsync/api")
-include(":bucketsync:data")
-project(":bucketsync:data").projectDir = file("../PebbleCommons/mobile/bucketsync/data")
-include(":bucketsync:test")
-project(":bucketsync:test").projectDir = file("../PebbleCommons/mobile/bucketsync/test")
 include(":navigation-impl")
 include(":tasker:api")
 include(":tasker:data")
 include(":tasker:ui")
 include(":tasker:test")
 include(":tools:ui")
+
+// Projects from PebbleCommons
+
+include(":bluetooth-common")
+project(":bluetooth-common").projectDir = file("../PebbleCommons/mobile/bluetooth-common")
+
+include(":bucketsync:api")
+project(":bucketsync:api").projectDir = file("../PebbleCommons/mobile/bucketsync/api")
+include(":bucketsync:data")
+project(":bucketsync:data").projectDir = file("../PebbleCommons/mobile/bucketsync/data")
+include(":bucketsync:test")
+project(":bucketsync:test").projectDir = file("../PebbleCommons/mobile/bucketsync/test")
+project(":bucketsync").projectDir = file("../PebbleCommons/mobile/bucketsync")
