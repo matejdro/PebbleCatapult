@@ -6,6 +6,7 @@ import com.matejdro.catapult.actionlist.api.CatapultAction
 import com.matejdro.catapult.actionlist.api.CatapultActionRepository
 import com.matejdro.catapult.actionlist.api.CatapultDirectory
 import com.matejdro.catapult.actionlist.api.DirectoryListRepository
+import com.matejdro.catapult.actionlist.api.MAX_ACTIONS_TO_SYNC
 import com.matejdro.catapult.common.logging.ActionLogger
 import com.matejdro.catapult.navigation.keys.ActionListKey
 import dev.zacsweers.metro.Inject
@@ -102,5 +103,3 @@ data class ActionListState(
    val actions: List<CatapultAction>,
    val showActionsWarning: Boolean,
 )
-
-private const val MAX_ACTIONS_TO_SYNC = 13

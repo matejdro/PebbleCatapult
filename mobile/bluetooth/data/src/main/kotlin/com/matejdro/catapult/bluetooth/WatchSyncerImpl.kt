@@ -3,6 +3,7 @@ package com.matejdro.catapult.bluetooth
 import com.matejdro.bucketsync.BucketSyncRepository
 import com.matejdro.catapult.actionlist.api.CatapultActionRepository
 import com.matejdro.catapult.actionlist.api.DirectoryListRepository
+import com.matejdro.catapult.actionlist.api.MAX_ACTIONS_TO_SYNC
 import com.matejdro.catapult.bluetooth.util.writeUByte
 import com.matejdro.catapult.bluetooth.util.writeUShort
 import com.matejdro.catapult.common.flow.firstData
@@ -57,5 +58,3 @@ class WatchSyncerImpl(
       bucketSyncRepository.deleteBucket(id.toUByte())
    }
 }
-
-private const val MAX_ACTIONS_TO_SYNC = 13
