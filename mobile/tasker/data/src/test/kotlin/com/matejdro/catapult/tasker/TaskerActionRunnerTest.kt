@@ -4,9 +4,9 @@ import androidx.core.os.bundleOf
 import com.matejdro.catapult.actionlist.api.CatapultAction
 import com.matejdro.catapult.actionlist.test.FakeCatapultActionRepository
 import com.matejdro.catapult.bluetooth.FakePebbleInfoRetriever
-import com.matejdro.catapult.bluetooth.FakePebbleSender
 import com.matejdro.catapult.bluetooth.FakeWatchappOpenController
 import com.matejdro.catapult.bluetooth.api.WATCHAPP_UUID
+import com.matejdro.pebble.bluetooth.common.test.FakePebbleSender
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import io.rebble.pebblekit2.common.model.WatchIdentifier

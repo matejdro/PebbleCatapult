@@ -5,6 +5,8 @@ import com.matejdro.bucketsync.background.FakeBackgroundSyncNotifier
 import com.matejdro.catapult.actionlist.api.CatapultAction
 import com.matejdro.catapult.actionlist.test.FakeCatapultActionRepository
 import com.matejdro.catapult.tasker.FakeTaskerTaskStarter
+import com.matejdro.pebble.bluetooth.common.test.FakePebbleSender
+import com.matejdro.pebble.bluetooth.common.test.sentData
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
