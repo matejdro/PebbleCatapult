@@ -19,7 +19,7 @@ immediately upon opening, there is no need to wait for the data to come from the
 
 ## Watchapp
 
-[<img src="docs/badge_rebble.png" alt="Get it on Rebble Store">](https://apps.rebble.io/en_US/application/69501540da1501000944b086)
+[<img src="docs/badge_rebble.svg" alt="Get it on Rebble Store">](https://apps.rebble.io/en_US/application/69501540da1501000944b086)
 [<img src="docs/badge_github.png" alt="Get it on GitHub">](../../releases/latest)
 
 # Contributing
