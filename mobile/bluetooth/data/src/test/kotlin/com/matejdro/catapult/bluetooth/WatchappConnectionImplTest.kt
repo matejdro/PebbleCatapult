@@ -93,7 +93,7 @@ class WatchappConnectionImplTest {
       bucketSyncRepository.updateBucket(1u, byteArrayOf(1))
       bucketSyncRepository.updateBucket(2u, byteArrayOf(2))
 
-      val result = receiveStandardHelloPacket(bufferSize = 60u)
+      val result = receiveStandardHelloPacket(bufferSize = 37u)
       runCurrent()
 
       result shouldBe ReceiveResult.Ack
