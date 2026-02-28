@@ -11,6 +11,7 @@ package net.dinglisch.android.tasker;// Version 1.3.3
 
 // For usage examples see http://tasker.dinglisch.net/invoketasks.html
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -121,6 +122,7 @@ public class TaskerIntent extends Intent {
     private final static int MAX_PRIORITY = 10;
 
     // For generating random names
+    @SuppressLint("WeakPrng") // Not user for cryptography
     private static Random rand = new Random();
 
     // Tracking state
