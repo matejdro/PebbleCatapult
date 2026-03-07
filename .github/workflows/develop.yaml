@@ -170,7 +170,13 @@ jobs:
           path: mobile/app/build/outputs/mapping/release/mapping.txt
 
       # Tests
-
+      - name: Compile Unit Tests
+        uses: burrunan/gradle-cache-action@v3.0.1
+        with:
+          arguments: "compileDebugUnitTestSources compileReleaseUnitTestSources --daemon"
+          build-root-directory: mobile
+          debug: false
+          concurrent: true
       - name: Lint
         uses: burrunan/gradle-cache-action@v3.0.1
         with:
@@ -187,13 +193,6 @@ jobs:
           debug: false
           concurrent: true
         if: "${{ env.BUILD_MOBILE == 'true' }}"
-      - name: Compile Unit Tests
-        uses: burrunan/gradle-cache-action@v3.0.1
-        with:
-          arguments: "compileDebugUnitTestSources compileReleaseUnitTestSources --daemon"
-          build-root-directory: mobile
-          debug: false
-          concurrent: true
         if: "${{ env.BUILD_MOBILE == 'true' }}"
       - name: Run Unit Tests
         uses: burrunan/gradle-cache-action@v3.0.1
