@@ -17,7 +17,7 @@ import si.inova.kotlinova.core.test.TestScopeWithDispatcherProvider
 import kotlin.time.Duration.Companion.seconds
 
 class WatchSyncerImplTest {
-   val bucketSyncRepository = FakeBucketSyncRepository(PROTOCOL_VERSION.toInt())
+   val bucketSyncRepository = FakeBucketSyncRepository(BUCKET_DATA_VERSION.toInt())
    val actionRepository = FakeCatapultActionRepository()
    val directoryRepository = FakeDirectoryListRepository()
 

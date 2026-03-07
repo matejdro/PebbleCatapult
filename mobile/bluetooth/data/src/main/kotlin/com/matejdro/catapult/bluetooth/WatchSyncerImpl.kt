@@ -23,7 +23,7 @@ class WatchSyncerImpl(
    private val directoryRepository: Lazy<DirectoryListRepository>,
 ) : WatchSyncer {
    override suspend fun init() {
-      val reloadAllData = !bucketSyncRepository.init(PROTOCOL_VERSION.toInt())
+      val reloadAllData = !bucketSyncRepository.init(BUCKET_DATA_VERSION.toInt())
       if (reloadAllData) {
          logcat { "Got different protocol version, resetting all data" }
          val allDirectories = directoryRepository.value.getAll().firstData()
