@@ -10,7 +10,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
@@ -24,7 +23,6 @@ import androidx.navigation3.scene.DialogSceneStrategy
 import com.matejdro.catapult.navigation.scenes.TabListDetailScene
 import com.matejdro.catapult.navigation.scenes.rememberTabListDetailSceneStrategy
 import com.matejdro.catapult.ui.theme.CatapultTheme
-import com.zhuinden.simplestack.Backstack
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -124,8 +122,6 @@ class MainActivity : ComponentActivity() {
                      remember { DialogSceneStrategy() }
                )
 
-               LogCurrentScreen(backstack)
-
                mainDeepLinkHandler.HandleNewIntentDeepLinks(this@MainActivity, backstack)
             }
          }
@@ -137,22 +133,5 @@ class MainActivity : ComponentActivity() {
          @Suppress("UNCHECKED_CAST")
          return mainViewModelFactory.create() as T
       }
-   }
-}
-
-@Composable
-private fun LogCurrentScreen(backstack: Backstack) {
-   DisposableEffect(backstack) {
-      val listener = Backstack.CompletionListener { stateChange ->
-         @Suppress("UNUSED_VARIABLE") // TODO use it
-         val newTopKey = stateChange.topNewKey<ScreenKey>()
-
-         // TODO log new top key here to the crash reporting service, such as Firebase
-         //  (and ideally set a Key) to make debugging crashes / error reports easier
-      }
-
-      backstack.addStateChangeCompletionListener(listener)
-
-      onDispose { backstack.removeStateChangeCompletionListener(listener) }
    }
 }

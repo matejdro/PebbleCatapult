@@ -64,7 +64,7 @@ class DirectoryListRepositoryImplTest {
       repo.getSingle(1).test {
          runCurrent()
 
-         expectMostRecentItem().shouldBeErrorWith(exceptionType = MissingDirectoryException::class.java)
+         expectMostRecentItem().shouldBeErrorWith(exceptionType = MissingDirectoryException::class)
       }
    }
 

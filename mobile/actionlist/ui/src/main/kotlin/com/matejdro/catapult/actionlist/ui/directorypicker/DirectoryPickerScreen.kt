@@ -1,6 +1,5 @@
 package com.matejdro.catapult.actionlist.ui.directorypicker
 
-import android.os.Parcelable
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -21,7 +20,7 @@ import com.matejdro.catapult.ui.components.AlertDialogWithContent
 import com.matejdro.catapult.ui.components.ProgressErrorSuccessScaffold
 import com.matejdro.catapult.ui.debugging.FullScreenPreviews
 import com.matejdro.catapult.ui.debugging.PreviewTheme
-import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 import si.inova.kotlinova.compose.components.itemsWithDivider
 import si.inova.kotlinova.compose.flow.collectAsStateWithLifecycleAndBlinkingPrevention
 import si.inova.kotlinova.compose.result.LocalResultPassingStore
@@ -98,15 +97,15 @@ private fun Content(
    }
 }
 
-@Parcelize
+@Serializable
 data class DirectoryPickerKey(
    val result: ResultKey<Result>,
 ) : ScreenKey(), DialogKey {
    override val dialogProperties: DialogProperties
       get() = DialogProperties()
 
-   @Parcelize
-   data class Result(val id: Int, val title: String) : Parcelable
+   @Serializable
+   data class Result(val id: Int, val title: String)
 }
 
 @FullScreenPreviews

@@ -1,7 +1,7 @@
 package com.matejdro.catapult.navigation.keys
 
 import com.matejdro.catapult.navigation.keys.base.BaseScreenKey
-import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 
-@Parcelize
+@Serializable
 data object ToolsScreenKey : BaseScreenKey()

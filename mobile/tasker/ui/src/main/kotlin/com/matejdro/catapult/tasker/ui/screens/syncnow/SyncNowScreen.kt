@@ -26,7 +26,7 @@ import com.matejdro.catapult.tasker.ui.R
 import com.matejdro.catapult.tasker.ui.TaskerConfigurationActivity
 import com.matejdro.catapult.ui.debugging.FullScreenPreviews
 import com.matejdro.catapult.ui.debugging.PreviewTheme
-import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 import me.zhanghai.compose.preference.LocalPreferenceTheme
 import me.zhanghai.compose.preference.SwitchPreference
 import me.zhanghai.compose.preference.preferenceTheme
@@ -120,5 +120,5 @@ internal fun SyncNowScreenPreview() {
    }
 }
 
-@Parcelize
+@Serializable
 data object SyncNowScreenKey : ScreenKey()

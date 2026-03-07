@@ -1181,7 +1181,5 @@ Compose:
     active: true
 
 kotlinovanavigation:
-  NavigationKeyNoEnums:
-    active: true
   NavigationSerializable:
-    active: false # Disable until the update to the new navigation
+    active: true
