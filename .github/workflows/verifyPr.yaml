@@ -90,9 +90,6 @@ jobs:
         run: pebble build && mv build/watch.pbw build/catapult-watchapp.pbw
         working-directory: watch
 
-      - name: "Create jacoco aggregate"
-        run: "./gradlew aggregatedJacocoReport"
-        working-directory: mobile
         #     GitHub Actions does not allow PR actions triggered from external contributors
         #     to post comments. As a workaround, we upload metadata artifacts
         #     and then sarif-comment.yaml workflow will run, which will post the comment
