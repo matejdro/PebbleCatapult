@@ -194,7 +194,6 @@ jobs:
       - name: "Generate new Screenshot Tests"
         run: "./gradlew config/generate-screenshots.sh master"
         working-directory: mobile
-        working-directory: mobile
         if: "${{ env.BUILD_MOBILE == 'true' }}"
       - name: "Run Screenshot Tests"
         run: "./gradlew --continue verifyPaparazziDebug"
