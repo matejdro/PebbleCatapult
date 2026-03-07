@@ -41,11 +41,11 @@ class DirectoryPickerScreen(
 ) : Screen<DirectoryPickerKey>() {
    @Composable
    override fun Content(key: DirectoryPickerKey) {
-      val stateOutcome = viewModel.uiState.collectAsStateWithLifecycleAndBlinkingPrevention().value
+      val stateOutcome = viewModel.uiState.collectAsStateWithLifecycleAndBlinkingPrevention()
       val resultPassingStore = LocalResultPassingStore.current
 
       Content(
-         stateOutcome = stateOutcome,
+         stateOutcome = stateOutcome::value,
          onDismiss = { navigator.goBack() },
          onDirectorySelect = {
             resultPassingStore.sendResult(key.result, DirectoryPickerKey.Result(it.id, it.title))
@@ -57,7 +57,7 @@ class DirectoryPickerScreen(
 
 @Composable
 private fun Content(
-   stateOutcome: Outcome<DirectoryListState>?,
+   stateOutcome: () -> Outcome<DirectoryListState>?,
    onDismiss: () -> Unit,
    onDirectorySelect: (CatapultDirectory) -> Unit,
    modifier: Modifier = Modifier,
@@ -115,15 +115,17 @@ data class DirectoryPickerKey(
 internal fun DirectoryPickerScreenPreview() {
    PreviewTheme {
       Content(
-         Outcome.Success(
-            DirectoryListState(
-               listOf(
-                  CatapultDirectory(1, "Directory 1"),
-                  CatapultDirectory(2, "Directory 2"),
-                  CatapultDirectory(3, "Directory 3")
+         {
+            Outcome.Success(
+               DirectoryListState(
+                  listOf(
+                     CatapultDirectory(1, "Directory 1"),
+                     CatapultDirectory(2, "Directory 2"),
+                     CatapultDirectory(3, "Directory 3")
+                  )
                )
             )
-         ),
+         },
          {}, {},
       )
    }

@@ -99,7 +99,7 @@ class ActionListScreen(
 ) : Screen<ActionListKey>() {
    @Composable
    override fun Content(key: ActionListKey) {
-      val stateOutcome = viewModel.uiState.collectAsStateWithLifecycleAndBlinkingPrevention().value
+      val stateOutcome = viewModel.uiState.collectAsStateWithLifecycleAndBlinkingPrevention()
 
       var addDialog by rememberSaveable { mutableStateOf<AddDialogAction?>(null) }
       var editDialog by remember { mutableStateOf<CatapultAction?>(null) }
@@ -117,7 +117,7 @@ class ActionListScreen(
       }
 
       ProgressErrorSuccessScaffold(
-         stateOutcome,
+         stateOutcome::value,
          Modifier
             .safeDrawingPadding(),
          { it.taskListUserFriendlyMessage() }

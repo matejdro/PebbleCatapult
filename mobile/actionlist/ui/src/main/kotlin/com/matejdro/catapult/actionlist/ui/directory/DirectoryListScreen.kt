@@ -80,7 +80,7 @@ class DirectoryListScreen(
    @Composable
    @Suppress("ModifierMissing") // Full screen
    fun Content(selectDirectory: (Int) -> Unit) {
-      val stateOutcome = viewModel.uiState.collectAsStateWithLifecycleAndBlinkingPrevention().value
+      val stateOutcome = viewModel.uiState.collectAsStateWithLifecycleAndBlinkingPrevention()
 
       var addDialog by rememberSaveable { mutableStateOf(false) }
       var editDialog by rememberSaveable { mutableStateOf<Int?>(null) }
@@ -90,7 +90,7 @@ class DirectoryListScreen(
       val snackbarHostState = remember { SnackbarHostState() }
 
       ProgressErrorSuccessScaffold(
-         stateOutcome,
+         stateOutcome::value,
          Modifier
             .safeDrawingPadding()
       ) { state ->
@@ -132,7 +132,7 @@ class DirectoryListScreen(
       } else if (editDialog != null) {
          NameEntryDialog(
             title = stringResource(R.string.edit),
-            initialText = stateOutcome?.data?.directories?.firstOrNull { it.id == editDialog }?.title.orEmpty(),
+            initialText = stateOutcome.value?.data?.directories?.firstOrNull { it.id == editDialog }?.title.orEmpty(),
             dismiss = { editDialog = null },
             accept = { newTitle ->
                editDialog?.let { id -> viewModel.edit(id, newTitle) }

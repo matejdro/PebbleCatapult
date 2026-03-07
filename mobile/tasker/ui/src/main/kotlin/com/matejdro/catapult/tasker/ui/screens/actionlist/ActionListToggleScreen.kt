@@ -72,7 +72,7 @@ class ActionListToggleScreen(
 ) : Screen<ActionListToggleKey>() {
    @Composable
    override fun Content(key: ActionListToggleKey) {
-      val stateOutcome = viewModel.uiState.collectAsStateWithLifecycleAndBlinkingPrevention().value
+      val stateOutcome = viewModel.uiState.collectAsStateWithLifecycleAndBlinkingPrevention()
 
       val activity = LocalContext.current.requireActivity().let { it as TaskerConfigurationActivity }
 
@@ -91,7 +91,7 @@ class ActionListToggleScreen(
       }
 
       ProgressErrorSuccessScaffold(
-         stateOutcome,
+         stateOutcome::value,
          Modifier
             .safeDrawingPadding(),
          { it.taskListUserFriendlyMessage() }
