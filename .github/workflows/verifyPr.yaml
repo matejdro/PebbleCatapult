@@ -57,25 +57,25 @@ jobs:
       # Build mobile app
 
       - name: Compile app
-        run: "compileReleaseKotlin assembleDebug"
+        run: "./gradlew compileReleaseKotlin assembleDebug"
 
       # Tests
 
       - name: Compile Unit Tests
-        run: "compileDebugUnitTestSources compileReleaseUnitTestSources"
+        run: "./gradlew compileDebugUnitTestSources compileReleaseUnitTestSources"
       - name: Lint
-        run: "lintRelease runDebugDetekt assertModuleGraph buildHealth detectTooManyFiles verifyDebugDatabaseMigration reportMerge --continue"
+        run: "./gradlew lintRelease runDebugDetekt assertModuleGraph buildHealth detectTooManyFiles verifyDebugDatabaseMigration reportMerge --continue"
       - name: Double check DB with the generated schema
-        run: "generateDebugDatabaseSchema verifyDebugDatabaseMigration --continue"
+        run: "./gradlew generateDebugDatabaseSchema verifyDebugDatabaseMigration --continue"
       - name: Run Unit Tests
-        run: "runDebugTests -x :app-screenshot-tests:testDebugUnitTest --continue"
+        run: "./gradlew runDebugTests -x :app-screenshot-tests:testDebugUnitTest --continue"
       - name: "Generate new Screenshot Tests"
-        run: "config/generate-screenshots.sh ${{ github.event.pull_request.head.ref }}"
+        run: "./gradlew config/generate-screenshots.sh ${{ github.event.pull_request.head.ref }}"
         working-directory: mobile
       - name: "Run Screenshot Tests"
-        run: "--continue verifyPaparazziDebug"
+        run: "./gradlew --continue verifyPaparazziDebug"
       - name: "Create jacoco aggregate"
-        run: "aggregatedJacocoReport"
+        run: "./gradlew aggregatedJacocoReport"
 
       # Build watchapp
 
