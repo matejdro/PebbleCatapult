@@ -33,7 +33,7 @@ dependencies {
    implementation(libs.androidx.navigation3)
    implementation(libs.composePreference)
 
-   testImplementation(projects.actionlist.test)
+   testImplementation(testFixtures(projects.actionlist.api))
    testImplementation(libs.kotlinova.core.test)
    testImplementation(libs.turbine)
 }

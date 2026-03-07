@@ -20,7 +20,7 @@ dependencies {
    implementation(libs.kotlinova.core)
    implementation(libs.dispatch)
 
-   testImplementation(projects.bluetooth.test)
+   testImplementation(testFixtures(projects.bluetooth.api))
    testImplementation(libs.kotlinova.core.test)
    testImplementation(libs.turbine)
 }

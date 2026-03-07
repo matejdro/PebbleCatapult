@@ -81,9 +81,9 @@ Every feature should contain following modules:
       No other `data` or `ui` module should depend on this (except for tests).
     * `api` - interfaces and data models exposed to other modules.
       This module should generally contain no logic to speed up builds.
+      It can also contain `testFixtures` source set for faking interfaces exposed in that module.
     * `ui` - Module containing feature's ui (Screens / Fragments / ViewModels).
       No other `data` or `ui` module should depend on this (except for tests).
-    * `test` (optional) - Module containing test helpers for faking stuff exposed in the `api` module
 
 If your module contains instrumented tests, you must enable them with the following call:
 

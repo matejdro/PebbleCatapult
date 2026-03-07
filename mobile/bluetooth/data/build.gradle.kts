@@ -18,10 +18,10 @@ dependencies {
    implementation(libs.logcat)
    implementation(libs.okio)
 
-   testImplementation(projects.bluetooth.test)
+   testImplementation(testFixtures(projects.bluetooth.api))
    testImplementation(projects.bucketsync.test)
    testImplementation(projects.bucketsync.data)
-   testImplementation(projects.actionlist.test)
-   testImplementation(projects.tasker.test)
+   testImplementation(testFixtures(projects.actionlist.api))
+   testImplementation(testFixtures(projects.tasker.api))
    testImplementation(libs.kotlinova.core.test)
 }

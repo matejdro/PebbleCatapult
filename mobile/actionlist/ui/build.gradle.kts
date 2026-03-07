@@ -26,6 +26,6 @@ dependencies {
    implementation(projects.sharedResources)
    implementation(libs.androidx.activity.compose)
 
-   testImplementation(projects.actionlist.test)
+   testImplementation(testFixtures(projects.actionlist.api))
    testImplementation(libs.kotlinova.core.test)
 }

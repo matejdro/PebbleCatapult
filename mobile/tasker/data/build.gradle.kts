@@ -24,8 +24,8 @@ dependencies {
    implementation(libs.pebblekit.api)
    implementation(libs.logcat)
 
-   testImplementation(projects.actionlist.test)
+   testImplementation(testFixtures(projects.actionlist.api))
    testImplementation(projects.bluetoothCommon)
-   testImplementation(projects.bluetooth.test)
+   testImplementation(testFixtures(projects.bluetooth.api))
    testImplementation(libs.kotlinova.core.test)
 }
