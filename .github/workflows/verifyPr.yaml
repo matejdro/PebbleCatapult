@@ -106,11 +106,11 @@ jobs:
             **/build/*-results/**/*.xml
             pr_number.txt
             ${{ github.event_path }}
-            merge.sarif
-            build/reports/jacoco/aggregatedJacocoReport/aggregatedJacocoReport.xml
+            mobile/merge.sarif
+            mobile/build/reports/jacoco/aggregatedJacocoReport/aggregatedJacocoReport.xml
       - name: "Upload Screenshot test failures"
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f #v6
         if: failure()
         with:
           name: failed-screenshot-tests
-          path: app-screenshot-tests/build/paparazzi/failures
+          path: mobile/app-screenshot-tests/build/paparazzi/failures
