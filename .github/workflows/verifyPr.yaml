@@ -58,24 +58,32 @@ jobs:
 
       - name: Compile app
         run: "./gradlew compileReleaseKotlin assembleDebug"
+        working-directory: mobile
 
       # Tests
 
       - name: Compile Unit Tests
         run: "./gradlew compileDebugUnitTestSources compileReleaseUnitTestSources"
+        working-directory: mobile
       - name: Lint
         run: "./gradlew lintRelease runDebugDetekt assertModuleGraph buildHealth detectTooManyFiles verifyDebugDatabaseMigration reportMerge --continue"
+        working-directory: mobile
       - name: Double check DB with the generated schema
         run: "./gradlew generateDebugDatabaseSchema verifyDebugDatabaseMigration --continue"
+        working-directory: mobile
       - name: Run Unit Tests
         run: "./gradlew runDebugTests -x :app-screenshot-tests:testDebugUnitTest --continue"
+        working-directory: mobile
       - name: "Generate new Screenshot Tests"
         run: "./gradlew config/generate-screenshots.sh ${{ github.event.pull_request.head.ref }}"
         working-directory: mobile
+        working-directory: mobile
       - name: "Run Screenshot Tests"
         run: "./gradlew --continue verifyPaparazziDebug"
+        working-directory: mobile
       - name: "Create jacoco aggregate"
         run: "./gradlew aggregatedJacocoReport"
+        working-directory: mobile
 
       # Build watchapp
 
@@ -85,6 +93,7 @@ jobs:
 
       - name: "Create jacoco aggregate"
         run: "./gradlew aggregatedJacocoReport"
+        working-directory: mobile
         #     GitHub Actions does not allow PR actions triggered from external contributors
         #     to post comments. As a workaround, we upload metadata artifacts
         #     and then sarif-comment.yaml workflow will run, which will post the comment

@@ -48,7 +48,7 @@ jobs:
         working-directory: repo
 
       - name: Post SARIF findings as comments in the pull request
-        if: always() && steps.download.outcome == 'success' && hashFiles('artifacts/results/PebbleCatapult/PebbleCatapult/merge.sarif') != ''
+        if: always() && steps.download.outcome == 'success' && hashFiles('artifacts/results/PebbleCatapult/PebbleCatapult/mobile/merge.sarif') != ''
         uses: sett-and-hive/sarif-to-comment-action/composite@7e69cd5f511daf8e8804487150df819f8380018e
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -57,7 +57,7 @@ jobs:
           pr-number: "${{ steps.pr-meta.outputs.pr_num }}"
           title: Lint report
           show-rule-details: false
-          sarif-file: 'artifacts/results/PebbleCatapult/PebbleCatapult/merge.sarif'
+          sarif-file: 'artifacts/results/PebbleCatapult/PebbleCatapult/mobile/merge.sarif'
           simple: true
       - name: Publish Test Results
         uses: EnricoMi/publish-unit-test-result-action/linux@c950f6fb443cb5af20a377fd0dfaa78838901040
@@ -76,7 +76,7 @@ jobs:
         if: always() && steps.download.outcome == 'success'
         with:
           paths: |
-            artifacts/results/PebbleCatapult/PebbleCatapult/build/reports/jacoco/aggregatedJacocoReport/aggregatedJacocoReport.xml,
+            artifacts/results/PebbleCatapult/PebbleCatapult/mobile/build/reports/jacoco/aggregatedJacocoReport/aggregatedJacocoReport.xml,
           token: ${{ secrets.GITHUB_TOKEN }}
           update-comment: true
           title: Code Coverage

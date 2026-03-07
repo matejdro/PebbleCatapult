@@ -163,6 +163,7 @@ jobs:
 
       - name: Compile app
         run: "./gradlew compileDebugKotlin assembleRelease"
+        working-directory: mobile
         env:
           RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
           RELEASE_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
@@ -177,21 +178,27 @@ jobs:
       # Tests
       - name: Compile Unit Tests
         run: "./gradlew compileDebugUnitTestSources compileReleaseUnitTestSources"
+        working-directory: mobile
       - name: Lint
         run: "./gradlew lintRelease runDebugDetekt assertModuleGraph buildHealth detectTooManyFiles :app:verifyDebugDatabaseMigration reportMerge --continue"
+        working-directory: mobile
         if: "${{ env.BUILD_MOBILE == 'true' }}"
       - name: Double check db with generated schema
         run: "./gradlew :app:generateDebugDatabaseSchema :app:verifyDebugDatabaseMigration"
+        working-directory: mobile
         if: "${{ env.BUILD_MOBILE == 'true' }}"
       - name: Run Unit Tests
         run: "./gradlew runDebugTests -x :app-screenshot-tests:testDebugUnitTest --continue"
+        working-directory: mobile
         if: "${{ env.BUILD_MOBILE == 'true' }}"
       - name: "Generate new Screenshot Tests"
         run: "./gradlew config/generate-screenshots.sh master"
         working-directory: mobile
+        working-directory: mobile
         if: "${{ env.BUILD_MOBILE == 'true' }}"
       - name: "Run Screenshot Tests"
         run: "./gradlew --continue verifyPaparazziDebug"
+        working-directory: mobile
         if: "${{ env.BUILD_MOBILE == 'true' }}"
       - name: "Upload Screenshot test failures"
         uses: actions/upload-artifact@v4
