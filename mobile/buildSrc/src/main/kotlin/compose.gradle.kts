@@ -1,5 +1,6 @@
 import org.gradle.accessors.dm.LibrariesForLibs
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import util.isAndroidProject
 
 val libs = the<LibrariesForLibs>()
 
@@ -20,9 +21,11 @@ dependencies {
    add("implementation", libs.androidx.lifecycle.compose)
    add("implementation", libs.kotlinova.compose)
 
-   add("debugRuntimeOnly", libs.androidx.compose.ui.test.manifest)
-   add("debugImplementation", libs.androidx.compose.ui.tooling)
-   add("debugImplementation", libs.rebugger)
+   if (isAndroidProject()) {
+      add("debugRuntimeOnly", libs.androidx.compose.ui.test.manifest)
+      add("debugImplementation", libs.androidx.compose.ui.tooling)
+      add("debugImplementation", libs.rebugger)
 
-   add("androidTestImplementation", libs.androidx.compose.ui.test.junit4)
+      add("androidTestImplementation", libs.androidx.compose.ui.test.junit4)
+   }
 }
