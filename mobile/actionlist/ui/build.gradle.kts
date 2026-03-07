@@ -10,9 +10,7 @@ plugins {
 android {
    namespace = "com.matejdro.catapult.actionlist.ui"
 
-   buildFeatures {
-      androidResources = true
-   }
+   androidResources.enable = true
 }
 
 dependencies {
