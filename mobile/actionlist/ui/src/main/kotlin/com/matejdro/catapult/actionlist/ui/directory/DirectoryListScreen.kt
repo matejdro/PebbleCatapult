@@ -34,7 +34,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -68,11 +68,11 @@ class DirectoryListScreen(
 ) : Screen<DirectoryListKey>() {
    @Composable
    override fun Content(key: DirectoryListKey) {
-      Content {
+      Content { directoryId ->
          if (key.targetScreen == ActionListToggleKey::class.java.name) {
-            navigator.navigate(ReplaceBackstack(ActionListToggleKey(it)))
+            navigator.navigate(ReplaceBackstack(ActionListToggleKey(directoryId)))
          } else {
-            navigator.navigateToOrReplaceType(ActionListKey(it))
+            navigator.navigateToOrReplaceType(ActionListKey(directoryId))
          }
       }
    }
@@ -84,7 +84,7 @@ class DirectoryListScreen(
 
       var addDialog by rememberSaveable { mutableStateOf(false) }
       var editDialog by rememberSaveable { mutableStateOf<Int?>(null) }
-      val context = LocalContext.current
+      val resources = LocalResources.current
 
       val scope = rememberCoroutineScope()
       val snackbarHostState = remember { SnackbarHostState() }
@@ -100,19 +100,19 @@ class DirectoryListScreen(
             addNew = {
                if (state.directories.size >= 15) {
                   scope.launch {
-                     snackbarHostState.showSnackbar(context.getString(R.string.you_can_only_have_up_to_15_directories))
+                     snackbarHostState.showSnackbar(resources.getString(R.string.you_can_only_have_up_to_15_directories))
                   }
                } else {
                   addDialog = true
                }
             },
-            edit = {
-               if (it == 1) {
+            edit = { directoryId ->
+               if (directoryId == 1) {
                   scope.launch {
-                     snackbarHostState.showSnackbar(context.getString(R.string.starting_directory_cannot_be_edited))
+                     snackbarHostState.showSnackbar(resources.getString(R.string.starting_directory_cannot_be_edited))
                   }
                } else {
-                  editDialog = it
+                  editDialog = directoryId
                }
             },
             select = selectDirectory
@@ -124,8 +124,8 @@ class DirectoryListScreen(
             title = stringResource(R.string.add),
             initialText = "",
             dismiss = { addDialog = false },
-            accept = {
-               viewModel.add(it)
+            accept = { name ->
+               viewModel.add(name)
                addDialog = false
             }
          )
@@ -173,11 +173,11 @@ private fun DirectoryListScreenContent(
          contentPadding = WindowInsets.safeDrawing.asPaddingValues(),
          modifier = Modifier.padding(paddingValues)
       ) {
-         itemsWithDivider(state.directories, key = { it.id }) {
+         itemsWithDivider(state.directories, key = { it.id }) { directory ->
             Text(
-               it.title,
+               directory.title,
                Modifier
-                  .combinedClickable(onClick = { select(it.id) }, onLongClick = { edit(it.id) })
+                  .combinedClickable(onClick = { select(directory.id) }, onLongClick = { edit(directory.id) })
                   .padding(32.dp)
                   .fillMaxWidth()
                   .animateItem()

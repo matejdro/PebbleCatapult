@@ -138,9 +138,9 @@ class WatchSyncerImplTest {
       watchSyncer.init()
 
       directoryRepository.insert(CatapultDirectory(1, "Directory 1"))
-      repeat(15) {
-         val id = it + 1
-         actionRepository.insert(CatapultAction("Action $it", directoryId = 1, id = id))
+      repeat(15) { index ->
+         val id = index + 1
+         actionRepository.insert(CatapultAction("Action $index", directoryId = 1, id = id))
       }
 
       watchSyncer.syncDirectory(1)

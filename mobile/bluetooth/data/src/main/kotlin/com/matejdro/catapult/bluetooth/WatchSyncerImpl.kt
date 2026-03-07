@@ -33,21 +33,22 @@ class WatchSyncerImpl(
       }
    }
 
+   @Suppress("MissingUseCall") // writeUtf8 returns `this` — buffer is already in a use block
    override suspend fun syncDirectory(id: Int) = withDefault {
       val items = actionRepository.value.getAll(id, limit = MAX_ACTIONS_TO_SYNC, onlyEnabled = true).firstData()
       logcat { "Syncing directory $id, ${items.size} items" }
 
-      val buffer = Buffer()
-
-      buffer.writeUByte(items.size.toUByte())
-      for (item in items) {
-         buffer.writeUShort(item.id.toUShort())
-         buffer.writeUByte(item.targetDirectoryId?.toUByte() ?: 0u)
-         buffer.writeUByte(0u) // Flags, unused for now
-         buffer.writeUtf8(item.title)
-         buffer.writeUByte(0u) // Null terminator
+      val data = Buffer().use { buffer ->
+         buffer.writeUByte(items.size.toUByte())
+         for (item in items) {
+            buffer.writeUShort(item.id.toUShort())
+            buffer.writeUByte(item.targetDirectoryId?.toUByte() ?: 0u)
+            buffer.writeUByte(0u) // Flags, unused for now
+            buffer.writeUtf8(item.title)
+            buffer.writeUByte(0u) // Null terminator
+         }
+         buffer.readByteArray()
       }
-      val data = buffer.readByteArray()
       logcat(LogPriority.DEBUG, null) { "Size: ${data.size} bytes" }
 
       bucketSyncRepository.updateBucket(id.toUByte(), data)

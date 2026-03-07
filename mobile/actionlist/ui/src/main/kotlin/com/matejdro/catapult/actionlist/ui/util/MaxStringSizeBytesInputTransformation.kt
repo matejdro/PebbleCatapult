@@ -17,7 +17,7 @@ class MaxStringSizeBytesInputTransformation(private val maxBytes: Int) : InputTr
       val trimmedString = trim(this.toString())
 
       if (length > trimmedString.length) {
-         this.delete(trimmedString.length, length)
+         this.delete(start = trimmedString.length, end = length)
          this.placeCursorAtEnd()
       }
    }

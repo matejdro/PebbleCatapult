@@ -6,6 +6,8 @@
 #include "ui/window_status.h"
 
 
+const uint16_t PROTOCOL_VERSION = 1;
+
 int main(void)
 {
     packets_init();

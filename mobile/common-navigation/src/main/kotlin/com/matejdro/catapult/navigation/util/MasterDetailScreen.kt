@@ -96,8 +96,8 @@ abstract class MasterDetailScreen<K : ScreenKey, D> : Screen<K>() {
          lastKey.value = key
       }
 
-      fun openDetail(key: D) {
-         currentDetailScreen.value = key
+      fun openDetail(detailKey: D) {
+         currentDetailScreen.value = detailKey
          scope.launch {
             openState.animateTo(true)
          }
@@ -159,9 +159,9 @@ abstract class MasterDetailScreen<K : ScreenKey, D> : Screen<K>() {
          },
       ) { open ->
          if (open) {
-            currentDetailScreen()?.let {
+            currentDetailScreen()?.let { screen ->
                Box(Modifier.fillMaxSize()) {
-                  detail(it)
+                  detail(screen)
                }
             }
          } else {
@@ -171,6 +171,7 @@ abstract class MasterDetailScreen<K : ScreenKey, D> : Screen<K>() {
          }
       }
 
+      @Suppress("SuspendFunSwallowedCancellation") // CancellationException is re-thrown after NonCancellable cleanup
       PredictiveBackHandler(enabled = openState.currentState == true) { events ->
          var completed = false
          try {
@@ -274,9 +275,9 @@ abstract class MasterDetailScreen<K : ScreenKey, D> : Screen<K>() {
       }
 
       TwoPane(
-         if (flipMasterDetail) detailPane else master,
-         if (flipMasterDetail) master else detailPane,
-         twoPaneStrategy,
+         first = if (flipMasterDetail) detailPane else master,
+         second = if (flipMasterDetail) master else detailPane,
+         strategy = twoPaneStrategy,
          displayFeatures = displayFeatures,
          modifier = Modifier
             .fillMaxSize()

@@ -30,9 +30,9 @@ class CatapultActionRepositoryImpl(
    override fun getAll(directory: Int, limit: Int, onlyEnabled: Boolean): Flow<Outcome<List<CatapultAction>>> {
       val enabledNot = if (onlyEnabled) 0L else 2L
       return dbActionQueries.selectAll(directory.toLong(), enabledNot, limit.toLong()).asFlow()
-         .map<Query<SelectAll>, Outcome<List<CatapultAction>>> {
+         .map<Query<SelectAll>, Outcome<List<CatapultAction>>> { query ->
             withDefault {
-               val list = it.awaitAsList()
+               val list = query.awaitAsList()
 
                Outcome.Success(list.map { it.toCatapultAction() })
             }
@@ -42,9 +42,9 @@ class CatapultActionRepositoryImpl(
 
    override fun getById(id: Int): Flow<Outcome<CatapultAction?>> {
       return dbActionQueries.selectSingle(id.toLong()).asFlow()
-         .map<Query<SelectSingle>, Outcome<CatapultAction?>> {
+         .map<Query<SelectSingle>, Outcome<CatapultAction?>> { query ->
             withDefault {
-               val entry = it.awaitAsOneOrNull()
+               val entry = query.awaitAsOneOrNull()
 
                Outcome.Success(entry?.toCatapultAction())
             }
@@ -67,7 +67,7 @@ class CatapultActionRepositoryImpl(
    override suspend fun update(id: Int, title: String, enabled: Boolean) {
       withIO {
          val directoryId = dbActionQueries.getDirectoryId(id.toLong()).executeAsOne().toInt()
-         dbActionQueries.update(title, if (enabled) 1L else 0L, id.toLong())
+         dbActionQueries.update(title = title, enabled = if (enabled) 1L else 0L, id = id.toLong())
 
          watchSyncer.syncDirectory(directoryId)
       }
@@ -110,7 +110,7 @@ class CatapultActionRepositoryImpl(
 
    override suspend fun massToggle(directory: Int, enable: List<Int>, disable: List<Int>) {
       withIO {
-         dbActionQueries.toggle(enable.map { it.toLong() }, disable.map { it.toLong() })
+         dbActionQueries.toggle(enable = enable.map { it.toLong() }, disable = disable.map { it.toLong() })
          watchSyncer.syncDirectory(directory)
       }
    }

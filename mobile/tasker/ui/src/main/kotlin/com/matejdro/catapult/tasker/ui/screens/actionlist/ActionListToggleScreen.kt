@@ -79,14 +79,18 @@ class ActionListToggleScreen(
       var actionsToEnable by remember {
          mutableStateOf(
             activity.existingData.getString(BundleKeys.ENABLED_TASK_IDS)
-               ?.split(",")?.mapNotNull { it.toIntOrNull() }.orEmpty()
+               ?.split(",")
+               ?.mapNotNull { it.toIntOrNull() }
+               .orEmpty()
          )
       }
 
       var actionsToDisable by remember {
          mutableStateOf(
             activity.existingData.getString(BundleKeys.DISABLED_TASK_IDS)
-               ?.split(",")?.mapNotNull { it.toIntOrNull() }.orEmpty()
+               ?.split(",")
+               ?.mapNotNull { it.toIntOrNull() }
+               .orEmpty()
          )
       }
 
@@ -98,16 +102,16 @@ class ActionListToggleScreen(
       ) { state ->
          ActionListToggleScreenContent(
             state = state.copy(
-               actions = state.actions.map {
-                  val enabled = if (actionsToEnable.contains(it.id)) {
+               actions = state.actions.map { action ->
+                  val enabled = if (actionsToEnable.contains(action.id)) {
                      true
-                  } else if (actionsToDisable.contains(it.id)) {
+                  } else if (actionsToDisable.contains(action.id)) {
                      false
                   } else {
-                     it.enabled
+                     action.enabled
                   }
 
-                  it.copy(enabled = enabled)
+                  action.copy(enabled = enabled)
                }
             ),
             toggleActionEnabled = { action, enabled ->
@@ -126,11 +130,11 @@ class ActionListToggleScreen(
                }
 
                save(
-                  activity,
-                  key.directoryId,
-                  state,
-                  actionsToEnable,
-                  actionsToDisable,
+                  activity = activity,
+                  directoryId = key.directoryId,
+                  state = state,
+                  actionIdsToEnable = actionsToEnable,
+                  actionIdsToDisable = actionsToDisable,
                )
             },
             reselectDirectory = {

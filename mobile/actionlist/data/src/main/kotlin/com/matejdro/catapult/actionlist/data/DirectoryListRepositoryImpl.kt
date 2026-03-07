@@ -23,9 +23,9 @@ class DirectoryListRepositoryImpl(
    private val watchSyncer: WatchSyncer,
 ) : DirectoryListRepository {
    override fun getAll(): Flow<Outcome<List<CatapultDirectory>>> {
-      return dbDirectoryQueries.selectAll().asFlow().map {
+      return dbDirectoryQueries.selectAll().asFlow().map { query ->
          withDefault {
-            val list = it.awaitAsList()
+            val list = query.awaitAsList()
 
             if (list.isEmpty()) {
                insert(CatapultDirectory(0, "Starting Directory"))
@@ -37,9 +37,9 @@ class DirectoryListRepositoryImpl(
    }
 
    override fun getSingle(id: Int): Flow<Outcome<CatapultDirectory>> {
-      return dbDirectoryQueries.selectSingle(id.toLong()).asFlow().map {
+      return dbDirectoryQueries.selectSingle(id.toLong()).asFlow().map { query ->
          withDefault {
-            val value = it.awaitAsOneOrNull()
+            val value = query.awaitAsOneOrNull()
 
             if (value == null) {
                Outcome.Error(MissingDirectoryException())

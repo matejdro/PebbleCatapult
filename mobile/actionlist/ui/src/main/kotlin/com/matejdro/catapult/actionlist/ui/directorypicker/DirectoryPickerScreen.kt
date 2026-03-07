@@ -47,8 +47,8 @@ class DirectoryPickerScreen(
       Content(
          stateOutcome = stateOutcome::value,
          onDismiss = { navigator.goBack() },
-         onDirectorySelect = {
-            resultPassingStore.sendResult(key.result, DirectoryPickerKey.Result(it.id, it.title))
+         onDirectorySelect = { directory ->
+            resultPassingStore.sendResult(key.result, DirectoryPickerKey.Result(directory.id, directory.title))
             navigator.goBack()
          }
       )
@@ -83,11 +83,11 @@ private fun Content(
    ) {
       ProgressErrorSuccessScaffold(stateOutcome) { state ->
          LazyColumn {
-            itemsWithDivider(state.directories, key = { it.id }) {
+            itemsWithDivider(state.directories, key = { it.id }) { directory ->
                Text(
-                  it.title,
+                  directory.title,
                   Modifier
-                     .clickable(onClick = { onDirectorySelect(it) })
+                     .clickable(onClick = { onDirectorySelect(directory) })
                      .padding(8.dp)
                      .fillMaxWidth()
                      .animateItem()

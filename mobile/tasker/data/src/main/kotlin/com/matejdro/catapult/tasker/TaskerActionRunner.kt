@@ -33,11 +33,15 @@ class TaskerActionRunner(
    private suspend fun runToggleAction(bundle: Bundle) {
       val directoryId = bundle.getInt(BundleKeys.DIRECTORY_ID, 1)
       val actionsToEnable = bundle.getString(BundleKeys.ENABLED_TASK_IDS)
-         ?.split(",")?.mapNotNull { it.toIntOrNull() }.orEmpty()
+         ?.split(",")
+         ?.mapNotNull { it.toIntOrNull() }
+         .orEmpty()
       val actionsToDisable = bundle.getString(BundleKeys.DISABLED_TASK_IDS)
-         ?.split(",")?.mapNotNull { it.toIntOrNull() }.orEmpty()
+         ?.split(",")
+         ?.mapNotNull { it.toIntOrNull() }
+         .orEmpty()
 
-      actionRepository.massToggle(directoryId, actionsToEnable, actionsToDisable)
+      actionRepository.massToggle(directory = directoryId, enable = actionsToEnable, disable = actionsToDisable)
    }
 
    private suspend fun runSyncAction(bundle: Bundle) {

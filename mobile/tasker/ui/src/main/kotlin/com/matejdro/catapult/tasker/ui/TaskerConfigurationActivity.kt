@@ -60,9 +60,9 @@ abstract class TaskerConfigurationActivity : ComponentActivity() {
                entryDecorators = listOf(
                   rememberSaveableStateHolderNavEntryDecorator(),
                   NavEntryDecorator<ScreenKey>(
-                     decorate = {
+                     decorate = { entry ->
                         Surface {
-                           it.Content()
+                           entry.Content()
                         }
                      }
                   )

@@ -61,7 +61,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -104,12 +104,12 @@ class ActionListScreen(
       var addDialog by rememberSaveable { mutableStateOf<AddDialogAction?>(null) }
       var editDialog by remember { mutableStateOf<CatapultAction?>(null) }
 
-      val taskerSelectResult = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-         val taskName = it.data?.dataString ?: return@rememberLauncherForActivityResult
+      val taskerSelectResult = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+         val taskName = result.data?.dataString ?: return@rememberLauncherForActivityResult
          addDialog = AddDialogAction.TaskerTask(taskName)
       }
 
-      val context = LocalContext.current
+      val resources = LocalResources.current
       val scope = rememberCoroutineScope()
       val snackbarHostState = remember { SnackbarHostState() }
       val directorySelectResult = registerResultReceiver<DirectoryPickerKey.Result> {
@@ -131,7 +131,7 @@ class ActionListScreen(
                   taskerSelectResult.launch(taskerSelectIntent)
                } catch (_: ActivityNotFoundException) {
                   scope.launch {
-                     snackbarHostState.showSnackbar(context.getString(R.string.error_no_tasker))
+                     snackbarHostState.showSnackbar(resources.getString(R.string.error_no_tasker))
                   }
                }
             },
@@ -153,9 +153,9 @@ class ActionListScreen(
       addDialog?.let { action ->
          AddDialog(
             action,
-            {
+            { title ->
                viewModel.add(
-                  title = it,
+                  title = title,
                   targetTask = (action as? AddDialogAction.TaskerTask)?.name,
                   targetDirectory = (action as? AddDialogAction.Directory)?.id
                )
@@ -166,10 +166,10 @@ class ActionListScreen(
 
       editDialog?.let { action ->
          EditDialog(
-            action,
-            { viewModel.editActionTitle(action.id, it) },
-            { editDialog = null },
-            { viewModel.deleteAction(action.id) }
+            editingAction = action,
+            confirm = { viewModel.editActionTitle(action.id, it) },
+            dismissDialog = { editDialog = null },
+            delete = { viewModel.deleteAction(action.id) }
          )
       }
    }
@@ -336,10 +336,10 @@ private fun AddButtons(
 
 @Composable
 private fun AddDialog(addingAction: AddDialogAction, confirm: (String) -> Unit, dismissDialog: () -> Unit) {
-   val context = LocalContext.current
+   val resources = LocalResources.current
 
    ActionEntryDialog(
-      title = context.getString(
+      title = resources.getString(
          when (addingAction) {
             is AddDialogAction.Directory -> R.string.open_directory
             is AddDialogAction.TaskerTask -> R.string.tasker_task
@@ -352,8 +352,8 @@ private fun AddDialog(addingAction: AddDialogAction, confirm: (String) -> Unit, 
       },
       actionNameText = addingAction.title,
       dismiss = dismissDialog,
-      accept = {
-         confirm(it)
+      accept = { text ->
+         confirm(text)
          dismissDialog()
       }
    )
@@ -361,10 +361,10 @@ private fun AddDialog(addingAction: AddDialogAction, confirm: (String) -> Unit, 
 
 @Composable
 private fun EditDialog(editingAction: CatapultAction, confirm: (String) -> Unit, dismissDialog: () -> Unit, delete: () -> Unit) {
-   val context = LocalContext.current
+   val resources = LocalResources.current
 
    ActionEntryDialog(
-      title = context.getString(
+      title = resources.getString(
          if (editingAction.taskerTaskName != null) {
             R.string.tasker_task
          } else {
@@ -372,7 +372,7 @@ private fun EditDialog(editingAction: CatapultAction, confirm: (String) -> Unit,
          }
       ),
       initialText = editingAction.title,
-      actionPrefixText = context.getString(
+      actionPrefixText = resources.getString(
          if (editingAction.taskerTaskName != null) {
             R.string.will_start_a_tasker_task
          } else {
@@ -383,8 +383,8 @@ private fun EditDialog(editingAction: CatapultAction, confirm: (String) -> Unit,
       dismiss = {
          dismissDialog()
       },
-      accept = {
-         confirm(it)
+      accept = { text ->
+         confirm(text)
          dismissDialog()
       },
       delete = {

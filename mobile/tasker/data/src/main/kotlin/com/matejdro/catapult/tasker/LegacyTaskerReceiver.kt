@@ -13,16 +13,18 @@ import com.matejdro.catapult.common.NotificationsKeys
 import logcat.logcat
 
 class LegacyTaskerReceiver : BroadcastReceiver() {
+   // ForegroundServiceStartNotAllowedException is API 31+ so direct catch is unsafe on older APIs
+   @Suppress("InstanceOfCheckForException")
    override fun onReceive(context: Context, intent: Intent) {
       if (isOrderedBroadcast()) {
          setResultCode(TaskerPluginConstants.RESULT_CODE_PENDING)
       }
 
       val serviceIntent: Intent = Intent(context, TaskerActionService::class.java)
-      intent.extras?.let {
-         it.putBoolean(TaskerPluginConstants.EXTRA_CAN_BIND_FIRE_SETTING, false)
+      intent.extras?.let { extras ->
+         extras.putBoolean(TaskerPluginConstants.EXTRA_CAN_BIND_FIRE_SETTING, false)
 
-         serviceIntent.putExtras(it)
+         serviceIntent.putExtras(extras)
       }
       logcat { "Received tasker broadcast, starting service" }
       try {

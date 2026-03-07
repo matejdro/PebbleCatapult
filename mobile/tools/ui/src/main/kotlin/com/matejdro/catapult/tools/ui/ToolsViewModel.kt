@@ -54,8 +54,12 @@ class ToolsViewModel(
          File(logFolder, "device.txt").writeText(fileLoggingController.getDeviceInfo())
 
          val logsZipFile = File(logFolder, "logs.zip")
-         ZipOutputStream(FileOutputStream(logsZipFile).buffered()).use { zipOutputStream ->
-            zipOutputStream.addAllLogsToZip(logFolder, logsZipFile)
+         FileOutputStream(logsZipFile).use { fileOutput ->
+            fileOutput.buffered().use { bufferedOutput ->
+               ZipOutputStream(bufferedOutput).use { zipOutputStream ->
+                  zipOutputStream.addAllLogsToZip(logFolder, logsZipFile)
+               }
+            }
          }
 
          FileProvider.getUriForFile(context, "com.matejdro.catapult.logs", logsZipFile)

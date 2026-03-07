@@ -278,9 +278,9 @@ class CatapultActionRepositoryImplTest {
       repo.getAll(1, limit = 8).test {
          runCurrent()
 
-         repeat(10) {
+         repeat(10) { i ->
             repo.insert(
-               CatapultAction("Action $it", 1),
+               CatapultAction("Action $i", 1),
             )
          }
          runCurrent()

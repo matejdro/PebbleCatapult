@@ -57,11 +57,11 @@ fun AlertDialogWithContent(
                measurePolicy = DialogMeasuePolicy,
                content = {
                   Box(Modifier.padding(bottom = 16.dp)) {
-                     title?.let {
+                     title?.let { titleContent ->
                         CompositionLocalProvider(
                            LocalTextStyle provides MaterialTheme.typography.headlineSmall
                         ) {
-                           it()
+                           titleContent()
                         }
                      }
                   }
@@ -104,9 +104,9 @@ private object DialogMeasuePolicy : MeasurePolicy {
          width = max(titlePlaceable.width, max(contentPlaceable.width, buttonsPlaceable.width)),
          height = titlePlaceable.height + contentPlaceable.height + buttonsPlaceable.height
       ) {
-         titlePlaceable.place(0, 0)
-         contentPlaceable.place(0, titlePlaceable.height)
-         buttonsPlaceable.place(0, titlePlaceable.height + contentPlaceable.height)
+         titlePlaceable.place(x = 0, y = 0)
+         contentPlaceable.place(x = 0, y = titlePlaceable.height)
+         buttonsPlaceable.place(x = 0, y = titlePlaceable.height + contentPlaceable.height)
       }
    }
 }

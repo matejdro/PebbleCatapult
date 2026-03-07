@@ -113,9 +113,9 @@ class MainActivity : ComponentActivity() {
                   entryDecorators = listOf(
                      rememberSaveableStateHolderNavEntryDecorator(),
                      NavEntryDecorator<ScreenKey>(
-                        decorate = {
+                        decorate = { entry ->
                            Surface {
-                              it.Content()
+                              entry.Content()
                            }
                         }
                      )
@@ -143,9 +143,9 @@ class MainActivity : ComponentActivity() {
 @Composable
 private fun LogCurrentScreen(backstack: Backstack) {
    DisposableEffect(backstack) {
-      val listener = Backstack.CompletionListener {
+      val listener = Backstack.CompletionListener { stateChange ->
          @Suppress("UNUSED_VARIABLE") // TODO use it
-         val newTopKey = it.topNewKey<ScreenKey>()
+         val newTopKey = stateChange.topNewKey<ScreenKey>()
 
          // TODO log new top key here to the crash reporting service, such as Firebase
          //  (and ideally set a Key) to make debugging crashes / error reports easier

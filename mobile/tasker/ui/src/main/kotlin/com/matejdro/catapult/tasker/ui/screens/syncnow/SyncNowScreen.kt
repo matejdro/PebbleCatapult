@@ -55,9 +55,9 @@ class SyncNowScreen : Screen<SyncNowScreenKey>() {
 
       SyncNowScreenContent(
          onlyOnWatchface,
-         {
-            onlyOnWatchface = it
-            save(activity, it)
+         { newValue ->
+            onlyOnWatchface = newValue
+            save(activity, newValue)
          },
          {
             activity.finish()

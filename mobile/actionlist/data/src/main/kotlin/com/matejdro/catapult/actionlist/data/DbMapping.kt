@@ -16,24 +16,24 @@ internal fun CatapultDirectory.toDb(): DbDirectory {
 
 internal fun SelectAll.toCatapultAction(): CatapultAction {
    return CatapultAction(
-      title,
-      directoryId.toInt(),
-      id.toInt(),
-      taskerTaskName,
-      targetDirectoryId?.toInt(),
-      targetDirectoryName,
-      enabled == 1L
+      title = title,
+      directoryId = directoryId.toInt(),
+      id = id.toInt(),
+      taskerTaskName = taskerTaskName,
+      targetDirectoryId = targetDirectoryId?.toInt(),
+      targetDirectoryName = targetDirectoryName,
+      enabled = enabled == 1L
    )
 }
 
 internal fun SelectSingle.toCatapultAction(): CatapultAction {
    return CatapultAction(
-      title,
-      directoryId.toInt(),
-      id.toInt(),
-      taskerTaskName,
-      targetDirectoryId?.toInt(),
-      targetDirectoryName,
-      enabled == 1L
+      title = title,
+      directoryId = directoryId.toInt(),
+      id = id.toInt(),
+      taskerTaskName = taskerTaskName,
+      targetDirectoryId = targetDirectoryId?.toInt(),
+      targetDirectoryName = targetDirectoryName,
+      enabled = enabled == 1L
    )
 }

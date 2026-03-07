@@ -64,16 +64,16 @@ class FakeCatapultActionRepository : CatapultActionRepository {
       disable: List<Int>,
    ) {
       actions.update { list ->
-         list.map {
-            val enabled = if (enable.contains(it.id)) {
+         list.map { action ->
+            val enabled = if (enable.contains(action.id)) {
                true
-            } else if (disable.contains(it.id)) {
+            } else if (disable.contains(action.id)) {
                false
             } else {
-               it.enabled
+               action.enabled
             }
 
-            it.copy(enabled = enabled)
+            action.copy(enabled = enabled)
          }
       }
    }

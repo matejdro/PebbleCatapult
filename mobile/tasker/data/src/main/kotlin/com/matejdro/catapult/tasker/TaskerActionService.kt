@@ -45,6 +45,7 @@ class TaskerActionService : Service() {
       super.onCreate()
    }
 
+   @Suppress("SuspendFunSwallowedCancellation") // CancellationException is re-thrown after signalFinish
    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
       val canBind = intent.getBooleanExtra(TaskerPluginConstants.EXTRA_CAN_BIND_FIRE_SETTING, false)
       logcat { "Starting TaskerActionService. Bound: $canBind" }
