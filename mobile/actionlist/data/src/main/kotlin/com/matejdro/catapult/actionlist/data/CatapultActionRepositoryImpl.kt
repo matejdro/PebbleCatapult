@@ -91,14 +91,14 @@ class CatapultActionRepositoryImpl(
          if (toIndex > fromIndex) {
             dbActionQueries.reorderUpwards(
                id = id.toLong(),
-               fromIndex = fromIndex.toLong(),
+               fromIndex = fromIndex,
                toIndex = toIndex.toLong(),
                directoryId = directoryId
             )
          } else {
             dbActionQueries.reorderDownwards(
                id = id.toLong(),
-               fromIndex = fromIndex.toLong(),
+               fromIndex = fromIndex,
                toIndex = toIndex.toLong(),
                directoryId = directoryId
             )
