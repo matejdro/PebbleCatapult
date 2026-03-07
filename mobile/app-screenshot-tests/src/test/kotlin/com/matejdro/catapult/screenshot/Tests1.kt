@@ -2,7 +2,6 @@ package com.matejdro.catapult.screenshot
 
 import com.google.testing.junit.testparameterinjector.TestParameter
 import org.junit.Test
-import screenshot.TestsBase
 
 class Tests1 : TestsBase() {
    @Test

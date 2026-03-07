@@ -1,4 +1,4 @@
-package screenshot
+package com.matejdro.catapult.screenshot
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -11,7 +11,6 @@ import com.android.ide.common.rendering.api.SessionParams
 import com.android.resources.NightMode
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.google.testing.junit.testparameterinjector.TestParameterValuesProvider
-import com.matejdro.catapult.screenshot.determinedHandlerWithRenaming
 import com.matejdro.catapult.showkase.getMetadata
 import org.junit.Rule
 import org.junit.runner.RunWith
