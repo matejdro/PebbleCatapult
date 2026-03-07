@@ -24,6 +24,7 @@ dependencies {
    implementation(projects.commonCompose)
    implementation(projects.sharedResources)
    implementation(libs.androidx.activity.compose)
+   implementation(libs.androidx.compose.material3.sizeClasses)
 
    testImplementation(testFixtures(projects.actionlist.api))
    testImplementation(libs.kotlinova.core.test)
