@@ -158,6 +158,7 @@ jobs:
           debug: false
           concurrent: true
           read-only: false
+          build-root-directory: mobile
 
       # Build mobile app
 

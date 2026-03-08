@@ -1,5 +1,6 @@
 package com.matejdro.catapult.actionlist.ui.directory
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -17,12 +18,16 @@ import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -34,12 +39,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.airbnb.android.showkase.annotation.ShowkaseComposable
 import com.matejdro.catapult.actionlist.api.CatapultDirectory
 import com.matejdro.catapult.actionlist.ui.R
@@ -51,12 +58,16 @@ import com.matejdro.catapult.ui.components.AlertDialogWithContent
 import com.matejdro.catapult.ui.components.ProgressErrorSuccessScaffold
 import com.matejdro.catapult.ui.debugging.FullScreenPreviews
 import com.matejdro.catapult.ui.debugging.PreviewTheme
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import si.inova.kotlinova.compose.components.itemsWithDivider
 import si.inova.kotlinova.compose.flow.collectAsStateWithLifecycleAndBlinkingPrevention
+import si.inova.kotlinova.core.activity.requireActivity
 import si.inova.kotlinova.navigation.di.ContributesScreenBinding
 import si.inova.kotlinova.navigation.instructions.ReplaceBackstack
 import si.inova.kotlinova.navigation.navigator.Navigator
+import si.inova.kotlinova.navigation.screenkeys.ScreenKey
 import si.inova.kotlinova.navigation.screens.InjectNavigationScreen
 import si.inova.kotlinova.navigation.screens.Screen
 
@@ -65,10 +76,24 @@ import si.inova.kotlinova.navigation.screens.Screen
 class DirectoryListScreen(
    private val viewModel: DirectoryListViewModel,
    private val navigator: Navigator,
+   private val backstack: StateFlow<List<ScreenKey>>,
 ) : Screen<DirectoryListKey>() {
    @Composable
+   @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
    override fun Content(key: DirectoryListKey) {
-      Content { directoryId ->
+      val lastDetailsFlow = remember {
+         backstack
+            .map { list -> list.filterIsInstance<ActionListKey>().lastOrNull() }
+      }
+
+      val selectedDetailsKey = lastDetailsFlow.collectAsStateWithLifecycle(null).value
+      val windowSizeClass = calculateWindowSizeClass(LocalContext.current.requireActivity())
+      // Do not highlight selected item in the phone mode
+      val selectedId = selectedDetailsKey?.id.takeIf {
+         windowSizeClass.widthSizeClass != WindowWidthSizeClass.Compact
+      }
+
+      Content(selectedId) { directoryId ->
          if (key.targetScreen == ActionListToggleKey::class.java.name) {
             navigator.navigate(ReplaceBackstack(ActionListToggleKey(directoryId)))
          } else {
@@ -79,7 +104,7 @@ class DirectoryListScreen(
 
    @Composable
    @Suppress("ModifierMissing") // Full screen
-   fun Content(selectDirectory: (Int) -> Unit) {
+   fun Content(selectedDirectory: Int?, selectDirectory: (Int) -> Unit) {
       val stateOutcome = viewModel.uiState.collectAsStateWithLifecycleAndBlinkingPrevention()
 
       var addDialog by rememberSaveable { mutableStateOf(false) }
@@ -96,6 +121,7 @@ class DirectoryListScreen(
       ) { state ->
          DirectoryListScreenContent(
             state,
+            selectedDirectory,
             snackbarHostState,
             addNew = {
                if (state.directories.size >= 15) {
@@ -150,6 +176,7 @@ class DirectoryListScreen(
 @Composable
 private fun DirectoryListScreenContent(
    state: DirectoryListState,
+   selectedDirectory: Int?,
    snackbarHostState: SnackbarHostState,
    addNew: () -> Unit,
    edit: (Int) -> Unit,
@@ -178,9 +205,21 @@ private fun DirectoryListScreenContent(
                directory.title,
                Modifier
                   .combinedClickable(onClick = { select(directory.id) }, onLongClick = { edit(directory.id) })
+                  .run {
+                     if (directory.id == selectedDirectory) {
+                        background(MaterialTheme.colorScheme.primary)
+                     } else {
+                        this
+                     }
+                  }
                   .padding(32.dp)
                   .fillMaxWidth()
-                  .animateItem()
+                  .animateItem(),
+               color = if (directory.id == selectedDirectory) {
+                  MaterialTheme.colorScheme.onPrimary
+               } else {
+                  MaterialTheme.colorScheme.onSurface
+               },
             )
          }
       }
@@ -265,6 +304,29 @@ internal fun DirectoryListScreenContentPreview() {
                CatapultDirectory(3, "Directory 3")
             )
          ),
+         null,
+         SnackbarHostState(),
+         {},
+         {},
+         {}
+      )
+   }
+}
+
+@Preview(showBackground = true)
+@Composable
+@ShowkaseComposable(group = "test")
+internal fun DirectoryListScreenContentSelectedPreview() {
+   PreviewTheme {
+      DirectoryListScreenContent(
+         DirectoryListState(
+            listOf(
+               CatapultDirectory(1, "Directory 1"),
+               CatapultDirectory(2, "Directory 2"),
+               CatapultDirectory(3, "Directory 3")
+            )
+         ),
+         1,
          SnackbarHostState(),
          {},
          {},

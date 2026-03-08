@@ -53,6 +53,7 @@ jobs:
           debug: false
           concurrent: true
           read-only: true
+          build-root-directory: mobile
 
       # Build mobile app
 
@@ -73,9 +74,6 @@ jobs:
         working-directory: mobile
       - name: Run Unit Tests
         run: "./gradlew runDebugTests -x :app-screenshot-tests:testDebugUnitTest --continue"
-        working-directory: mobile
-      - name: "Generate new Screenshot Tests"
-        run: "./gradlew config/generate-screenshots.sh ${{ github.event.pull_request.head.ref }}"
         working-directory: mobile
       - name: "Run Screenshot Tests"
         run: "./gradlew --continue verifyPaparazziDebug"
