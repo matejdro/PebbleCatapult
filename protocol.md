@@ -68,6 +68,7 @@ Sent from the watch when the app is opened.
 Sent from the watch when the app is opened.
 
 * `1` - ID of the action to trigger (uint16)
+* `2` - Text of the action to trigger (cstring)
 
 # Buckets
 

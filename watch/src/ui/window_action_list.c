@@ -239,7 +239,7 @@ static void on_button_select_pressed(ClickRecognizerRef recognizer, void* contex
     else
     {
         bluetooth_register_sending_finish(on_task_starting_result);
-        send_trigger_action(selected_item->id);
+        send_trigger_action(selected_item->id, selected_item->title);
     }
 }
 

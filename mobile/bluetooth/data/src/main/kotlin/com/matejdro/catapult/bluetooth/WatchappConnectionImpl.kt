@@ -8,6 +8,7 @@ import com.matejdro.pebble.bluetooth.common.PacketQueue
 import com.matejdro.pebble.bluetooth.common.WatchAppConnection
 import com.matejdro.pebble.bluetooth.common.di.WatchappConnectionGraph
 import com.matejdro.pebble.bluetooth.common.di.WatchappConnectionScope
+import com.matejdro.pebble.bluetooth.common.util.requireString
 import com.matejdro.pebble.bluetooth.common.util.requireUint
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
@@ -93,9 +94,15 @@ class WatchappConnectionImpl(
 
    private suspend fun processStartTaskPacket(data: PebbleDictionary): ReceiveResult {
       val actionId = data.requireUint(1u)
+      val remoteActionTitle = data.requireString(2u)
       val action = actionRepository.getById(actionId.toInt()).firstData()
       if (action == null) {
          logcat { "Unknown action. Nacking..." }
+         return ReceiveResult.Nack
+      }
+
+      if (action.title != remoteActionTitle) {
+         logcat { "Mismatch action. local='${action.title}' vs remote='$remoteActionTitle'. Nacking..." }
          return ReceiveResult.Nack
       }
 

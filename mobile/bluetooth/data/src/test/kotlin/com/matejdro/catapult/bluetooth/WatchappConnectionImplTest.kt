@@ -135,6 +135,7 @@ class WatchappConnectionImplTest {
       result.getCompleted() shouldBe ReceiveResult.Ack
    }
 
+   @Test
    fun `Trigger tasker task when the watch requests it`() = scope.runTest {
       taskerTaskStarter.reportStartSuccessful = true
       actionRepository.insert(CatapultAction("Action A", 1, 1, "Tasker A"))
@@ -143,6 +144,7 @@ class WatchappConnectionImplTest {
          mapOf(
             0u to PebbleDictionaryItem.UInt32(4u),
             1u to PebbleDictionaryItem.UInt32(1u),
+            2u to PebbleDictionaryItem.Text("Action A"),
          )
       )
       runCurrent()
@@ -160,6 +162,7 @@ class WatchappConnectionImplTest {
          mapOf(
             0u to PebbleDictionaryItem.UInt32(4u),
             1u to PebbleDictionaryItem.UInt32(2u),
+            2u to PebbleDictionaryItem.Text("Action A"),
          )
       )
       runCurrent()
@@ -177,6 +180,7 @@ class WatchappConnectionImplTest {
          mapOf(
             0u to PebbleDictionaryItem.UInt32(4u),
             1u to PebbleDictionaryItem.UInt32(1u),
+            2u to PebbleDictionaryItem.Text("Action A"),
          )
       )
       runCurrent()
@@ -193,11 +197,30 @@ class WatchappConnectionImplTest {
          mapOf(
             0u to PebbleDictionaryItem.UInt32(4u),
             1u to PebbleDictionaryItem.UInt32(1u),
+            2u to PebbleDictionaryItem.Text("Action A"),
          )
       )
       runCurrent()
 
       result shouldBe ReceiveResult.Nack
+   }
+
+   @Test
+   fun `Return Nack when local action name does not match remote action name`() = scope.runTest {
+      taskerTaskStarter.reportStartSuccessful = true
+      actionRepository.insert(CatapultAction("Action A", 1, 1, "Tasker A"))
+
+      val result = connection.onPacketReceived(
+         mapOf(
+            0u to PebbleDictionaryItem.UInt32(4u),
+            1u to PebbleDictionaryItem.UInt32(1u),
+            2u to PebbleDictionaryItem.Text("Action B"),
+         )
+      )
+      runCurrent()
+
+      result shouldBe ReceiveResult.Nack
+      taskerTaskStarter.startedTasks.shouldBeEmpty()
    }
 
    @Test
