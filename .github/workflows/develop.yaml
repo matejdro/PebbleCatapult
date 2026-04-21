@@ -259,7 +259,7 @@ jobs:
             mobile/app/build/outputs/apk/release/catapult-mobile.apk
             watch/build/catapult-watchapp.pbw
       - name: Create a Release
-        uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1
+        uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1.21.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
