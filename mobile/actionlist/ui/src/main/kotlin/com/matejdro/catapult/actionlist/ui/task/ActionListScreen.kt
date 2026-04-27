@@ -368,6 +368,7 @@ private fun AddDialog(addingAction: AddDialogAction, confirm: (String, Boolean) 
          is AddDialogAction.TaskerTask -> stringResource(R.string.will_start_a_tasker_task)
       },
       actionNameText = addingAction.title,
+      showVoice = addingAction is AddDialogAction.TaskerTask,
       dismiss = dismissDialog,
       accept = { text, voiceArgument ->
          confirm(text, voiceArgument)
@@ -403,6 +404,7 @@ private fun EditDialog(
          }
       ),
       actionNameText = editingAction.taskerTaskName ?: editingAction.targetDirectoryName.orEmpty(),
+      showVoice = editingAction.taskerTaskName != null,
       dismiss = {
          dismissDialog()
       },
@@ -424,6 +426,7 @@ private fun ActionEntryDialog(
    initialVoiceArgument: Boolean,
    actionPrefixText: String,
    actionNameText: String,
+   showVoice: Boolean,
    dismiss: () -> Unit,
    accept: (text: String, Boolean) -> Unit,
    delete: (() -> Unit)? = null,
@@ -489,9 +492,11 @@ private fun ActionEntryDialog(
             Text(actionNameText, fontWeight = FontWeight.Bold)
          }
 
-         Row(Modifier.padding(top = 8.dp, bottom = 8.dp, end = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text(stringResource(R.string.voice_argument))
-            Switch(voiceArgument, { voiceArgument = it }, Modifier.weight(1f))
+         if (showVoice) {
+            Row(Modifier.padding(top = 8.dp, bottom = 8.dp, end = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+               Text(stringResource(R.string.voice_argument))
+               Switch(voiceArgument, { voiceArgument = it }, Modifier.weight(1f))
+            }
          }
       }
 
