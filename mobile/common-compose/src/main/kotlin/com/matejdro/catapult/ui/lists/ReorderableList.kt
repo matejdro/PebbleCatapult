@@ -52,21 +52,24 @@ fun <T> ReorderableListContainer(
 
    val scope = object : ReorderableListScope<T> {
       @Composable
-      override fun ReorderableListItem(
-         key: Any,
+      override fun <K : Any> ReorderableListItem(
+         key: K,
          data: T,
-         setOrder: (toIndex: Int) -> Unit,
+         setOrder: (key: K, toIndex: Int) -> Unit,
          modifier: Modifier,
-         content: @Composable (Modifier) -> Unit,
+         minReorderableIndex: Int,
+         enabled: Boolean,
+         content: @Composable ((Modifier, isDragging: () -> Boolean) -> Unit),
       ) {
          ReorderableItem(
             state = reorderState,
             key = key,
             data = data,
+            enabled = enabled,
             onDragEnter = { state ->
                reorderingList = reorderingList.toMutableList().apply {
                   val index = indexOf(data)
-                  if (index == -1) return@ReorderableItem
+                  if (index < minReorderableIndex) return@ReorderableItem
                   remove(state.data)
                   add(index, state.data)
 
@@ -99,13 +102,13 @@ fun <T> ReorderableListContainer(
                   coroutineScope.launch {
                      handleLazyListScroll(
                         lazyListState = lazyListState,
-                        dropIndex = index + 3,
+                        dropKey = key,
                         density = density,
                      )
                   }
                }
             },
-            onDrop = { drop ->
+            onDrop = { state ->
                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                   vibrator?.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
                } else {
@@ -115,7 +118,8 @@ fun <T> ReorderableListContainer(
 
                dragging = false
                lastDragIndex = -1
-               setOrder(reorderingList.indexOf(drop.data))
+               @Suppress("UNCHECKED_CAST")
+               setOrder(state.key as K, reorderingList.indexOf(state.data))
             },
             draggableContent = {
                content(
@@ -129,7 +133,8 @@ fun <T> ReorderableListContainer(
                            offset = DpOffset(x = 2.dp, 2.dp),
                         )
                      )
-                     .background(MaterialTheme.colorScheme.surface)
+                     .background(MaterialTheme.colorScheme.surface),
+                  { true }
                )
             },
             modifier = modifier,
@@ -137,7 +142,8 @@ fun <T> ReorderableListContainer(
             content(
                Modifier.graphicsLayer {
                   alpha = if (isDragging) 0f else 1f
-               }
+               },
+               { false },
             )
          }
       }
@@ -155,11 +161,13 @@ fun <T> ReorderableListContainer(
 @Stable
 interface ReorderableListScope<T> {
    @Composable
-   fun ReorderableListItem(
-      key: Any,
+   fun <K : Any> ReorderableListItem(
+      key: K,
       data: T,
-      setOrder: (toIndex: Int) -> Unit,
+      setOrder: (key: K, toIndex: Int) -> Unit,
       modifier: Modifier = Modifier,
-      content: @Composable ((Modifier) -> Unit),
+      minReorderableIndex: Int = 0,
+      enabled: Boolean = true,
+      content: @Composable ((Modifier, isDragging: () -> Boolean) -> Unit),
    )
 }
