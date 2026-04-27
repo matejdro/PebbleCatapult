@@ -10,6 +10,8 @@ static void receive_sync_restart(const DictionaryIterator* iterator);
 static void receive_sync_next_packet(const DictionaryIterator* iterator);
 static void receive_watch_packet(const DictionaryIterator* received);
 
+static uint8_t active_buckets_holder[MAX_BUCKETS];
+
 void packets_init()
 {
     bluetooth_register_reconnect_callback(send_watch_welcome);
@@ -18,12 +20,19 @@ void packets_init()
 
 void send_watch_welcome()
 {
+    const BucketList* active_buckets = bucket_sync_get_bucket_list();
+    for (int i = 0; i < active_buckets->count; i++)
+    {
+        active_buckets_holder[i] = active_buckets->data[i].id;
+    }
+
     DictionaryIterator* iterator;
     app_message_outbox_begin(&iterator);
     dict_write_uint8(iterator, 0, 0);
     dict_write_uint16(iterator, 1, PROTOCOL_VERSION);
     dict_write_uint16(iterator, 2, bucket_sync_current_version);
     dict_write_uint16(iterator, 3, appmessage_max_size);
+    dict_write_data(iterator, 7, active_buckets_holder, active_buckets->count);
     bluetooth_app_message_outbox_send();
 }
 

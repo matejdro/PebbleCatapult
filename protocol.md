@@ -62,7 +62,8 @@ Sent from the watch when the app is opened.
 * `1` - watch protocol version (uint16)
 * `2` - current bucketsync watch version (uint16)
 * `3` - Appmessage incoming buffer size in bytes (uint16)
-
+* `7` - List of bucket ids currently active on the watch (byte array)
+  
 ### Trigger action (packet 4)
 
 Sent from the watch when the app is opened.

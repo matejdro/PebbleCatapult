@@ -42,7 +42,7 @@ class WatchSyncerImplTest {
       watchSyncer.syncDirectory(1)
       delay(1.seconds)
 
-      bucketSyncRepository.awaitNextUpdate(0u) shouldBe BucketUpdate(
+      bucketSyncRepository.awaitNextUpdate(0u, emptyList()) shouldBe BucketUpdate(
          1u,
          listOf(1u),
          listOf(
@@ -92,7 +92,7 @@ class WatchSyncerImplTest {
       watchSyncer.deleteDirectory(1)
       delay(1.seconds)
 
-      bucketSyncRepository.awaitNextUpdate(0u) shouldBe BucketUpdate(
+      bucketSyncRepository.awaitNextUpdate(0u, emptyList()) shouldBe BucketUpdate(
          2u,
          emptyList(),
          emptyList(),
@@ -114,7 +114,7 @@ class WatchSyncerImplTest {
 
       watchSyncer.init()
 
-      val update = async { bucketSyncRepositoryWithOldVersion.awaitNextUpdate(0u) }
+      val update = async { bucketSyncRepositoryWithOldVersion.awaitNextUpdate(0u, emptyList()) }
       delay(1.seconds)
 
       update.getCompleted().activeBuckets.shouldContainExactly(1u, 2u)
@@ -127,7 +127,7 @@ class WatchSyncerImplTest {
 
       watchSyncer.init()
 
-      val update = async { bucketSyncRepository.awaitNextUpdate(0u) }
+      val update = async { bucketSyncRepository.awaitNextUpdate(0u, emptyList()) }
       delay(1.seconds)
       update.isCompleted shouldBe false
       update.cancel()
@@ -146,6 +146,6 @@ class WatchSyncerImplTest {
       watchSyncer.syncDirectory(1)
       delay(1.seconds)
 
-      bucketSyncRepository.awaitNextUpdate(0u).bucketsToUpdate.first().data.first() shouldBe 13
+      bucketSyncRepository.awaitNextUpdate(0u, emptyList()).bucketsToUpdate.first().data.first() shouldBe 13
    }
 }

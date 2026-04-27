@@ -38,20 +38,21 @@ class WatchappConnectionImplTest {
 
    private val packetQueue = PacketQueue(sender, watch, WATCHAPP_UUID)
 
+   private val bucketSyncWatchLoop = BucketSyncWatchLoopImpl(
+      scope.backgroundScope,
+      packetQueue,
+      bucketSyncRepository,
+      watchappOpenController,
+      FakeBackgroundSyncNotifier(),
+      watch,
+   )
    private val connection = WatchappConnectionImpl(
       scope.backgroundScope,
       actionRepository,
       taskerTaskStarter,
       watchappOpenController,
       packetQueue,
-      BucketSyncWatchLoopImpl(
-         scope.backgroundScope,
-         packetQueue,
-         bucketSyncRepository,
-         watchappOpenController,
-         FakeBackgroundSyncNotifier(),
-         watch,
-      )
+      bucketSyncWatchLoop
    )
 
    @Test
@@ -246,13 +247,29 @@ class WatchappConnectionImplTest {
       sender.sentData.first().shouldContainKey(3u)
    }
 
-   private suspend fun receiveStandardHelloPacket(version: UInt = 0u, bufferSize: UInt = 1000u): ReceiveResult =
+   @Test
+   fun `Pass currently active packets in init packet`() = scope.runTest {
+      bucketSyncRepository.updateBucket(1u, byteArrayOf(1))
+      bucketSyncRepository.updateBucket(2u, byteArrayOf(2))
+
+      receiveStandardHelloPacket(bufferSize = 38u, currentlyActiveBuckets = byteArrayOf(4, 5))
+      runCurrent()
+
+      bucketSyncWatchLoop.lastActiveBuckets shouldBe listOf(4u.toUByte(), 5u.toUByte())
+   }
+
+   private suspend fun receiveStandardHelloPacket(
+      version: UInt = 0u,
+      bufferSize: UInt = 1000u,
+      currentlyActiveBuckets: ByteArray = byteArrayOf(),
+   ): ReceiveResult =
       connection.onPacketReceived(
          mapOf(
             0u to PebbleDictionaryItem.UInt32(0u),
             1u to PebbleDictionaryItem.UInt32(PROTOCOL_VERSION.toUInt()),
             2u to PebbleDictionaryItem.UInt32(version),
             3u to PebbleDictionaryItem.UInt32(bufferSize),
+            7u to PebbleDictionaryItem.Bytes(currentlyActiveBuckets),
          )
       )
 }

@@ -75,6 +75,12 @@ class WatchappConnectionImpl(
          return ReceiveResult.Ack
       }
 
+      val activeBuckets = data[7u]
+         ?.let { it as? PebbleDictionaryItem.Bytes }
+         ?.value
+         ?.map { it.toUByte() }
+         .orEmpty()
+
       val watchVersion = data.requireUint(2u).toUShort()
       watchBufferSize = data.requireUint(3u).toInt()
       logcat { "Watch data: version=$watchVersion, buffer size=$watchBufferSize" }
@@ -86,7 +92,8 @@ class WatchappConnectionImpl(
             (3u to UInt8(1u)).takeIf { watchappOpenController.isNextWatchappOpenForAutoSync() },
          ),
          watchVersion,
-         watchBufferSize
+         watchBufferSize,
+         activeBuckets,
       )
 
       return ReceiveResult.Ack
