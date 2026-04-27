@@ -5,7 +5,8 @@ CREATE TABLE dbCatapultAction (
     taskerTaskName TEXT,
     targetDirectoryId INTEGER,
     sortOrder INTEGER NOT NULL,
-    enabled INTEGER NOT NULL DEFAULT 1
+    enabled INTEGER NOT NULL DEFAULT 1,
+    voiceArgument INTEGER NOT NULL DEFAULT 0
 );
 
 selectAll:
@@ -16,6 +17,7 @@ SELECT dbCatapultAction.id,
     dbCatapultAction.targetDirectoryId,
     dbCatapultAction.sortOrder,
     dbCatapultAction.enabled,
+    dbCatapultAction.voiceArgument,
     dbDirectory.title AS targetDirectoryName
     FROM
         dbCatapultAction LEFT JOIN
@@ -32,6 +34,7 @@ SELECT dbCatapultAction.id,
     dbCatapultAction.targetDirectoryId,
     dbCatapultAction.sortOrder,
     dbCatapultAction.enabled,
+    dbCatapultAction.voiceArgument,
     dbDirectory.title AS targetDirectoryName
     FROM
         dbCatapultAction LEFT JOIN
@@ -42,13 +45,14 @@ selectSingleRaw:
     SELECT * FROM dbCatapultAction WHERE id = ?;
 
 insert:
-   INSERT INTO dbCatapultAction (title, directoryId, taskerTaskName, targetDirectoryId, enabled, sortOrder)
+   INSERT INTO dbCatapultAction (title, directoryId, taskerTaskName, targetDirectoryId, enabled, voiceArgument, sortOrder)
    VALUES (
        :title,
        :directoryId,
        :taskerTaskName,
        :targetDirectoryId,
        :enabled,
+       :voiceArgument,
        (SELECT COALESCE(MAX(sortOrder) + 1, 0) FROM dbCatapultAction WHERE directoryId = :directoryId)
    );
 
@@ -61,7 +65,7 @@ delete {
 }
 
 update:
-    UPDATE dbCatapultAction SET title = :title, enabled = :enabled WHERE id = ?;
+    UPDATE dbCatapultAction SET title = :title, enabled = :enabled, voiceArgument = :voiceArgument WHERE id = ?;
 
 reorderUpwards {
     UPDATE dbCatapultAction

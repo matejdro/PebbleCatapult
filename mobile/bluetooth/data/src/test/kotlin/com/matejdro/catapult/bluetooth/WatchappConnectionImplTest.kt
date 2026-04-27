@@ -151,7 +151,7 @@ class WatchappConnectionImplTest {
       runCurrent()
 
       result shouldBe ReceiveResult.Ack
-      taskerTaskStarter.startedTasks.shouldContainExactly("Tasker A")
+      taskerTaskStarter.startedTasks.shouldContainExactly("Tasker A" to null)
    }
 
    @Test
@@ -256,6 +256,25 @@ class WatchappConnectionImplTest {
       runCurrent()
 
       bucketSyncWatchLoop.lastActiveBuckets shouldBe listOf(4u.toUByte(), 5u.toUByte())
+   }
+
+   @Test
+   fun `Pass task parameter`() = scope.runTest {
+      taskerTaskStarter.reportStartSuccessful = true
+      actionRepository.insert(CatapultAction("Action A", 1, 1, "Tasker A"))
+
+      val result = connection.onPacketReceived(
+         mapOf(
+            0u to PebbleDictionaryItem.UInt32(4u),
+            1u to PebbleDictionaryItem.UInt32(1u),
+            2u to PebbleDictionaryItem.Text("Action A"),
+            3u to PebbleDictionaryItem.Text("Param"),
+         )
+      )
+      runCurrent()
+
+      result shouldBe ReceiveResult.Ack
+      taskerTaskStarter.startedTasks.shouldContainExactly("Tasker A" to "Param")
    }
 
    private suspend fun receiveStandardHelloPacket(

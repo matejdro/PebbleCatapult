@@ -33,15 +33,27 @@ class FakeCatapultActionRepository : CatapultActionRepository {
    }
 
    override suspend fun insert(action: CatapultAction) {
-      actions.update { it + action }
+      actions.update { it + action.copy(id = action.id.takeIf { it > 0 } ?: (it.size + 1)) }
    }
 
    fun insert(vararg action: CatapultAction) {
       actions.update { it + action }
    }
 
-   override suspend fun update(id: Int, title: String, enabled: Boolean) {
-      actions.update { list -> list.map { if (it.id == id) it.copy(title = title, enabled = enabled) else it } }
+   override suspend fun update(id: Int, title: String, enabled: Boolean, voiceArgument: Boolean) {
+      actions.update { list ->
+         list.map {
+            if (it.id == id) {
+               it.copy(
+                  title = title,
+                  enabled = enabled,
+                  voiceArgument = voiceArgument
+               )
+            } else {
+               it
+            }
+         }
+      }
    }
 
    override suspend fun reorder(id: Int, toIndex: Int) {

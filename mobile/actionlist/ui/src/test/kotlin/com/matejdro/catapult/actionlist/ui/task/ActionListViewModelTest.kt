@@ -49,11 +49,13 @@ class ActionListViewModelTest {
 
       vm.key = ActionListKey(1)
       vm.onServiceRegistered()
-      vm.add("A Task", "My Task", null)
+      vm.add("A Task", "My Task", null, false)
+      vm.add("Another Task", "My Task", null, true)
       runCurrent()
 
       actionsRepo.getAll(1).first() shouldBeSuccessWithData listOf(
-         CatapultAction("A Task", directoryId = 1, id = 0, taskerTaskName = "My Task")
+         CatapultAction("A Task", directoryId = 1, id = 1, taskerTaskName = "My Task"),
+         CatapultAction("Another Task", directoryId = 1, id = 2, taskerTaskName = "My Task", voiceArgument = true)
       )
    }
 
@@ -63,16 +65,16 @@ class ActionListViewModelTest {
 
       vm.key = ActionListKey(1)
       vm.onServiceRegistered()
-      vm.add("A Task", null, 2)
+      vm.add("A Task", null, 2, false)
       runCurrent()
 
       actionsRepo.getAll(1).first() shouldBeSuccessWithData listOf(
-         CatapultAction("A Task", directoryId = 1, id = 0, targetDirectoryId = 2)
+         CatapultAction("A Task", directoryId = 1, id = 1, targetDirectoryId = 2)
       )
    }
 
    @Test
-   fun `Allow editing name of the existing action`() = scope.runTest {
+   fun `Allow editing name and voice argument of the existing action`() = scope.runTest {
       initDirectories()
       actionsRepo.insert(CatapultAction("Action A", 1, taskerTaskName = "Task A", id = 1))
       actionsRepo.insert(CatapultAction("Action B", 1, taskerTaskName = "Task B", id = 2))
@@ -80,12 +82,12 @@ class ActionListViewModelTest {
       vm.key = ActionListKey(1)
       vm.onServiceRegistered()
       runCurrent()
-      vm.editActionTitle(2, "Action C")
+      vm.editActionTitleVoiceArgument(2, "Action C", true)
       runCurrent()
 
       actionsRepo.getAll(1).first() shouldBeSuccessWithData listOf(
          CatapultAction("Action A", 1, taskerTaskName = "Task A", id = 1),
-         CatapultAction("Action C", 1, taskerTaskName = "Task B", id = 2)
+         CatapultAction("Action C", 1, taskerTaskName = "Task B", id = 2, voiceArgument = true)
       )
    }
 

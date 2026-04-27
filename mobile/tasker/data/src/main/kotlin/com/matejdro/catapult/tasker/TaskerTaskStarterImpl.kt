@@ -14,7 +14,7 @@ import net.dinglisch.android.tasker.TaskerIntent
 @Inject
 @ContributesBinding(AppScope::class)
 class TaskerTaskStarterImpl(private val context: Context) : TaskerTaskStarter {
-   override fun startTask(task: String): Boolean {
+   override fun startTask(task: String, parameter: String?): Boolean {
       val status = TaskerIntent.testStatus(context)
       logcat { "Tasker status $status" }
 
@@ -44,6 +44,9 @@ class TaskerTaskStarterImpl(private val context: Context) : TaskerTaskStarter {
       }
 
       val intent = TaskerIntent(task)
+      if (parameter != null) {
+         intent.addLocalVariable("%par1", parameter)
+      }
 
       // Regular broadcasts are sometimes delayed on Android 14+. Use ordered ones instead.
       // https://stackoverflow.com/questions/77842817/slow-intent-broadcast-delivery-on-android-14

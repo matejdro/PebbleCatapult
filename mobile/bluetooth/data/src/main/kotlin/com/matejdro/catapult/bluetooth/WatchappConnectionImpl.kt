@@ -102,6 +102,8 @@ class WatchappConnectionImpl(
    private suspend fun processStartTaskPacket(data: PebbleDictionary): ReceiveResult {
       val actionId = data.requireUint(1u)
       val remoteActionTitle = data.requireString(2u)
+      val parameter = (data[3u] as PebbleDictionaryItem.Text?)?.value
+
       val action = actionRepository.getById(actionId.toInt()).firstData()
       if (action == null) {
          logcat { "Unknown action. Nacking..." }
@@ -119,9 +121,9 @@ class WatchappConnectionImpl(
          return ReceiveResult.Nack
       }
 
-      logcat { "Starting task $taskerTask" }
+      logcat { "Starting task $taskerTask, parameter '${parameter ?: "NULL"}'" }
 
-      val success = taskerTaskStarter.startTask(taskerTask)
+      val success = taskerTaskStarter.startTask(taskerTask, parameter)
 
       return if (success) {
          logcat { "Task successfully started" }

@@ -225,6 +225,39 @@ static void on_task_starting_result(bool success)
     }
 }
 
+static void voice_callback(DictationSession* session, DictationSessionStatus status, char* transcription, void* context)
+{
+    const WindowActionList* window_action_list = context;
+    const MenuLayer* menu_layer = window_action_list->menu;
+    const MenuIndex index = menu_layer_get_selected_index(menu_layer);
+    const ActionItem* selected_item = &window_action_list->current_menu_data.data[index.row];
+
+    if (status == DictationSessionStatusSuccess)
+    {
+        send_trigger_action(selected_item->id, selected_item->title, transcription);
+    }
+
+    dictation_session_destroy(session);
+}
+
+static void trigger_voice_parameter(void* context)
+{
+    DictationSession* session = dictation_session_create(300, voice_callback, context);
+
+    if (session == NULL)
+    {
+        vibes_double_pulse();
+        return;
+    }
+
+    const bool start_success = dictation_session_start(session);
+
+    if (!start_success)
+    {
+        vibes_double_pulse();
+    }
+}
+
 static void on_button_select_pressed(ClickRecognizerRef recognizer, void* context)
 {
     const WindowActionList* window_action_list = context;
@@ -239,7 +272,14 @@ static void on_button_select_pressed(ClickRecognizerRef recognizer, void* contex
     else
     {
         bluetooth_register_sending_finish(on_task_starting_result);
-        send_trigger_action(selected_item->id, selected_item->title);
+        if ((selected_item->flags & 0x01) != 0)
+        {
+            trigger_voice_parameter(context);
+        }
+        else
+        {
+            send_trigger_action(selected_item->id, selected_item->title, NULL);
+        }
     }
 }
 

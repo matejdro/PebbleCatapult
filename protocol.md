@@ -70,6 +70,7 @@ Sent from the watch when the app is opened.
 
 * `1` - ID of the action to trigger (uint16)
 * `2` - Text of the action to trigger (cstring)
+* `3` - Argument to the action, usually user's voice (cstring) 
 
 # Buckets
 
@@ -82,7 +83,8 @@ Data in every bucket:
 * Items (Max 13 items - 19 bytes per item)
   * ID (uint16)
   * Target directory (uint8) - If item should open another directory, 0 otherwise
-  * Flags (uint8) - For future use
+  * Flags (uint8) 
+    * Respond with voice (0x01) - when 1, watch will show voice prompt before triggering action
   * Title (cstring) - up to 14 bytes + null terminator
 
 Every bucket is stored in the `2001` - `2015` storage keys

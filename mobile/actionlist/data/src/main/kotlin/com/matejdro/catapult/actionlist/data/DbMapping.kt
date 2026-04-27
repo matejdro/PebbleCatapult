@@ -22,7 +22,8 @@ internal fun SelectAll.toCatapultAction(): CatapultAction {
       taskerTaskName = taskerTaskName,
       targetDirectoryId = targetDirectoryId?.toInt(),
       targetDirectoryName = targetDirectoryName,
-      enabled = enabled == 1L
+      enabled = enabled == 1L,
+      voiceArgument = voiceArgument == 1L
    )
 }
 

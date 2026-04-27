@@ -57,7 +57,7 @@ class WatchSyncerImplTest {
                   0, 10,
                   // Target directory (not applicable, so zero)
                   0,
-                  // Flags (Unused for now)
+                  // Flags
                   0,
                   // Title
                   0x41, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x20, 0x41, 0,
@@ -67,7 +67,7 @@ class WatchSyncerImplTest {
                   0, 11,
                   // Target directory
                   2,
-                  // Flags (Unused for now)
+                  // Flags
                   0,
                   // Title
                   0x41, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x20, 0x42, 0
@@ -147,5 +147,22 @@ class WatchSyncerImplTest {
       delay(1.seconds)
 
       bucketSyncRepository.awaitNextUpdate(0u, emptyList()).bucketsToUpdate.first().data.first() shouldBe 13
+   }
+
+   @Test
+   fun `Send voice flag to the watch`() = scope.runTest {
+      watchSyncer.init()
+
+      directoryRepository.insert(CatapultDirectory(1, "Directory 1"))
+
+      actionRepository.insert(CatapultAction("Action A", directoryId = 1, id = 10, voiceArgument = true))
+
+      watchSyncer.syncDirectory(1)
+      delay(1.seconds)
+
+      bucketSyncRepository.awaitNextUpdate(0u, emptyList())
+         .bucketsToUpdate
+         .first()
+         .data[4] shouldBe 1.toByte()
    }
 }

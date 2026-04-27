@@ -38,13 +38,25 @@ class CatapultActionRepositoryImplTest {
             CatapultAction("Action A", 1, taskerTaskName = "Task A"),
          )
          repo.insert(
-            CatapultAction("Action B", 1, targetDirectoryId = 2)
+            CatapultAction("Action B", 1, targetDirectoryId = 2, voiceArgument = true)
          )
          runCurrent()
 
          expectMostRecentItem() shouldBeSuccessWithData listOf(
-            CatapultAction("Action A", 1, 1, taskerTaskName = "Task A"),
-            CatapultAction("Action B", 1, 2, targetDirectoryId = 2, targetDirectoryName = "Directory B")
+            CatapultAction(
+               "Action A",
+               1,
+               1,
+               taskerTaskName = "Task A"
+            ),
+            CatapultAction(
+               "Action B",
+               1,
+               2,
+               targetDirectoryId = 2,
+               targetDirectoryName = "Directory B",
+               voiceArgument = true
+            )
          )
       }
    }
@@ -84,11 +96,30 @@ class CatapultActionRepositoryImplTest {
          )
          runCurrent()
 
-         repo.update(1, "Action B", true)
+         repo.update(id = 1, title = "Action B", enabled = true, voiceArgument = false)
          runCurrent()
 
          expectMostRecentItem() shouldBeSuccessWithData listOf(
             CatapultAction("Action B", 1, 1, taskerTaskName = "Task A"),
+         )
+      }
+   }
+
+   @Test
+   fun `Allow updating voice argument`() = scope.runTest {
+      repo.getAll(1).test {
+         runCurrent()
+
+         repo.insert(
+            CatapultAction("Action A", 1, taskerTaskName = "Task A"),
+         )
+         runCurrent()
+
+         repo.update(1, "Action A", true, true)
+         runCurrent()
+
+         expectMostRecentItem() shouldBeSuccessWithData listOf(
+            CatapultAction("Action A", 1, 1, taskerTaskName = "Task A", voiceArgument = true),
          )
       }
    }
@@ -103,7 +134,7 @@ class CatapultActionRepositoryImplTest {
          )
          runCurrent()
 
-         repo.update(1, "Action A", false)
+         repo.update(id = 1, title = "Action A", enabled = false, voiceArgument = false)
          runCurrent()
 
          expectMostRecentItem() shouldBeSuccessWithData listOf(
@@ -144,7 +175,7 @@ class CatapultActionRepositoryImplTest {
          )
          runCurrent()
 
-         repo.update(1, "Action A", false)
+         repo.update(id = 1, title = "Action A", enabled = false, voiceArgument = false)
          runCurrent()
 
          expectMostRecentItem() shouldBeSuccessWithData listOf(
@@ -311,7 +342,7 @@ class CatapultActionRepositoryImplTest {
       runCurrent()
 
       syncer.syncedDirectories.clear()
-      repo.update(1, "Action B", true)
+      repo.update(id = 1, title = "Action B", enabled = true, voiceArgument = false)
       runCurrent()
 
       syncer.syncedDirectories.shouldContainExactly(1)

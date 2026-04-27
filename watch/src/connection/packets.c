@@ -36,13 +36,17 @@ void send_watch_welcome()
     bluetooth_app_message_outbox_send();
 }
 
-void send_trigger_action(const uint16_t id, const char* name)
+void send_trigger_action(const uint16_t id, const char* name, const char* parameter)
 {
     DictionaryIterator* iterator;
     app_message_outbox_begin(&iterator);
     dict_write_uint8(iterator, 0, 4);
     dict_write_uint16(iterator, 1, id);
     dict_write_cstring(iterator, 2, name);
+    if (parameter != NULL)
+    {
+        dict_write_cstring(iterator, 3, parameter);
+    }
     bluetooth_app_message_outbox_send();
 }
 

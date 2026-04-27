@@ -43,7 +43,7 @@ class WatchSyncerImpl(
          for (item in items) {
             buffer.writeUShort(item.id.toUShort())
             buffer.writeUByte(item.targetDirectoryId?.toUByte() ?: 0u)
-            buffer.writeUByte(0u) // Flags, unused for now
+            buffer.writeUByte(if (item.voiceArgument) 1u else 0u)
             buffer.writeUtf8(item.title)
             buffer.writeUByte(0u) // Null terminator
          }

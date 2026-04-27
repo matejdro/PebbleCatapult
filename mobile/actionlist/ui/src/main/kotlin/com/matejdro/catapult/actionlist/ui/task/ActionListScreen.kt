@@ -154,11 +154,12 @@ class ActionListScreen(
       addDialog?.let { action ->
          AddDialog(
             action,
-            { title ->
+            { title, voiceArgument ->
                viewModel.add(
                   title = title,
                   targetTask = (action as? AddDialogAction.TaskerTask)?.name,
-                  targetDirectory = (action as? AddDialogAction.Directory)?.id
+                  targetDirectory = (action as? AddDialogAction.Directory)?.id,
+                  voiceArgument = voiceArgument
                )
             },
             { addDialog = null },
@@ -168,7 +169,9 @@ class ActionListScreen(
       editDialog?.let { action ->
          EditDialog(
             editingAction = action,
-            confirm = { viewModel.editActionTitle(action.id, it) },
+            confirm = { title, voiceArgument ->
+               viewModel.editActionTitleVoiceArgument(action.id, title, voiceArgument)
+            },
             dismissDialog = { editDialog = null },
             delete = { viewModel.deleteAction(action.id) }
          )
@@ -348,7 +351,7 @@ private fun AddButtons(
 }
 
 @Composable
-private fun AddDialog(addingAction: AddDialogAction, confirm: (String) -> Unit, dismissDialog: () -> Unit) {
+private fun AddDialog(addingAction: AddDialogAction, confirm: (String, Boolean) -> Unit, dismissDialog: () -> Unit) {
    val resources = LocalResources.current
 
    ActionEntryDialog(
@@ -359,21 +362,27 @@ private fun AddDialog(addingAction: AddDialogAction, confirm: (String) -> Unit, 
          }
       ),
       initialText = addingAction.title,
+      initialVoiceArgument = false,
       actionPrefixText = when (addingAction) {
          is AddDialogAction.Directory -> stringResource(R.string.will_open_a_directory)
          is AddDialogAction.TaskerTask -> stringResource(R.string.will_start_a_tasker_task)
       },
       actionNameText = addingAction.title,
       dismiss = dismissDialog,
-      accept = { text ->
-         confirm(text)
+      accept = { text, voiceArgument ->
+         confirm(text, voiceArgument)
          dismissDialog()
       }
    )
 }
 
 @Composable
-private fun EditDialog(editingAction: CatapultAction, confirm: (String) -> Unit, dismissDialog: () -> Unit, delete: () -> Unit) {
+private fun EditDialog(
+   editingAction: CatapultAction,
+   confirm: (String, Boolean) -> Unit,
+   dismissDialog: () -> Unit,
+   delete: () -> Unit,
+) {
    val resources = LocalResources.current
 
    ActionEntryDialog(
@@ -385,6 +394,7 @@ private fun EditDialog(editingAction: CatapultAction, confirm: (String) -> Unit,
          }
       ),
       initialText = editingAction.title,
+      initialVoiceArgument = editingAction.voiceArgument,
       actionPrefixText = resources.getString(
          if (editingAction.taskerTaskName != null) {
             R.string.will_start_a_tasker_task
@@ -396,8 +406,8 @@ private fun EditDialog(editingAction: CatapultAction, confirm: (String) -> Unit,
       dismiss = {
          dismissDialog()
       },
-      accept = { text ->
-         confirm(text)
+      accept = { text, voiceArgument ->
+         confirm(text, voiceArgument)
          dismissDialog()
       },
       delete = {
@@ -411,14 +421,16 @@ private fun EditDialog(editingAction: CatapultAction, confirm: (String) -> Unit,
 private fun ActionEntryDialog(
    title: String,
    initialText: String,
+   initialVoiceArgument: Boolean,
    actionPrefixText: String,
    actionNameText: String,
    dismiss: () -> Unit,
-   accept: (text: String) -> Unit,
+   accept: (text: String, Boolean) -> Unit,
    delete: (() -> Unit)? = null,
 ) {
    val inputTransformation = remember { MaxStringSizeBytesInputTransformation(MAX_ACTION_TITLE_BYTES) }
    val textFieldState = rememberTextFieldState(inputTransformation.trim(initialText))
+   var voiceArgument by remember { mutableStateOf(initialVoiceArgument) }
 
    AlertDialogWithContent(
       title = {
@@ -430,7 +442,7 @@ private fun ActionEntryDialog(
       confirmButton = {
          TextButton(
             onClick = {
-               accept(textFieldState.text.toString())
+               accept(textFieldState.text.toString(), voiceArgument)
             }
          ) {
             Text(stringResource(R.string.ok))
@@ -466,7 +478,7 @@ private fun ActionEntryDialog(
                .fillMaxWidth()
                .focusRequester(focusRequester)
                .padding(bottom = 8.dp),
-            onKeyboardAction = { accept(textFieldState.text.toString()) },
+            onKeyboardAction = { accept(textFieldState.text.toString(), voiceArgument) },
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
             lineLimits = TextFieldLineLimits.SingleLine,
             inputTransformation = inputTransformation
@@ -475,6 +487,11 @@ private fun ActionEntryDialog(
          FlowRow {
             Text(actionPrefixText)
             Text(actionNameText, fontWeight = FontWeight.Bold)
+         }
+
+         Row(Modifier.padding(top = 8.dp, bottom = 8.dp, end = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(stringResource(R.string.voice_argument))
+            Switch(voiceArgument, { voiceArgument = it }, Modifier.weight(1f))
          }
       }
 

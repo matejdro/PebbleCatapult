@@ -10,5 +10,6 @@ data class CatapultAction(
    public val taskerTaskName: String? = null,
    public val targetDirectoryId: Int? = null,
    public val targetDirectoryName: String? = null,
+   public val voiceArgument: Boolean = false,
    public val enabled: Boolean = true,
 )
