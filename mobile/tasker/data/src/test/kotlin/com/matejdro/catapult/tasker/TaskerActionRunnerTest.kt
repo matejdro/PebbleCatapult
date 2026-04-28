@@ -7,8 +7,13 @@ import com.matejdro.catapult.bluetooth.FakePebbleInfoRetriever
 import com.matejdro.catapult.bluetooth.FakeWatchappOpenController
 import com.matejdro.catapult.bluetooth.api.WATCHAPP_UUID
 import com.matejdro.pebble.bluetooth.common.test.FakePebbleSender
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.throwable.shouldHaveMessage
+import io.rebble.pebblekit2.common.model.TimelineLayout
+import io.rebble.pebblekit2.common.model.TimelineLayoutType
+import io.rebble.pebblekit2.common.model.TimelinePin
 import io.rebble.pebblekit2.common.model.WatchIdentifier
 import io.rebble.pebblekit2.model.Watchapp
 import kotlinx.coroutines.flow.first
@@ -18,7 +23,11 @@ import org.junit.jupiter.api.Test
 import si.inova.kotlinova.core.test.TestScopeWithDispatcherProvider
 import si.inova.kotlinova.core.test.outcomes.shouldBeSuccessWithData
 import si.inova.kotlinova.core.test.time.virtualTimeProvider
+import java.time.LocalDateTime
+import java.time.ZoneId
 import java.util.UUID
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.toKotlinInstant
 
 class TaskerActionRunnerTest {
    private val scope = TestScopeWithDispatcherProvider()
@@ -26,7 +35,13 @@ class TaskerActionRunnerTest {
    private val pebbleSender = FakePebbleSender(scope.virtualTimeProvider())
    private val pebbleInfoRetriever = FakePebbleInfoRetriever()
    private val openController = FakeWatchappOpenController()
-   private val runner = TaskerActionRunner(repo, pebbleSender, pebbleInfoRetriever, openController)
+   private val runner = TaskerActionRunner(
+      repo,
+      pebbleSender,
+      pebbleInfoRetriever,
+      openController,
+      scope.virtualTimeProvider()
+   )
 
    @Test
    fun `Run toggle action`() = scope.runTest {
@@ -113,5 +128,87 @@ class TaskerActionRunnerTest {
             listOf(WatchIdentifier("3"))
          ),
       )
+   }
+
+   @Test
+   fun `Insert pin with full data`() = scope.runTest {
+      runner.run(
+         bundleOf(
+            BundleKeys.ACTION to "CREATE_PIN",
+            BundleKeys.ID to "10",
+            BundleKeys.TITLE to "Title",
+            BundleKeys.TEXT to "Text",
+            BundleKeys.START_DATE to "2026-02-10",
+            BundleKeys.START_TIME to "10:00",
+            BundleKeys.DURATION to "4",
+            BundleKeys.ICON to "TIMELINE_WEATHER",
+         )
+      )
+      runCurrent()
+
+      val targetInstant = LocalDateTime.of(2026, 2, 10, 10, 0)
+         .atZone(ZoneId.of("UTC"))
+         .toInstant()
+         .toKotlinInstant()
+
+      pebbleSender.insertedPins.shouldContainExactly(
+         TimelinePin(
+            "10",
+            targetInstant,
+            4.minutes,
+            TimelineLayout(
+               TimelineLayoutType.CALENDAR_PIN,
+               "Title",
+               body = "Text",
+               tinyIcon = "system://images/TIMELINE_WEATHER",
+            )
+         )
+      )
+   }
+
+   @Test
+   fun `Insert pin with minimal data`() = scope.runTest {
+      runner.run(
+         bundleOf(
+            BundleKeys.ACTION to "CREATE_PIN",
+            BundleKeys.ID to "10",
+            BundleKeys.TITLE to "Title",
+            BundleKeys.START_DATE to "2026-02-10",
+            BundleKeys.START_TIME to "10:00",
+         )
+      )
+      runCurrent()
+
+      val targetInstant = LocalDateTime.of(2026, 2, 10, 10, 0)
+         .atZone(ZoneId.of("UTC"))
+         .toInstant()
+         .toKotlinInstant()
+
+      pebbleSender.insertedPins.shouldContainExactly(
+         TimelinePin(
+            "10",
+            targetInstant,
+            layout = TimelineLayout(
+               TimelineLayoutType.GENERIC_PIN,
+               "Title",
+            )
+         )
+      )
+   }
+
+   @Test
+   fun `Throw exception on invalid formatting`() = scope.runTest {
+      shouldThrow<TaskerInvalidInputException> {
+         runner.run(
+            bundleOf(
+               BundleKeys.ACTION to "CREATE_PIN",
+               BundleKeys.ID to "10",
+               BundleKeys.TITLE to "Title",
+               BundleKeys.START_DATE to "2026-02",
+               BundleKeys.START_TIME to "10:00",
+            )
+         )
+         runCurrent()
+      }.shouldHaveMessage("Invalid date format: '2026-02'")
    }
 }

@@ -11,4 +11,23 @@
     <string name="save">Save</string>
     <string name="sync_now">Sync Now</string>
     <string name="sync_now_only_on_watchface">Sync Now, only on watchface</string>
+    <string name="create_timeline_pin">Create Timeline pin</string>
+    <string name="create_pin_description">Insert/update timeline pin \'%1$s\'</string>
+    <string name="pin_id">ID</string>
+    <string name="pin_id_description">Unique identifier of the pin. Can be used to update or delete the pin later.</string>
+    <string name="pin_title">Title</string>
+    <string name="pin_text">Text</string>
+    <string name="pin_text_description">Can be left blank</string>
+    <string name="pin_date">Start date</string>
+    <string name="pin_date_description">Date of the pin in the \'yyyy-MM-DD\' format. You can use Tasker\'s \'Parse/Format
+        DateTime\' action to create the valid text.
+    </string>
+    <string name="pin_time">Start time</string>
+    <string name="pin_time_description">Time of the pin in the 24 hour \'HH:mm\' format. You can use Tasker\'s \'Parse/Format
+        DateTime\' action to create the valid text.
+    </string>
+    <string name="pin_duration">Duration</string>
+    <string name="pin_duration_description">Duration of the pin in minutes. Can be left blank.</string>
+    <string name="pin_icon">Icon</string>
+    <string name="pin_icon_description">Icon of the pin, such as \'TIMELINE_CALENDAR\'. Can be left blank.</string>
 </resources>
