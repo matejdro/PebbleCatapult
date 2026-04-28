@@ -40,6 +40,7 @@ class TaskerActionRunner(
 
          TaskerAction.SYNC_NOW -> runSyncAction(bundle)
          TaskerAction.CREATE_PIN -> runCreatePin(bundle)
+         TaskerAction.DELETE_PIN -> runDeletePin(bundle)
       }
    }
 
@@ -149,6 +150,45 @@ class TaskerActionRunner(
 
          is TimelineResult.Unknown -> {
             throw UnknownCauseException("Unknown timeline error '${result.message.orEmpty()}'")
+         }
+
+         TimelineResult.Success -> {
+            // Success! Nothing to do
+         }
+      }
+   }
+
+   @Suppress("ThrowsCount") // Input validation
+   private suspend fun runDeletePin(bundle: Bundle) {
+      val id = bundle.getString(BundleKeys.ID)
+      if (id.isNullOrBlank()) {
+         throw TaskerInvalidInputException("ID is mandatory")
+      }
+
+      val result = sender.deleteTimelinePin(
+         WATCHAPP_UUID,
+         id,
+      )
+
+      when (result) {
+         TimelineResult.FailedNoPebbleApp -> {
+            throw TaskerInvalidInputException("Pebble app is not installed")
+         }
+
+         TimelineResult.FailedNoPermissions -> {
+            throw TaskerInvalidInputException("Catapult watchapp is not installed")
+         }
+
+         TimelineResult.FailedUnsupportedAction -> {
+            throw TaskerInvalidInputException("Installed Pebble app is too old for the Timeline feature")
+         }
+
+         is TimelineResult.Unknown -> {
+            throw UnknownCauseException("Unknown timeline error '${result.message.orEmpty()}'")
+         }
+
+         TimelineResult.FailedUnknownPin -> {
+            // Pin did not exist in the first place, so, deletion was a success
          }
 
          TimelineResult.Success -> {

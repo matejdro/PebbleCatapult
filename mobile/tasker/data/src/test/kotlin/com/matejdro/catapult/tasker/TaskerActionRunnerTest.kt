@@ -211,4 +211,17 @@ class TaskerActionRunnerTest {
          runCurrent()
       }.shouldHaveMessage("Invalid date format: '2026-02'")
    }
+
+   @Test
+   fun `Delete pin`() = scope.runTest {
+      runner.run(
+         bundleOf(
+            BundleKeys.ACTION to "DELETE_PIN",
+            BundleKeys.ID to "10",
+         )
+      )
+      runCurrent()
+
+      pebbleSender.deletedPins.shouldContainExactly("10")
+   }
 }

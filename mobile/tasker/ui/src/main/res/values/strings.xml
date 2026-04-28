@@ -30,4 +30,5 @@
     <string name="pin_duration_description">Duration of the pin in minutes. Can be left blank.</string>
     <string name="pin_icon">Icon</string>
     <string name="pin_icon_description">Icon of the pin, such as \'TIMELINE_CALENDAR\'. Can be left blank.</string>
+    <string name="delete_timeline_pin">Delete Timeline pin</string>
 </resources>
