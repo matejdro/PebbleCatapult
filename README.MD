@@ -1,6 +1,6 @@
 # Catapult for Pebble
 
-A pebble watchapp for interacting with the [Tasker](https://tasker.joaoapps.com/).
+A watchapp for PebbleOS watches for interacting with the [Tasker](https://tasker.joaoapps.com/).
 
 ![](docs/demo.gif)
 
