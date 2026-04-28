@@ -56,6 +56,7 @@ class CreatePinScreen : Screen<CreatePinScreenKey>() {
                BundleKeys.ACTION to TaskerAction.CREATE_PIN.name,
                BundleKeys.ID to id.text.toString(),
                BundleKeys.TITLE to title.text.toString(),
+               BundleKeys.TEXT to text.text.toString(),
                BundleKeys.START_DATE to startDate.text.toString(),
                BundleKeys.START_TIME to startTime.text.toString(),
                BundleKeys.DURATION to duration.text.toString(),
@@ -63,6 +64,7 @@ class CreatePinScreen : Screen<CreatePinScreenKey>() {
                TaskerPluginConstants.VARIABLE_REPLACE_KEYS to listOf(
                   BundleKeys.ID,
                   BundleKeys.TITLE,
+                  BundleKeys.TEXT,
                   BundleKeys.START_DATE,
                   BundleKeys.START_TIME,
                   BundleKeys.DURATION,
