@@ -1,5 +1,6 @@
 package com.matejdro.catapult.tasker.ui.screens.createpin
 
+import android.os.Bundle
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,7 +22,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import androidx.core.os.bundleOf
 import com.airbnb.android.showkase.annotation.ShowkaseComposable
 import com.matejdro.catapult.tasker.BundleKeys
 import com.matejdro.catapult.tasker.TaskerAction
@@ -46,11 +46,11 @@ class DeletePinScreen : Screen<DeletePinScreenKey>() {
 
       fun save() {
          activity.saveConfiguration(
-            bundleOf(
-               BundleKeys.ACTION to TaskerAction.DELETE_PIN.name,
-               BundleKeys.ID to id.text.toString(),
-               TaskerPluginConstants.VARIABLE_REPLACE_KEYS to BundleKeys.ID
-            ),
+            Bundle().apply {
+               putString(BundleKeys.ACTION, TaskerAction.DELETE_PIN.name)
+               putString(BundleKeys.ID, id.text.toString())
+               putString(TaskerPluginConstants.VARIABLE_REPLACE_KEYS, BundleKeys.ID)
+            },
             "Delete pin '${id.text}' from the timeline"
          )
       }

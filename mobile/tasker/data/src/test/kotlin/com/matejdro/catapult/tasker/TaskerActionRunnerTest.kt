@@ -1,6 +1,6 @@
 package com.matejdro.catapult.tasker
 
-import androidx.core.os.bundleOf
+import android.os.Bundle
 import com.matejdro.catapult.actionlist.api.CatapultAction
 import com.matejdro.catapult.actionlist.test.FakeCatapultActionRepository
 import com.matejdro.catapult.bluetooth.FakePebbleInfoRetriever
@@ -53,12 +53,12 @@ class TaskerActionRunnerTest {
       )
 
       runner.run(
-         bundleOf(
-            BundleKeys.ACTION to "TOGGLE_ACTIONS",
-            BundleKeys.DIRECTORY_ID to 10,
-            BundleKeys.ENABLED_TASK_IDS to "1,2",
-            BundleKeys.DISABLED_TASK_IDS to "3,4"
-         )
+         Bundle().apply {
+            putString(BundleKeys.ACTION, "TOGGLE_ACTIONS")
+            putInt(BundleKeys.DIRECTORY_ID, 10)
+            putString(BundleKeys.ENABLED_TASK_IDS, "1,2")
+            putString(BundleKeys.DISABLED_TASK_IDS, "3,4")
+         }
       )
       runCurrent()
 
@@ -73,9 +73,9 @@ class TaskerActionRunnerTest {
    @Test
    fun `Start app on all watches when running normal sync now`() = scope.runTest {
       runner.run(
-         bundleOf(
-            BundleKeys.ACTION to "SYNC_NOW",
-         )
+         Bundle().apply {
+            putString(BundleKeys.ACTION, "SYNC_NOW")
+         }
       )
       runCurrent()
 
@@ -113,10 +113,10 @@ class TaskerActionRunnerTest {
       )
 
       runner.run(
-         bundleOf(
-            BundleKeys.ACTION to "SYNC_NOW",
-            BundleKeys.ONLY_ON_WATCHFACE to true,
-         )
+         Bundle().apply {
+            putString(BundleKeys.ACTION, "SYNC_NOW")
+            putBoolean(BundleKeys.ONLY_ON_WATCHFACE, true)
+         }
       )
       runCurrent()
 
@@ -133,16 +133,16 @@ class TaskerActionRunnerTest {
    @Test
    fun `Insert pin with full data`() = scope.runTest {
       runner.run(
-         bundleOf(
-            BundleKeys.ACTION to "CREATE_PIN",
-            BundleKeys.ID to "10",
-            BundleKeys.TITLE to "Title",
-            BundleKeys.TEXT to "Text",
-            BundleKeys.START_DATE to "2026-02-10",
-            BundleKeys.START_TIME to "10:00",
-            BundleKeys.DURATION to "4",
-            BundleKeys.ICON to "TIMELINE_WEATHER",
-         )
+         Bundle().apply {
+            putString(BundleKeys.ACTION, "CREATE_PIN")
+            putString(BundleKeys.ID, "10")
+            putString(BundleKeys.TITLE, "Title")
+            putString(BundleKeys.TEXT, "Text")
+            putString(BundleKeys.START_DATE, "2026-02-10")
+            putString(BundleKeys.START_TIME, "10:00")
+            putString(BundleKeys.DURATION, "4")
+            putString(BundleKeys.ICON, "TIMELINE_WEATHER")
+         }
       )
       runCurrent()
 
@@ -169,13 +169,13 @@ class TaskerActionRunnerTest {
    @Test
    fun `Insert pin with minimal data`() = scope.runTest {
       runner.run(
-         bundleOf(
-            BundleKeys.ACTION to "CREATE_PIN",
-            BundleKeys.ID to "10",
-            BundleKeys.TITLE to "Title",
-            BundleKeys.START_DATE to "2026-02-10",
-            BundleKeys.START_TIME to "10:00",
-         )
+         Bundle().apply {
+            putString(BundleKeys.ACTION, "CREATE_PIN")
+            putString(BundleKeys.ID, "10")
+            putString(BundleKeys.TITLE, "Title")
+            putString(BundleKeys.START_DATE, "2026-02-10")
+            putString(BundleKeys.START_TIME, "10:00")
+         }
       )
       runCurrent()
 
@@ -200,13 +200,13 @@ class TaskerActionRunnerTest {
    fun `Throw exception on invalid formatting`() = scope.runTest {
       shouldThrow<TaskerInvalidInputException> {
          runner.run(
-            bundleOf(
-               BundleKeys.ACTION to "CREATE_PIN",
-               BundleKeys.ID to "10",
-               BundleKeys.TITLE to "Title",
-               BundleKeys.START_DATE to "2026-02",
-               BundleKeys.START_TIME to "10:00",
-            )
+            Bundle().apply {
+               putString(BundleKeys.ACTION, "CREATE_PIN")
+               putString(BundleKeys.ID, "10")
+               putString(BundleKeys.TITLE, "Title")
+               putString(BundleKeys.START_DATE, "2026-02")
+               putString(BundleKeys.START_TIME, "10:00")
+            }
          )
          runCurrent()
       }.shouldHaveMessage("Invalid date format: '2026-02'")
@@ -215,10 +215,10 @@ class TaskerActionRunnerTest {
    @Test
    fun `Delete pin`() = scope.runTest {
       runner.run(
-         bundleOf(
-            BundleKeys.ACTION to "DELETE_PIN",
-            BundleKeys.ID to "10",
-         )
+         Bundle().apply {
+            putString(BundleKeys.ACTION, "DELETE_PIN")
+            putString(BundleKeys.ID, "10")
+         }
       )
       runCurrent()
 

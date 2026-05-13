@@ -8,7 +8,6 @@ import android.os.Bundle
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
-import androidx.core.os.bundleOf
 import com.matejdro.catapult.common.NotificationsKeys
 import com.matejdro.catapult.common.di.NavigationInjectingApplication
 import dev.zacsweers.metro.Inject
@@ -71,7 +70,10 @@ class TaskerActionService : Service() {
                this@TaskerActionService,
                intent,
                TaskerPluginConstants.RESULT_CODE_FAILED,
-               bundleOf("%err" to "1", "%errmsg" to "Cancelled")
+               Bundle().apply {
+                  putString("%err", "1")
+                  putString("%errmsg", "Cancelled")
+               }
             )
             throw e
          } catch (e: Exception) {
@@ -80,7 +82,10 @@ class TaskerActionService : Service() {
                this@TaskerActionService,
                intent,
                TaskerPluginConstants.RESULT_CODE_FAILED,
-               bundleOf("%err" to "1", "%errmsg" to e.message)
+               Bundle().apply {
+                  putString("%err", "1")
+                  putString("%errmsg", e.message)
+               }
             )
          } finally {
             val leftTasks = runningTasks.decrementAndGet()

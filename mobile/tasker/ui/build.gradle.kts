@@ -24,7 +24,6 @@ dependencies {
    implementation(projects.sharedResources)
    implementation(projects.tasker.api)
    implementation(libs.androidx.activity.compose)
-   implementation(libs.androidx.core)
    implementation(libs.kotlin.coroutines)
    implementation(libs.kotlinova.core)
    implementation(libs.kotlinova.navigation.navigation3)
