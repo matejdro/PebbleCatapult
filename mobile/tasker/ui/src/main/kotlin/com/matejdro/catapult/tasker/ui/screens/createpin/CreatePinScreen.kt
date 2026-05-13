@@ -1,5 +1,6 @@
 package com.matejdro.catapult.tasker.ui.screens.createpin
 
+import android.os.Bundle
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,7 +22,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import androidx.core.os.bundleOf
 import com.airbnb.android.showkase.annotation.ShowkaseComposable
 import com.matejdro.catapult.tasker.BundleKeys
 import com.matejdro.catapult.tasker.TaskerAction
@@ -52,25 +52,28 @@ class CreatePinScreen : Screen<CreatePinScreenKey>() {
 
       fun save() {
          activity.saveConfiguration(
-            bundleOf(
-               BundleKeys.ACTION to TaskerAction.CREATE_PIN.name,
-               BundleKeys.ID to id.text.toString(),
-               BundleKeys.TITLE to title.text.toString(),
-               BundleKeys.TEXT to text.text.toString(),
-               BundleKeys.START_DATE to startDate.text.toString(),
-               BundleKeys.START_TIME to startTime.text.toString(),
-               BundleKeys.DURATION to duration.text.toString(),
-               BundleKeys.ICON to icon.text.toString(),
-               TaskerPluginConstants.VARIABLE_REPLACE_KEYS to listOf(
-                  BundleKeys.ID,
-                  BundleKeys.TITLE,
-                  BundleKeys.TEXT,
-                  BundleKeys.START_DATE,
-                  BundleKeys.START_TIME,
-                  BundleKeys.DURATION,
-                  BundleKeys.ICON,
-               ).joinToString(" ")
-            ),
+            Bundle().apply {
+               putString(BundleKeys.ACTION, TaskerAction.CREATE_PIN.name)
+               putString(BundleKeys.ID, id.text.toString())
+               putString(BundleKeys.TITLE, title.text.toString())
+               putString(BundleKeys.TEXT, text.text.toString())
+               putString(BundleKeys.START_DATE, startDate.text.toString())
+               putString(BundleKeys.START_TIME, startTime.text.toString())
+               putString(BundleKeys.DURATION, duration.text.toString())
+               putString(BundleKeys.ICON, icon.text.toString())
+               putString(
+                  TaskerPluginConstants.VARIABLE_REPLACE_KEYS,
+                  listOf(
+                     BundleKeys.ID,
+                     BundleKeys.TITLE,
+                     BundleKeys.TEXT,
+                     BundleKeys.START_DATE,
+                     BundleKeys.START_TIME,
+                     BundleKeys.DURATION,
+                     BundleKeys.ICON,
+                  ).joinToString(" ")
+               )
+            },
             activity.getString(R.string.create_pin_description, title.text)
          )
       }

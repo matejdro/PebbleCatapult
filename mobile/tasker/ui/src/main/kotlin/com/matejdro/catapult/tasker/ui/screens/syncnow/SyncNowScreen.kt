@@ -1,5 +1,6 @@
 package com.matejdro.catapult.tasker.ui.screens.syncnow
 
+import android.os.Bundle
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -18,7 +19,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.core.os.bundleOf
 import com.airbnb.android.showkase.annotation.ShowkaseComposable
 import com.matejdro.catapult.tasker.BundleKeys
 import com.matejdro.catapult.tasker.TaskerAction
@@ -76,10 +76,10 @@ class SyncNowScreen : Screen<SyncNowScreenKey>() {
       }
 
       activity.saveConfiguration(
-         bundleOf(
-            BundleKeys.ACTION to TaskerAction.SYNC_NOW.name,
-            BundleKeys.ONLY_ON_WATCHFACE to onlyOnWatchface,
-         ),
+         Bundle().apply {
+            putString(BundleKeys.ACTION, TaskerAction.SYNC_NOW.name)
+            putBoolean(BundleKeys.ONLY_ON_WATCHFACE, onlyOnWatchface)
+         },
          message
       )
    }

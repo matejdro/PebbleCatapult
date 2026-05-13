@@ -1,5 +1,6 @@
 package com.matejdro.catapult.tasker.ui.screens.actionlist
 
+import android.os.Bundle
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -41,7 +42,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.os.bundleOf
 import com.airbnb.android.showkase.annotation.ShowkaseComposable
 import com.matejdro.catapult.actionlist.api.CatapultAction
 import com.matejdro.catapult.actionlist.api.CatapultDirectory
@@ -243,12 +243,12 @@ private fun save(
    val textsDisable = actionsToDisable.map { activity.getString(R.string.disable, it.title) }
    val message = (textsEnable + textsDisable).joinToString(", \n")
 
-   val bundle = bundleOf(
-      BundleKeys.ACTION to TaskerAction.TOGGLE_ACTIONS.name,
-      BundleKeys.DIRECTORY_ID to directoryId,
-      BundleKeys.ENABLED_TASK_IDS to actionsToEnable.map { it.id }.joinToString(","),
-      BundleKeys.DISABLED_TASK_IDS to actionsToDisable.map { it.id }.joinToString(","),
-   )
+   val bundle = Bundle().apply {
+      putString(BundleKeys.ACTION, TaskerAction.TOGGLE_ACTIONS.name)
+      putInt(BundleKeys.DIRECTORY_ID, directoryId)
+      putString(BundleKeys.ENABLED_TASK_IDS, actionsToEnable.map { it.id }.joinToString(","))
+      putString(BundleKeys.DISABLED_TASK_IDS, actionsToDisable.map { it.id }.joinToString(","))
+   }
 
    activity.saveConfiguration(bundle, message)
 }
