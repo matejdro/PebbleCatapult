@@ -31,8 +31,6 @@ import si.inova.kotlinova.compose.result.ResultPassingStore
 import si.inova.kotlinova.compose.time.ComposeAndroidDateTimeFormatter
 import si.inova.kotlinova.compose.time.LocalDateFormatter
 import si.inova.kotlinova.core.time.AndroidDateTimeFormatter
-import si.inova.kotlinova.navigation.deeplink.HandleNewIntentDeepLinks
-import si.inova.kotlinova.navigation.deeplink.MainDeepLinkHandler
 import si.inova.kotlinova.navigation.di.NavigationContext
 import si.inova.kotlinova.navigation.di.NavigationInjection
 import si.inova.kotlinova.navigation.navigation3.NavDisplay
@@ -40,7 +38,6 @@ import si.inova.kotlinova.navigation.screenkeys.ScreenKey
 
 class MainActivity : ComponentActivity() {
    private lateinit var navigationInjectionFactory: NavigationInjection.Factory
-   private lateinit var mainDeepLinkHandler: MainDeepLinkHandler
    private lateinit var navigationContext: NavigationContext
    private lateinit var dateFormatter: AndroidDateTimeFormatter
    private lateinit var mainViewModelFactory: MainViewModel.Factory
@@ -54,7 +51,6 @@ class MainActivity : ComponentActivity() {
       val appGraph = (requireNotNull(application) as CatapultApplication).applicationGraph
 
       navigationInjectionFactory = appGraph.getNavigationInjectionFactory()
-      mainDeepLinkHandler = appGraph.getMainDeepLinkHandler()
       navigationContext = appGraph.getNavigationContext()
       dateFormatter = appGraph.getDateFormatter()
       mainViewModelFactory = appGraph.getMainViewModelFactory()
@@ -66,27 +62,15 @@ class MainActivity : ComponentActivity() {
       val splashScreen = installSplashScreen()
       splashScreen.setKeepOnScreenCondition { !initComplete }
 
-      beginInitialisation(savedInstanceState == null)
+      beginInitialisation()
    }
 
-   private fun beginInitialisation(startup: Boolean) {
+   private fun beginInitialisation() {
       lifecycleScope.launch {
          val initialHistory = viewModel.startingScreens.filterNotNull().first()
 
-         val deepLinkTarget = if (startup) {
-            intent?.data?.let { mainDeepLinkHandler.handleDeepLink(it, startup = true) }
-         } else {
-            null
-         }
-
-         val overridenInitialHistoryFromDeepLink = if (deepLinkTarget != null) {
-            deepLinkTarget.performNavigation(initialHistory, navigationContext).newBackstack
-         } else {
-            initialHistory
-         }
-
          setContent {
-            NavigationRoot(overridenInitialHistoryFromDeepLink)
+            NavigationRoot(initialHistory)
          }
 
          initComplete = true
@@ -106,7 +90,7 @@ class MainActivity : ComponentActivity() {
                LocalDateFormatter provides ComposeAndroidDateTimeFormatter(dateFormatter),
                LocalResultPassingStore provides resultPassingStore
             ) {
-               val backstack = navigationInjectionFactory.NavDisplay(
+               navigationInjectionFactory.NavDisplay(
                   initialHistory = { initialHistory },
                   entryDecorators = listOf(
                      rememberSaveableStateHolderNavEntryDecorator(),
@@ -118,11 +102,11 @@ class MainActivity : ComponentActivity() {
                         }
                      )
                   ),
-                  sceneStrategy = rememberTabListDetailSceneStrategy(tabListDetailSceneFactory) then
-                     remember { DialogSceneStrategy() }
+                  sceneStrategies = listOf(
+                     rememberTabListDetailSceneStrategy(tabListDetailSceneFactory),
+                     remember { DialogSceneStrategy() },
+                  )
                )
-
-               mainDeepLinkHandler.HandleNewIntentDeepLinks(this@MainActivity, backstack)
             }
          }
       }

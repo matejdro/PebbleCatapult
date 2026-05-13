@@ -18,7 +18,6 @@ import dispatch.core.DefaultCoroutineScope
 import si.inova.kotlinova.core.reporting.ErrorReporter
 import si.inova.kotlinova.core.time.AndroidDateTimeFormatter
 import si.inova.kotlinova.navigation.conditions.ConditionalNavigationHandler
-import si.inova.kotlinova.navigation.deeplink.MainDeepLinkHandler
 import si.inova.kotlinova.navigation.di.NavigationContext
 import si.inova.kotlinova.navigation.di.NavigationInjection
 import si.inova.kotlinova.navigation.di.OuterNavigationScope
@@ -43,7 +42,6 @@ interface ApplicationGraph : NavigationInjectingGraph, TaskerServiceInjector {
    fun getErrorReporter(): ErrorReporter
    fun getDefaultCoroutineScope(): DefaultCoroutineScope
    override fun getNavigationInjectionFactory(): NavigationInjection.Factory
-   fun getMainDeepLinkHandler(): MainDeepLinkHandler
    override fun getNavigationContext(): NavigationContext
    fun getDateFormatter(): AndroidDateTimeFormatter
    fun getMainViewModelFactory(): MainViewModel.Factory
