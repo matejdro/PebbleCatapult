@@ -8,6 +8,10 @@
 
 const uint16_t PROTOCOL_VERSION = 3;
 
+// We must initialize this here instead of in the main, otherwise the entire Basalt watch crashes when creating a voice session
+// Maybe we run out of stack?
+static uint8_t tmp[PERSIST_DATA_MAX_LENGTH];
+
 int main(void)
 {
     packets_init();
@@ -16,7 +20,6 @@ int main(void)
 
     send_watch_welcome();
 
-    uint8_t tmp[PERSIST_DATA_MAX_LENGTH];
     const bool loaded = bucket_sync_load_bucket(1, tmp);
 
     if (!loaded || tmp[0] == 0)
