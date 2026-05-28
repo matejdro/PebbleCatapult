@@ -127,12 +127,12 @@ jobs:
       - name: Downgrade python to 3.13
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
-          python-version: '3.14'
+          python-version: '3.13'
         if: "${{ env.BUILD_WATCH == 'true' }}"
         # Sometimes SDK installation exits with exit code 1, but still succeeds. 
         # We can just ignore failures here, as watchapp build will fail anyway even if the SDK is faulty
       - name: Install pebble SDK
-        run: "uv tool install pebble-tool && (pebble sdk install latest || true)"
+        run: "uv tool install pebble-tool --python 3.13 && (pebble sdk install latest || true)"
         if: "${{ env.BUILD_WATCH == 'true' }}"
       - name: Globally enable build cache and parallel execution
         run: |

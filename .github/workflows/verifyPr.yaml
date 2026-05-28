@@ -16,8 +16,13 @@ jobs:
         run: "sudo apt-get install -y libfreetype6 fontconfig fonts-dejavu"
       - name: Install uv
         uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+       # Newest version of Python is not supported by the Pebble SDK yet
+      - name: Downgrade python to 3.13
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: '3.13'
       - name: Install pebble SDK
-        run: "uv tool install pebble-tool && pebble sdk install latest"
+        run: "uv tool install pebble-tool --python 3.13 && (pebble sdk install latest || true)"
       - name: Globally enable build cache and parallel execution
         run: |
           mkdir -p ~/.gradle
