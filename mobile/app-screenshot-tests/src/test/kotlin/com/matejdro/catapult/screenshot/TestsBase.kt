@@ -83,7 +83,6 @@ abstract class TestsBase {
          }
 
          fun snapshot(suffix: String? = null) {
-            val tags = testKey.showkaseBrowserComponent.tags
             paparazzi.snapshot(name = suffix) {
                composable()
             }
