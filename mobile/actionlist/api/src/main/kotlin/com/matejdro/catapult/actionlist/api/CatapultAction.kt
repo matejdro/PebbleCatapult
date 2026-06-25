@@ -4,12 +4,13 @@ import androidx.compose.runtime.Immutable
 
 @Immutable
 data class CatapultAction(
-   public val title: String,
-   public val directoryId: Int,
-   public val id: Int = 0,
-   public val taskerTaskName: String? = null,
-   public val targetDirectoryId: Int? = null,
-   public val targetDirectoryName: String? = null,
-   public val voiceArgument: Boolean = false,
-   public val enabled: Boolean = true,
+   val title: String,
+   val directoryId: Int,
+   val id: Int = 0,
+   val taskerTaskName: String? = null,
+   val targetDirectoryId: Int? = null,
+   val targetDirectoryName: String? = null,
+   val voiceArgument: Boolean = false,
+   val enabled: Boolean = true,
+   val doNotClose: Boolean = false,
 )

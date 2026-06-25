@@ -40,14 +40,15 @@ class FakeCatapultActionRepository : CatapultActionRepository {
       actions.update { it + action }
    }
 
-   override suspend fun update(id: Int, title: String, enabled: Boolean, voiceArgument: Boolean) {
+   override suspend fun update(id: Int, title: String, enabled: Boolean, voiceArgument: Boolean, doNotClose: Boolean) {
       actions.update { list ->
          list.map {
             if (it.id == id) {
                it.copy(
                   title = title,
                   enabled = enabled,
-                  voiceArgument = voiceArgument
+                  voiceArgument = voiceArgument,
+                  doNotClose = doNotClose,
                )
             } else {
                it

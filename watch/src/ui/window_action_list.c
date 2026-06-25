@@ -29,6 +29,7 @@ typedef struct
     CustomStatusBarLayer* status_bar;
 } WindowActionList;
 
+static ActionItem last_starting_task;
 
 static void load_menu(WindowActionList* window);
 static void configure_buttons(void* context);
@@ -217,7 +218,11 @@ static void on_task_starting_result(bool success)
     if (success)
     {
         vibes_short_pulse();
-        window_stack_pop_all(true);
+
+        if ((last_starting_task.flags & 0x02) == 0)
+        {
+            window_stack_pop_all(true);
+        }
     }
     else
     {
@@ -271,6 +276,7 @@ static void on_button_select_pressed(ClickRecognizerRef recognizer, void* contex
     }
     else
     {
+        last_starting_task = *selected_item;
         bluetooth_register_sending_finish(on_task_starting_result);
         if ((selected_item->flags & 0x01) != 0)
         {

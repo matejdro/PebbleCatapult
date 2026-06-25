@@ -52,7 +52,7 @@ class ActionListViewModel(
       }
    }
 
-   fun add(title: String, targetTask: String?, targetDirectory: Int?, voiceArgument: Boolean) =
+   fun add(title: String, targetTask: String?, targetDirectory: Int?, voiceArgument: Boolean, doNotClose: Boolean) =
       resources.launchWithExceptionReporting {
          actionLogger.logAction {
             "TaskListViewModel.add(" +
@@ -67,22 +67,25 @@ class ActionListViewModel(
                directoryId = directoryId,
                taskerTaskName = targetTask,
                targetDirectoryId = targetDirectory,
-               voiceArgument = voiceArgument
+               voiceArgument = voiceArgument,
+               doNotClose = doNotClose,
             )
          )
       }
 
-   fun editActionTitleVoiceArgument(id: Int, title: String, voiceArgument: Boolean) = resources.launchWithExceptionReporting {
-      actionLogger.logAction { "ActionListViewModel.editActionTitle(id = $id, title = $title)" }
-      val action = _uiState.value.data?.actions?.find { it.id == id } ?: return@launchWithExceptionReporting
+   fun editActionMetadata(id: Int, title: String, voiceArgument: Boolean, doNotClose: Boolean) =
+      resources.launchWithExceptionReporting {
+         actionLogger.logAction { "ActionListViewModel.editActionTitle(id = $id, title = $title)" }
+         val action = _uiState.value.data?.actions?.find { it.id == id } ?: return@launchWithExceptionReporting
 
-      actionsRepo.update(
-         id = id,
-         title = title,
-         enabled = action.enabled,
-         voiceArgument = voiceArgument
-      )
-   }
+         actionsRepo.update(
+            id = id,
+            title = title,
+            enabled = action.enabled,
+            voiceArgument = voiceArgument,
+            doNotClose = doNotClose,
+         )
+      }
 
    fun editActionEnabled(id: Int, enabled: Boolean) = resources.launchWithExceptionReporting {
       actionLogger.logAction { "ActionListViewModel.editActionEnabled(id = $id, enabled = $enabled)" }
@@ -92,7 +95,8 @@ class ActionListViewModel(
          id = id,
          title = action.title,
          enabled = enabled,
-         voiceArgument = action.voiceArgument
+         voiceArgument = action.voiceArgument,
+         doNotClose = action.doNotClose,
       )
    }
 

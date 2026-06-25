@@ -13,4 +13,5 @@
     <string name="will_start_a_tasker_task">"Will start a Tasker task "</string>
     <string name="you_can_only_have_up_to_15_directories">You can only have up to 15 directories</string>
     <string name="voice_argument" tools:ignore="Typos">Pass voice input as %par1</string>
+    <string name="do_not_close_watchapp">Do not close watchapp</string>
 </resources>

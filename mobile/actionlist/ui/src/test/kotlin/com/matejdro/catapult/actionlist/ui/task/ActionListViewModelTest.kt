@@ -49,12 +49,12 @@ class ActionListViewModelTest {
 
       vm.key = ActionListKey(1)
       vm.onServiceRegistered()
-      vm.add("A Task", "My Task", null, false)
-      vm.add("Another Task", "My Task", null, true)
+      vm.add("A Task", "My Task", null, voiceArgument = false, doNotClose = true)
+      vm.add("Another Task", "My Task", null, voiceArgument = true, doNotClose = false)
       runCurrent()
 
       actionsRepo.getAll(1).first() shouldBeSuccessWithData listOf(
-         CatapultAction("A Task", directoryId = 1, id = 1, taskerTaskName = "My Task"),
+         CatapultAction("A Task", directoryId = 1, id = 1, taskerTaskName = "My Task", doNotClose = true),
          CatapultAction("Another Task", directoryId = 1, id = 2, taskerTaskName = "My Task", voiceArgument = true)
       )
    }
@@ -65,7 +65,7 @@ class ActionListViewModelTest {
 
       vm.key = ActionListKey(1)
       vm.onServiceRegistered()
-      vm.add("A Task", null, 2, false)
+      vm.add("A Task", null, 2, false, false)
       runCurrent()
 
       actionsRepo.getAll(1).first() shouldBeSuccessWithData listOf(
@@ -82,12 +82,30 @@ class ActionListViewModelTest {
       vm.key = ActionListKey(1)
       vm.onServiceRegistered()
       runCurrent()
-      vm.editActionTitleVoiceArgument(2, "Action C", true)
+      vm.editActionMetadata(2, "Action C", voiceArgument = true, doNotClose = false)
       runCurrent()
 
       actionsRepo.getAll(1).first() shouldBeSuccessWithData listOf(
          CatapultAction("Action A", 1, taskerTaskName = "Task A", id = 1),
          CatapultAction("Action C", 1, taskerTaskName = "Task B", id = 2, voiceArgument = true)
+      )
+   }
+
+   @Test
+   fun `Allow do not close of the existing action`() = scope.runTest {
+      initDirectories()
+      actionsRepo.insert(CatapultAction("Action A", 1, taskerTaskName = "Task A", id = 1))
+      actionsRepo.insert(CatapultAction("Action B", 1, taskerTaskName = "Task B", id = 2))
+
+      vm.key = ActionListKey(1)
+      vm.onServiceRegistered()
+      runCurrent()
+      vm.editActionMetadata(2, "Action C", voiceArgument = false, doNotClose = true)
+      runCurrent()
+
+      actionsRepo.getAll(1).first() shouldBeSuccessWithData listOf(
+         CatapultAction("Action A", 1, taskerTaskName = "Task A", id = 1),
+         CatapultAction("Action C", 1, taskerTaskName = "Task B", id = 2, doNotClose = true)
       )
    }
 

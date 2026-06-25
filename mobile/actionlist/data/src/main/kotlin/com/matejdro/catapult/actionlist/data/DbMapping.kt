@@ -23,7 +23,8 @@ internal fun SelectAll.toCatapultAction(): CatapultAction {
       targetDirectoryId = targetDirectoryId?.toInt(),
       targetDirectoryName = targetDirectoryName,
       enabled = enabled == 1L,
-      voiceArgument = voiceArgument == 1L
+      voiceArgument = voiceArgument == 1L,
+      doNotClose = doNotClose == 1L,
    )
 }
 
@@ -35,6 +36,7 @@ internal fun SelectSingle.toCatapultAction(): CatapultAction {
       taskerTaskName = taskerTaskName,
       targetDirectoryId = targetDirectoryId?.toInt(),
       targetDirectoryName = targetDirectoryName,
-      enabled = enabled == 1L
+      enabled = enabled == 1L,
+      doNotClose = doNotClose == 1L,
    )
 }

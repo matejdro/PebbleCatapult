@@ -154,12 +154,13 @@ class ActionListScreen(
       addDialog?.let { action ->
          AddDialog(
             action,
-            { title, voiceArgument ->
+            { title, voiceArgument, doNotClose ->
                viewModel.add(
                   title = title,
                   targetTask = (action as? AddDialogAction.TaskerTask)?.name,
                   targetDirectory = (action as? AddDialogAction.Directory)?.id,
-                  voiceArgument = voiceArgument
+                  voiceArgument = voiceArgument,
+                  doNotClose = doNotClose,
                )
             },
             { addDialog = null },
@@ -169,8 +170,8 @@ class ActionListScreen(
       editDialog?.let { action ->
          EditDialog(
             editingAction = action,
-            confirm = { title, voiceArgument ->
-               viewModel.editActionTitleVoiceArgument(action.id, title, voiceArgument)
+            confirm = { title, voiceArgument, doNotClose ->
+               viewModel.editActionMetadata(action.id, title, voiceArgument, doNotClose)
             },
             dismissDialog = { editDialog = null },
             delete = { viewModel.deleteAction(action.id) }
@@ -351,7 +352,7 @@ private fun AddButtons(
 }
 
 @Composable
-private fun AddDialog(addingAction: AddDialogAction, confirm: (String, Boolean) -> Unit, dismissDialog: () -> Unit) {
+private fun AddDialog(addingAction: AddDialogAction, confirm: (String, Boolean, Boolean) -> Unit, dismissDialog: () -> Unit) {
    val resources = LocalResources.current
 
    ActionEntryDialog(
@@ -363,15 +364,16 @@ private fun AddDialog(addingAction: AddDialogAction, confirm: (String, Boolean) 
       ),
       initialText = addingAction.title,
       initialVoiceArgument = false,
+      initialDoNotCloseArgument = false,
       actionPrefixText = when (addingAction) {
          is AddDialogAction.Directory -> stringResource(R.string.will_open_a_directory)
          is AddDialogAction.TaskerTask -> stringResource(R.string.will_start_a_tasker_task)
       },
       actionNameText = addingAction.title,
-      showVoice = addingAction is AddDialogAction.TaskerTask,
+      showToggles = addingAction is AddDialogAction.TaskerTask,
       dismiss = dismissDialog,
-      accept = { text, voiceArgument ->
-         confirm(text, voiceArgument)
+      accept = { text, voiceArgument, doNotClose ->
+         confirm(text, voiceArgument, doNotClose)
          dismissDialog()
       }
    )
@@ -380,7 +382,7 @@ private fun AddDialog(addingAction: AddDialogAction, confirm: (String, Boolean) 
 @Composable
 private fun EditDialog(
    editingAction: CatapultAction,
-   confirm: (String, Boolean) -> Unit,
+   confirm: (String, Boolean, Boolean) -> Unit,
    dismissDialog: () -> Unit,
    delete: () -> Unit,
 ) {
@@ -396,6 +398,7 @@ private fun EditDialog(
       ),
       initialText = editingAction.title,
       initialVoiceArgument = editingAction.voiceArgument,
+      initialDoNotCloseArgument = editingAction.doNotClose,
       actionPrefixText = resources.getString(
          if (editingAction.taskerTaskName != null) {
             R.string.will_start_a_tasker_task
@@ -404,12 +407,12 @@ private fun EditDialog(
          }
       ),
       actionNameText = editingAction.taskerTaskName ?: editingAction.targetDirectoryName.orEmpty(),
-      showVoice = editingAction.taskerTaskName != null,
+      showToggles = editingAction.taskerTaskName != null,
       dismiss = {
          dismissDialog()
       },
-      accept = { text, voiceArgument ->
-         confirm(text, voiceArgument)
+      accept = { text, voiceArgument, doNotClose ->
+         confirm(text, voiceArgument, doNotClose)
          dismissDialog()
       },
       delete = {
@@ -424,16 +427,18 @@ private fun ActionEntryDialog(
    title: String,
    initialText: String,
    initialVoiceArgument: Boolean,
+   initialDoNotCloseArgument: Boolean,
    actionPrefixText: String,
    actionNameText: String,
-   showVoice: Boolean,
+   showToggles: Boolean,
    dismiss: () -> Unit,
-   accept: (text: String, Boolean) -> Unit,
+   accept: (text: String, Boolean, Boolean) -> Unit,
    delete: (() -> Unit)? = null,
 ) {
    val inputTransformation = remember { MaxStringSizeBytesInputTransformation(MAX_ACTION_TITLE_BYTES) }
    val textFieldState = rememberTextFieldState(inputTransformation.trim(initialText))
    var voiceArgument by remember { mutableStateOf(initialVoiceArgument) }
+   var doNotClose by remember { mutableStateOf(initialDoNotCloseArgument) }
 
    AlertDialogWithContent(
       title = {
@@ -445,7 +450,7 @@ private fun ActionEntryDialog(
       confirmButton = {
          TextButton(
             onClick = {
-               accept(textFieldState.text.toString(), voiceArgument)
+               accept(textFieldState.text.toString(), voiceArgument, doNotClose)
             }
          ) {
             Text(stringResource(R.string.ok))
@@ -481,7 +486,7 @@ private fun ActionEntryDialog(
                .fillMaxWidth()
                .focusRequester(focusRequester)
                .padding(bottom = 8.dp),
-            onKeyboardAction = { accept(textFieldState.text.toString(), voiceArgument) },
+            onKeyboardAction = { accept(textFieldState.text.toString(), voiceArgument, doNotClose) },
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
             lineLimits = TextFieldLineLimits.SingleLine,
             inputTransformation = inputTransformation
@@ -492,10 +497,15 @@ private fun ActionEntryDialog(
             Text(actionNameText, fontWeight = FontWeight.Bold)
          }
 
-         if (showVoice) {
+         if (showToggles) {
             Row(Modifier.padding(top = 8.dp, bottom = 8.dp, end = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                Text(stringResource(R.string.voice_argument))
                Switch(voiceArgument, { voiceArgument = it }, Modifier.weight(1f))
+            }
+
+            Row(Modifier.padding(top = 8.dp, bottom = 8.dp, end = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+               Text(stringResource(R.string.do_not_close_watchapp))
+               Switch(doNotClose, { doNotClose = it }, Modifier.weight(1f))
             }
          }
       }

@@ -59,20 +59,22 @@ class CatapultActionRepositoryImpl(
          taskerTaskName = action.taskerTaskName,
          targetDirectoryId = action.targetDirectoryId?.toLong(),
          enabled = if (action.enabled) 1L else 0L,
-         voiceArgument = if (action.voiceArgument) 1L else 0L
+         voiceArgument = if (action.voiceArgument) 1L else 0L,
+         doNotClose = if (action.doNotClose) 1L else 0L,
       )
 
       watchSyncer.syncDirectory(action.directoryId)
    }
 
-   override suspend fun update(id: Int, title: String, enabled: Boolean, voiceArgument: Boolean) {
+   override suspend fun update(id: Int, title: String, enabled: Boolean, voiceArgument: Boolean, doNotClose: Boolean) {
       withIO {
          val directoryId = dbActionQueries.getDirectoryId(id.toLong()).executeAsOne().toInt()
          dbActionQueries.update(
             title = title,
             enabled = if (enabled) 1L else 0L,
             id = id.toLong(),
-            voiceArgument = if (voiceArgument) 1L else 0L
+            voiceArgument = if (voiceArgument) 1L else 0L,
+            doNotClose = if (doNotClose) 1L else 0L,
          )
 
          watchSyncer.syncDirectory(directoryId)

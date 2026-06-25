@@ -85,6 +85,7 @@ Data in every bucket:
   * Target directory (uint8) - If item should open another directory, 0 otherwise
   * Flags (uint8) 
     * Respond with voice (0x01) - when 1, watch will show voice prompt before triggering action
+    * Do not close (0x02) - when 1, watch will not close the watchapp upon successful action triggering
   * Title (cstring) - up to 14 bytes + null terminator
 
 Every bucket is stored in the `2001` - `2015` storage keys

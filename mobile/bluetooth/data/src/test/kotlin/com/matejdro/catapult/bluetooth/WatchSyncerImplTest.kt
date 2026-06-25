@@ -165,4 +165,21 @@ class WatchSyncerImplTest {
          .first()
          .data[4] shouldBe 1.toByte()
    }
+
+   @Test
+   fun `Send do not close flag to the watch`() = scope.runTest {
+      watchSyncer.init()
+
+      directoryRepository.insert(CatapultDirectory(1, "Directory 1"))
+
+      actionRepository.insert(CatapultAction("Action A", directoryId = 1, id = 10, doNotClose = true))
+
+      watchSyncer.syncDirectory(1)
+      delay(1.seconds)
+
+      bucketSyncRepository.awaitNextUpdate(0u, emptyList())
+         .bucketsToUpdate
+         .first()
+         .data[4] shouldBe 2.toByte()
+   }
 }

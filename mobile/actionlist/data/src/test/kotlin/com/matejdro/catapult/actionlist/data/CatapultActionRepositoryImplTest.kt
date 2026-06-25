@@ -35,7 +35,7 @@ class CatapultActionRepositoryImplTest {
          runCurrent()
 
          repo.insert(
-            CatapultAction("Action A", 1, taskerTaskName = "Task A"),
+            CatapultAction("Action A", 1, taskerTaskName = "Task A", doNotClose = true),
          )
          repo.insert(
             CatapultAction("Action B", 1, targetDirectoryId = 2, voiceArgument = true)
@@ -47,7 +47,8 @@ class CatapultActionRepositoryImplTest {
                "Action A",
                1,
                1,
-               taskerTaskName = "Task A"
+               taskerTaskName = "Task A",
+               doNotClose = true,
             ),
             CatapultAction(
                "Action B",
@@ -55,7 +56,7 @@ class CatapultActionRepositoryImplTest {
                2,
                targetDirectoryId = 2,
                targetDirectoryName = "Directory B",
-               voiceArgument = true
+               voiceArgument = true,
             )
          )
       }
@@ -96,7 +97,7 @@ class CatapultActionRepositoryImplTest {
          )
          runCurrent()
 
-         repo.update(id = 1, title = "Action B", enabled = true, voiceArgument = false)
+         repo.update(id = 1, title = "Action B", enabled = true, voiceArgument = false, doNotClose = false)
          runCurrent()
 
          expectMostRecentItem() shouldBeSuccessWithData listOf(
@@ -115,11 +116,30 @@ class CatapultActionRepositoryImplTest {
          )
          runCurrent()
 
-         repo.update(1, "Action A", true, true)
+         repo.update(id = 1, title = "Action A", enabled = true, voiceArgument = true, doNotClose = false)
          runCurrent()
 
          expectMostRecentItem() shouldBeSuccessWithData listOf(
             CatapultAction("Action A", 1, 1, taskerTaskName = "Task A", voiceArgument = true),
+         )
+      }
+   }
+
+   @Test
+   fun `Allow updating do not close`() = scope.runTest {
+      repo.getAll(1).test {
+         runCurrent()
+
+         repo.insert(
+            CatapultAction("Action A", 1, taskerTaskName = "Task A"),
+         )
+         runCurrent()
+
+         repo.update(id = 1, title = "Action A", enabled = true, voiceArgument = false, doNotClose = true)
+         runCurrent()
+
+         expectMostRecentItem() shouldBeSuccessWithData listOf(
+            CatapultAction("Action A", 1, 1, taskerTaskName = "Task A", doNotClose = true),
          )
       }
    }
@@ -134,7 +154,7 @@ class CatapultActionRepositoryImplTest {
          )
          runCurrent()
 
-         repo.update(id = 1, title = "Action A", enabled = false, voiceArgument = false)
+         repo.update(id = 1, title = "Action A", enabled = false, voiceArgument = false, doNotClose = false)
          runCurrent()
 
          expectMostRecentItem() shouldBeSuccessWithData listOf(
@@ -175,7 +195,7 @@ class CatapultActionRepositoryImplTest {
          )
          runCurrent()
 
-         repo.update(id = 1, title = "Action A", enabled = false, voiceArgument = false)
+         repo.update(id = 1, title = "Action A", enabled = false, voiceArgument = false, doNotClose = false)
          runCurrent()
 
          expectMostRecentItem() shouldBeSuccessWithData listOf(
@@ -342,7 +362,7 @@ class CatapultActionRepositoryImplTest {
       runCurrent()
 
       syncer.syncedDirectories.clear()
-      repo.update(id = 1, title = "Action B", enabled = true, voiceArgument = false)
+      repo.update(id = 1, title = "Action B", enabled = true, voiceArgument = false, doNotClose = false)
       runCurrent()
 
       syncer.syncedDirectories.shouldContainExactly(1)
