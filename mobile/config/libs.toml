@@ -14,7 +14,6 @@ androidx-lifecycle = "2.11.0"
 androidx-navigation3 = "1.1.7"
 androidx-startup = "1.2.0"
 androidx-workManager = "2.11.2"
-coil = "3.6.1"
 composeDnd = "0.5.0"
 composePreference = "2.2.0"
 dependencyAnalysis = "3.19.1"
@@ -78,8 +77,6 @@ androidx-lifecycle-viewModel-compose = { module = "androidx.lifecycle:lifecycle-
 androidx-navigation3 = { module = "androidx.navigation3:navigation3-ui", version.ref = "androidx-navigation3" }
 androidx-startup = { module = "androidx.startup:startup-runtime", version.ref = "androidx-startup" }
 androidx-workManager = { module = "androidx.work:work-runtime-ktx", version.ref = "androidx-workManager" }
-coil = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
-coil-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coil" }
 composeDnd = { module = "com.mohamedrejeb.dnd:compose-dnd", version.ref = "composeDnd" }
 composePreference = { module = "me.zhanghai.compose.preference:preference", version.ref = "composePreference" }
 dependencyAnalysis = { module = "com.autonomousapps:dependency-analysis-gradle-plugin", version.ref = "dependencyAnalysis" }
