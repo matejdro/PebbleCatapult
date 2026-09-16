@@ -9,10 +9,7 @@ To contribute to this project:
 5. Create a new branch for your contribution
 6. Commit your work. While commiting, use [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/). Scope tag should
    be the name of the module you are updating.
-7. Try to avoid breaking changes, but if they cannot be avoided, you must put `BREAKING CHANGE` in the footer of the commit
-   mesasage
-   and explain the change.
-8. Create a merge request
+7. Create a merge request
 9. After your PR is merged, new release will be generated automatically every day
 
 ## Updating versions
