@@ -1,7 +1,6 @@
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.LibraryExtension
 import org.gradle.accessors.dm.LibrariesForLibs
-import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.findByType
 import util.isAndroidProject
 
