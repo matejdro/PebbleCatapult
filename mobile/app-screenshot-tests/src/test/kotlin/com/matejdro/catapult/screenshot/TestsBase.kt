@@ -2,6 +2,7 @@ package com.matejdro.catapult.screenshot
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalInspectionMode
 import app.cash.paparazzi.DeviceConfig.Companion.PIXEL_5
 import app.cash.paparazzi.Paparazzi
@@ -10,44 +11,14 @@ import com.airbnb.android.showkase.models.Showkase
 import com.airbnb.android.showkase.models.ShowkaseBrowserComponent
 import com.android.ide.common.rendering.api.SessionParams
 import com.android.resources.NightMode
-import com.google.testing.junit.testparameterinjector.TestParameterInjector
-import com.google.testing.junit.testparameterinjector.TestParameterValuesProvider
 import com.matejdro.catapult.showkase.getMetadata
-import org.junit.runner.RunWith
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.MethodSource
 
-@Suppress("JUnitMalformedDeclaration")
-@RunWith(TestParameterInjector::class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 abstract class TestsBase {
-   object PreviewProvider : TestParameterValuesProvider() {
-      override fun provideValues(context: Context): List<*> {
-         val splitIndex = context.getOtherAnnotation(SplitIndex::class.java).index
-         val totalSplits = System.getProperty("numSplits")?.toInt() ?: error("Missing numSplits property")
-
-         val allComponents = Showkase.getMetadata().componentList
-         val perSplit = allComponents.size / totalSplits
-
-         val start = splitIndex * perSplit
-         val end = if (splitIndex == totalSplits - 1) {
-            allComponents.size
-         } else {
-            start + perSplit
-         }
-
-         val components = allComponents
-            .subList(start, end)
-            .map { TestKey(it) }
-
-         for (i in components.indices) {
-            for (j in components.indices) {
-               if (i != j && components[i].key == components[j].key) {
-                  throw AssertionError("Duplicate @Preview: '${components[i].key}'")
-               }
-            }
-         }
-
-         return components
-      }
-   }
+   abstract val splitIndex: Int
 
    data class TestKey(val showkaseBrowserComponent: ShowkaseBrowserComponent) {
       val key = with(showkaseBrowserComponent) {
@@ -57,10 +28,9 @@ abstract class TestsBase {
       override fun toString(): String = key
    }
 
-   protected open fun test(
-
-      testKey: TestKey,
-   ) {
+   @ParameterizedTest
+   @MethodSource("provideTestValuesValues")
+   fun test(testKey: TestKey) {
       val paparazzi = Paparazzi(
          deviceConfig = PIXEL_5,
          theme = "android:Theme.Material.Light.NoActionBar",
@@ -83,8 +53,25 @@ abstract class TestsBase {
          }
 
          fun snapshot(suffix: String? = null) {
-            paparazzi.snapshot(name = suffix) {
-               composable()
+            val tags = testKey.showkaseBrowserComponent.tags
+            if (tags.contains("animated")) {
+               val duration = tags.firstOrNull { it.startsWith("duration-") }?.removePrefix("duration-")?.toInt()
+                  ?: DEFAULT_DURATION_MS
+
+               paparazzi.gif(
+                  name = suffix,
+                  view = ComposeView(paparazzi.context).apply {
+                     setContent {
+                        composable()
+                     }
+                  },
+                  end = duration.toLong(),
+                  fps = 20
+               )
+            } else {
+               paparazzi.snapshot(name = suffix) {
+                  composable()
+               }
             }
          }
 
@@ -119,5 +106,33 @@ abstract class TestsBase {
       }
    }
 
-   annotation class SplitIndex(val index: Int)
+   fun provideTestValuesValues(): List<TestKey> {
+      val totalSplits = System.getProperty("numSplits")?.toInt() ?: error("Missing numSplits property")
+
+      val allComponents = Showkase.getMetadata().componentList
+      val perSplit = allComponents.size / totalSplits
+
+      val start = splitIndex * perSplit
+      val end = if (splitIndex == totalSplits - 1) {
+         allComponents.size
+      } else {
+         start + perSplit
+      }
+
+      val components = allComponents
+         .subList(start, end)
+         .map { TestKey(it) }
+
+      for (i in components.indices) {
+         for (j in components.indices) {
+            if (i != j && components[i].key == components[j].key) {
+               throw AssertionError("Duplicate @Preview: '${components[i].key}'")
+            }
+         }
+      }
+
+      return components
+   }
 }
+
+private const val DEFAULT_DURATION_MS = 1000
