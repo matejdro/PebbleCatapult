@@ -178,6 +178,12 @@ jobs:
         with:
           name: mapping-app-develop-release.txt
           path: mobile/app/build/outputs/mapping/release/mapping.txt
+      - name: Ensure apk is ready to release
+        run: 
+          if [[ ! -f mobile/app/build/outputs/apk/release/catapult-mobile.apk ]]; then
+            echo "Mobile release missing"
+            exit 1
+          fi
 
       # Tests
       - name: Compile Unit Tests
@@ -213,7 +219,12 @@ jobs:
       # Build watchapp
 
       - name: Build watchapp
-        run: pebble build && mv build/watch.pbw build/catapult-watchapp.pbw
+        run: 
+          pebble build && mv build/watch.pbw build/catapult-watchapp.pbw
+          if [[ ! -f build/catapult-watchapp.pbw ]]; then
+            echo "Watchapp release missing"
+            exit 1
+          fi
         working-directory: watch
         if: "${{ env.BUILD_WATCH == 'true' }}"
 
