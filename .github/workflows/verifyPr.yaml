@@ -20,7 +20,7 @@ jobs:
       - name: Downgrade python to 3.13
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
-          python-version: '3.14'
+          python-version: '3.15'
       - name: Install pebble SDK
         run: "uv tool install pebble-tool --python 3.13 && (pebble sdk install latest || true)"
       - name: Globally enable build cache and parallel execution
